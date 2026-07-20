@@ -1,0 +1,192 @@
+/* =========================================================
+   Dideban Platform - Global Design System
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Fonts
+   --------------------------------------------------------- */
+
+@font-face {
+    font-family: "Vazirmatn";
+    src:
+        local("Vazirmatn Regular"),
+        local("Vazirmatn-Regular"),
+        url("../fonts/vazirmatn/Vazirmatn-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Vazirmatn";
+    src:
+        local("Vazirmatn Medium"),
+        local("Vazirmatn-Medium"),
+        url("../fonts/vazirmatn/Vazirmatn-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Vazirmatn";
+    src:
+        local("Vazirmatn Bold"),
+        local("Vazirmatn-Bold"),
+        url("../fonts/vazirmatn/Vazirmatn-Bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ---------------------------------------------------------
+   Design tokens
+   --------------------------------------------------------- */
+
+:root {
+    /* Typography */
+    --dideban-font:
+        "Vazirmatn",
+        "Segoe UI",
+        Tahoma,
+        Arial,
+        sans-serif;
+
+    /* Brand colors */
+    --dideban-primary: #49c779;
+    --dideban-primary-hover: #5bd389;
+    --dideban-primary-dark: #2b9f5d;
+    --dideban-primary-soft: rgba(73, 199, 121, 0.14);
+
+    /* Background colors */
+    --dideban-bg: #090e15;
+    --dideban-bg-secondary: #0f1620;
+    --dideban-surface: #19202b;
+    --dideban-surface-hover: #202936;
+    --dideban-panel: rgba(25, 32, 43, 0.92);
+
+    /* Text colors */
+    --dideban-text: #eef2f7;
+    --dideban-text-secondary: #b7c0cb;
+    --dideban-text-muted: #8f9aa8;
+    --dideban-text-disabled: #687280;
+
+    /* Borders */
+    --dideban-border: rgba(255, 255, 255, 0.1);
+    --dideban-border-strong: #3b4655;
+
+    /* Status colors */
+    --dideban-success: #49c779;
+    --dideban-warning: #e9a23b;
+    --dideban-danger: #e35d6a;
+    --dideban-info: #4f9fe8;
+
+    /* Shadows */
+    --dideban-shadow-sm: 0 5px 15px rgba(0, 0, 0, 0.18);
+    --dideban-shadow-md: 0 14px 35px rgba(0, 0, 0, 0.28);
+    --dideban-shadow-lg: 0 28px 75px rgba(0, 0, 0, 0.48);
+
+    /* Radius */
+    --dideban-radius-sm: 7px;
+    --dideban-radius-md: 11px;
+    --dideban-radius-lg: 18px;
+    --dideban-radius-round: 999px;
+
+    /* Transitions */
+    --dideban-transition-fast: 150ms ease;
+    --dideban-transition: 220ms ease;
+}
+
+/* ---------------------------------------------------------
+   Global typography
+   --------------------------------------------------------- */
+
+html {
+    font-family: var(--dideban-font);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+    font-family: var(--dideban-font);
+}
+
+body {
+    font-synthesis: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--dideban-font);
+    font-weight: 700;
+}
+
+p,
+span,
+label,
+a,
+li,
+td,
+th {
+    font-family: var(--dideban-font);
+}
+
+/* ---------------------------------------------------------
+   Form normalization
+   --------------------------------------------------------- */
+
+input,
+select,
+textarea,
+button {
+    letter-spacing: 0;
+}
+
+button,
+select {
+    cursor: pointer;
+}
+
+input::placeholder,
+textarea::placeholder {
+    font-family: var(--dideban-font);
+}
+
+/* ---------------------------------------------------------
+   Reusable utility classes
+   --------------------------------------------------------- */
+
+.dideban-text-primary {
+    color: var(--dideban-primary) !important;
+}
+
+.dideban-text-muted {
+    color: var(--dideban-text-muted) !important;
+}
+
+.dideban-bg-surface {
+    background: var(--dideban-surface) !important;
+}
+
+.dideban-panel {
+    color: var(--dideban-text);
+    background: var(--dideban-panel);
+    border: 1px solid var(--dideban-border);
+    border-radius: var(--dideban-radius-lg);
+    box-shadow: var(--dideban-shadow-md);
+}
+
+.dideban-focus-ring:focus {
+    outline: none;
+    border-color: var(--dideban-primary);
+    box-shadow: 0 0 0 4px var(--dideban-primary-soft);
+}
