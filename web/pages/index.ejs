@@ -1,0 +1,459 @@
+<% include blocks/header %>
+
+<%
+    if (screen) {
+        screen = screen.toLowerCase()
+    }
+%>
+
+<style>
+    html,
+    body {
+        direction: rtl;
+    }
+
+    body {
+        font-family: Tahoma, Arial, sans-serif;
+    }
+
+    .panel-login {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .panel-login .panel-heading,
+    .panel-login .panel-body {
+        direction: rtl;
+    }
+
+    .login-header {
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .login-header h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-family: Tahoma, Arial, sans-serif;
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    .login-header p {
+        margin: 0;
+        color: #777;
+        font-family: Tahoma, Arial, sans-serif;
+        font-size: 13px;
+    }
+
+    .login-logo {
+        border-radius: 50%;
+    }
+
+    .panel-login input,
+    .panel-login select,
+    .panel-login button {
+        font-family: Tahoma, Arial, sans-serif;
+    }
+
+    .panel-login input {
+        text-align: right;
+    }
+
+    /*
+     * ایمیل و رمز عبور معمولاً با حروف انگلیسی وارد می‌شوند.
+     * بنابراین متن واردشده در این دو فیلد چپ‌به‌راست است.
+     */
+    #email,
+    #pass {
+        direction: ltr;
+        text-align: left;
+    }
+
+    #email::placeholder,
+    #pass::placeholder {
+        direction: rtl;
+        text-align: right;
+    }
+
+    #key {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .login-function-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    .login-function-select {
+        flex: 1;
+        width: auto !important;
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .login-function-select select {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .remember-container {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+    .remember-container .mdl-switch {
+        width: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .remember-container .mdl-switch__label {
+        padding-right: 8px;
+        padding-left: 0;
+        font-family: Tahoma, Arial, sans-serif;
+        font-size: 13px;
+    }
+
+    #login-submit {
+        font-family: Tahoma, Arial, sans-serif;
+        font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+        .login-function-row {
+            display: block;
+        }
+
+        .login-function-select {
+            width: 100% !important;
+            margin-bottom: 15px;
+        }
+
+        .remember-container {
+            justify-content: flex-start;
+        }
+    }
+</style>
+
+<div class="shinobi-bg display-table" dir="rtl" style="height:100%">
+    <div class="shinobi-bg-shade">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="panel panel-login">
+
+                        <div class="panel-heading">
+                            <div class="panel-heading-shade">
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <a href="http://shinobi.video" target="_blank">
+                                            <img
+                                                src="libs/img/icon/apple-touch-icon-76x76.png"
+                                                class="login-logo"
+                                                alt="لوگوی سامانه">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+
+                                    <div class="login-header">
+                                        <h3>سامانه مدیریت دوربین‌ها</h3>
+                                        <p>برای ورود، اطلاعات حساب کاربری خود را وارد کنید</p>
+                                    </div>
+
+                                    <form
+                                        id="login-form"
+                                        method="post"
+                                        dir="rtl"
+                                        style="display:block">
+
+                                        <input
+                                            type="hidden"
+                                            name="machineID"
+                                            id="machineID"
+                                            value="">
+
+                                        <div class="form-group">
+                                            <input
+                                                type="text"
+                                                name="mail"
+                                                id="email"
+                                                tabindex="1"
+                                                class="monospace form-control"
+                                                placeholder="ایمیل"
+                                                autocomplete="username"
+                                                value="">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <input
+                                                type="password"
+                                                name="pass"
+                                                id="pass"
+                                                tabindex="2"
+                                                class="monospace form-control"
+                                                placeholder="رمز عبور"
+                                                autocomplete="current-password">
+                                        </div>
+
+                                        <div
+                                            class="form-group f_i_input f_i_ldap"
+                                            style="display:none">
+
+                                            <input
+                                                type="text"
+                                                name="key"
+                                                id="key"
+                                                tabindex="3"
+                                                class="monospace form-control"
+                                                placeholder="کلید گروه">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row login-function-row">
+
+                                                <div class="col-md-12 monospace login-function-select">
+                                                    <select
+                                                        class="form-control"
+                                                        name="function"
+                                                        selector="f_i"
+                                                        tabindex="4">
+
+                                                        <% switch(screen) {
+                                                            case 'super': %>
+
+                                                            <option value="super">
+                                                                مدیر ارشد
+                                                            </option>
+
+                                                        <% break;
+
+                                                            case 'admin': %>
+
+                                                            <option value="admin">
+                                                                مدیر
+                                                            </option>
+
+                                                        <% break;
+
+                                                            default: %>
+
+                                                            <option value="dash" selected>
+                                                                داشبورد
+                                                            </option>
+
+                                                            <% if (config.productType === 'Pro') { %>
+
+                                                                <option value="ldap">
+                                                                    ورود LDAP
+                                                                </option>
+
+                                                            <% } %>
+
+                                                            <option value="streamer">
+                                                                پخش‌کننده
+                                                            </option>
+
+                                                            <option value="cam">
+                                                                دوربین متحرک (پخش‌کننده نسخه ۲)
+                                                            </option>
+
+                                                        <% break;
+                                                        } %>
+
+                                                    </select>
+                                                </div>
+
+                                                <div
+                                                    class="remember-container"
+                                                    title="مرا به خاطر بسپار">
+
+                                                    <label
+                                                        class="mdl-switch mdl-js-switch mdl-js-ripple-effect"
+                                                        for="remember_me">
+
+                                                        <input
+                                                            type="checkbox"
+                                                            id="remember_me"
+                                                            value="1"
+                                                            name="remember"
+                                                            class="mdl-switch__input">
+
+                                                        <span class="monospace mdl-switch__label">
+                                                            مرا به خاطر بسپار
+                                                        </span>
+
+                                                    </label>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="form-group"
+                                            style="margin:20px">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <button
+                                                type="submit"
+                                                name="login-submit"
+                                                id="login-submit"
+                                                tabindex="5"
+                                                class="btn btn-success btn-block">
+                                                ورود
+                                            </button>
+                                        </div>
+
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="libs/js/material.min.js"></script>
+
+<script>
+    <% var failedLogin; if (failedLogin === true) { %>
+        localStorage.removeItem('ShinobiLogin_' + location.host)
+    <% } %>
+
+    $.ccio = {
+        f: $('#login-form'),
+        ls: localStorage.getItem('ShinobiLogin_' + location.host),
+        auth: localStorage.getItem('ShinobiAuth_' + location.host)
+    }
+
+    $.ccio.gid = function (x) {
+        if (!x) {
+            x = 10
+        }
+
+        var t = ''
+        var p = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+        for (var i = 0; i < x; i++) {
+            t += p.charAt(Math.floor(Math.random() * p.length))
+        }
+
+        return t
+    }
+
+    if (!$.ccio.auth || $.ccio.auth === '') {
+        $.ccio.auth = $.ccio.gid(20)
+
+        localStorage.setItem(
+            'ShinobiAuth_' + location.host,
+            $.ccio.auth
+        )
+    }
+
+    $(document).ready(function () {
+        $('#machineID').val($.ccio.auth)
+    })
+
+    $.ccio.f.submit(function (e) {
+        $('input').css('border-color', '')
+
+        e.e = $(this)
+        e.s = e.e.serializeObject()
+        e.inputs = e.e.find('input,button')
+
+        if (e.s.remember) {
+            localStorage.setItem(
+                'ShinobiLogin_' + location.host,
+                JSON.stringify({
+                    mail: e.s.mail,
+                    pass: e.s.pass,
+                    function: e.s.function
+                })
+            )
+        } else {
+            localStorage.removeItem(
+                'ShinobiLogin_' + location.host
+            )
+        }
+    })
+
+    if ($.ccio.ls) {
+        $.ccio.ls = JSON.parse($.ccio.ls)
+
+        $.each($.ccio.ls, function (n, v) {
+            n = $.ccio.f.find('[name="' + n + '"]')
+
+            if (n.attr('type') === 'checkbox') {
+                n.prop('checked', true)
+            } else {
+                n.val(v)
+            }
+        })
+
+        $.ccio.f
+            .find('[name="remember"]')
+            .prop('checked', true)
+
+        $.ccio.f.submit()
+    }
+
+    $('[name="function"]').change(function () {
+        var e = {}
+
+        e.removeClass =
+            'btn-danger btn-primary btn-success btn-warning'
+
+        switch ($(this).val()) {
+            case 'streamer':
+                e.addClass = 'btn-warning'
+            break
+
+            case 'admin':
+                e.addClass = 'btn-primary'
+            break
+
+            case 'super':
+                e.addClass = 'btn-danger'
+            break
+
+            default:
+                e.addClass = 'btn-success'
+            break
+        }
+
+        $('#login-submit')
+            .removeClass(e.removeClass)
+            .addClass(e.addClass)
+    })
+
+    $('[selector]').change(function () {
+        var e = {}
+
+        e.v = $(this).val()
+        e.a = $(this).attr('selector')
+
+        $('.' + e.a + '_input').hide()
+        $('.' + e.a + '_' + e.v).show()
+
+        $('.' + e.a + '_text').text(
+            $(this).find('option:selected').text()
+        )
+    }).change()
+</script>
