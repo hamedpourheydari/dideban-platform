@@ -152,16 +152,29 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.login-logo {
-    display: block;
-    width: 82px;
-    height: 82px;
-    margin: 0 auto;
-    object-fit: contain;
-    border-radius: 50%;
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.32));
+.login-logo{
+    display:block;
+
+    width:120px;
+
+    height:120px;
+
+    margin:0 auto 8px;
+
+    object-fit:contain;
+
+    border-radius:0;
+
+    filter:
+        drop-shadow(0 8px 18px rgba(0,0,0,.35));
+
+    transition:.3s;
 }
 
+.login-logo:hover{
+
+    transform:scale(1.04);
+}
 .panel-login > .panel-body {
     padding: 27px 30px 28px;
     direction: rtl;
