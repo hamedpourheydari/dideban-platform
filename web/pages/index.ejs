@@ -1,15 +1,13 @@
 <% include blocks/header %>
 
-<link rel="stylesheet" href="libs/css/dideban.css">
-
 <%
     if (screen) {
         screen = screen.toLowerCase()
     }
 %>
 
-<div class="shinobi-bg" dir="rtl">
-    <div class="shinobi-bg-shade"></div>
+<div class="dideban-bg" dir="rtl">
+    <div class="dideban-bg-shade"></div>
 
     <main class="container dideban-login-shell">
         <div class="row">
@@ -223,54 +221,130 @@
 <script src="libs/js/material.min.js"></script>
 
 <script>
+    /*
+     * Dideban localStorage keys
+     *
+     * کلیدهای legacy فقط برای مهاجرت اطلاعات نسخه قبلی استفاده می‌شوند.
+     * پس از مهاجرت موفق، کلید قدیمی حذف می‌شود.
+     */
+    var legacyLoginStorageKey = 'ShinobiLogin_' + location.host
+    var legacyAuthStorageKey = 'ShinobiAuth_' + location.host
+
+    var loginStorageKey = 'DidebanLogin_' + location.host
+    var authStorageKey = 'DidebanAuth_' + location.host
+
+    /*
+     * اگر ورود قبلی ناموفق بوده، اطلاعات Remember Me پاک شود.
+     * کلید جدید و قدیمی هر دو حذف می‌شوند تا اطلاعات اشتباه باقی نماند.
+     */
     <% var failedLogin; if (failedLogin === true) { %>
-        localStorage.removeItem('ShinobiLogin_' + location.host)
+        localStorage.removeItem(loginStorageKey)
+        localStorage.removeItem(legacyLoginStorageKey)
     <% } %>
 
+    /*
+ * مهاجرت اطلاعات ورود ذخیره‌شده از نسخه قدیمی به دیده‌بان
+ */
+    if (
+        !localStorage.getItem(loginStorageKey) &&
+        localStorage.getItem(legacyLoginStorageKey)
+    ) {
+        localStorage.setItem(
+            loginStorageKey,
+            localStorage.getItem(legacyLoginStorageKey)
+        )
+
+        localStorage.removeItem(legacyLoginStorageKey)
+    }
+
+  /*
+ * مهاجرت شناسه دستگاه از نسخه قدیمی به دیده‌بان
+ */
+    if (
+        !localStorage.getItem(authStorageKey) &&
+        localStorage.getItem(legacyAuthStorageKey)
+    ) {
+        localStorage.setItem(
+            authStorageKey,
+            localStorage.getItem(legacyAuthStorageKey)
+        )
+
+        localStorage.removeItem(legacyAuthStorageKey)
+    }
+
+    /*
+     * Login controller
+     */
     $.ccio = {
         f: $('#login-form'),
-        ls: localStorage.getItem('ShinobiLogin_' + location.host),
-        auth: localStorage.getItem('ShinobiAuth_' + location.host)
+        ls: localStorage.getItem(loginStorageKey),
+        auth: localStorage.getItem(authStorageKey)
     }
 
-    $.ccio.gid = function (x) {
-        if (!x) {
-            x = 10
+    /*
+     * تولید شناسه تصادفی برای دستگاه
+     */
+    $.ccio.gid = function (length) {
+        if (!length) {
+            length = 10
         }
 
-        var t = ''
-        var p = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        var result = ''
+        var characters =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
-        for (var i = 0; i < x; i++) {
-            t += p.charAt(Math.floor(Math.random() * p.length))
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(
+                Math.floor(Math.random() * characters.length)
+            )
         }
 
-        return t
+        return result
     }
 
+    /*
+     * اگر شناسه دستگاه وجود ندارد، یک شناسه جدید ایجاد شود.
+     */
     if (!$.ccio.auth || $.ccio.auth === '') {
         $.ccio.auth = $.ccio.gid(20)
 
         localStorage.setItem(
-            'ShinobiAuth_' + location.host,
+            authStorageKey,
             $.ccio.auth
         )
     }
 
+    /*
+     * عملیات پس از آماده‌شدن صفحه
+     */
     $(document).ready(function () {
         $('#machineID').val($.ccio.auth)
 
+        /*
+         * نمایش و مخفی‌سازی رمز عبور
+         */
         $('#toggle-password').on('click', function () {
             var button = $(this)
             var passwordInput = $('#pass')
             var icon = button.find('i')
-            var showPassword = passwordInput.attr('type') === 'password'
+            var showPassword =
+                passwordInput.attr('type') === 'password'
 
-            passwordInput.attr('type', showPassword ? 'text' : 'password')
-            button.attr('aria-pressed', showPassword ? 'true' : 'false')
+            passwordInput.attr(
+                'type',
+                showPassword ? 'text' : 'password'
+            )
+
+            button.attr(
+                'aria-pressed',
+                showPassword ? 'true' : 'false'
+            )
+
             button.attr(
                 'aria-label',
-                showPassword ? 'مخفی کردن رمز عبور' : 'نمایش رمز عبور'
+                showPassword
+                    ? 'مخفی کردن رمز عبور'
+                    : 'نمایش رمز عبور'
             )
 
             icon.toggleClass('fa-eye', !showPassword)
@@ -278,49 +352,71 @@
         })
     })
 
-    $.ccio.f.submit(function (e) {
+    /*
+     * ذخیره یا حذف اطلاعات Remember Me هنگام ارسال فرم
+     */
+    $.ccio.f.submit(function (event) {
         $('input').css('border-color', '')
 
-        e.e = $(this)
-        e.s = e.e.serializeObject()
-        e.inputs = e.e.find('input,button')
+        event.e = $(this)
+        event.s = event.e.serializeObject()
+        event.inputs = event.e.find('input,button')
 
-        if (e.s.remember) {
+        if (event.s.remember) {
             localStorage.setItem(
-                'ShinobiLogin_' + location.host,
+                loginStorageKey,
                 JSON.stringify({
-                    mail: e.s.mail,
-                    pass: e.s.pass,
-                    function: e.s.function
+                    mail: event.s.mail,
+                    pass: event.s.pass,
+                    function: event.s.function
                 })
             )
         } else {
-            localStorage.removeItem(
-                'ShinobiLogin_' + location.host
-            )
+            localStorage.removeItem(loginStorageKey)
         }
     })
 
+    /*
+     * بازیابی اطلاعات ذخیره‌شده Remember Me
+     */
     if ($.ccio.ls) {
-        $.ccio.ls = JSON.parse($.ccio.ls)
+        try {
+            $.ccio.ls = JSON.parse($.ccio.ls)
 
-        $.each($.ccio.ls, function (n, v) {
-            n = $.ccio.f.find('[name="' + n + '"]')
+            $.each($.ccio.ls, function (name, value) {
+                var input =
+                    $.ccio.f.find('[name="' + name + '"]')
 
-            if (n.attr('type') === 'checkbox') {
-                n.prop('checked', true)
-            } else {
-                n.val(v)
-            }
-        })
+                if (input.attr('type') === 'checkbox') {
+                    input.prop('checked', true)
+                } else {
+                    input.val(value)
+                }
+            })
 
-        $.ccio.f
-            .find('[name="remember"]')
-            .prop('checked', true)
+            $.ccio.f
+                .find('[name="remember"]')
+                .prop('checked', true)
 
-        $.ccio.f.submit()
+            /*
+             * این رفتار در نسخه اصلی وجود داشته و فرم را
+             * به‌صورت خودکار ارسال می‌کند.
+             */
+            $.ccio.f.submit()
+        } catch (error) {
+            console.warn(
+                'Dideban: invalid saved login information.',
+                error
+            )
+
+            localStorage.removeItem(loginStorageKey)
+            $.ccio.ls = null
+        }
     }
 
+    /*
+     * ثبت نوع ورود روی دکمه
+     */
     $('[name="function"]').change(function () {
         $('#login-submit').attr(
             'data-login-mode',
@@ -328,16 +424,18 @@
         )
     })
 
+    /*
+     * مدیریت Selectorهای فرم
+     */
     $('[selector]').change(function () {
-        var e = {}
+        var selectedValue = $(this).val()
+        var selectorName = $(this).attr('selector')
 
-        e.v = $(this).val()
-        e.a = $(this).attr('selector')
+        $('.' + selectorName + '_input').hide()
 
-        $('.' + e.a + '_input').hide()
-        $('.' + e.a + '_' + e.v).show()
+        $('.' + selectorName + '_' + selectedValue).show()
 
-        $('.' + e.a + '_text').text(
+        $('.' + selectorName + '_text').text(
             $(this).find('option:selected').text()
         )
     }).change()

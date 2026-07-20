@@ -44,7 +44,7 @@ body {
     background: #090e15;
 }
 
-.shinobi-bg {
+.dideban-bg {
     position: relative;
     min-height: 100vh;
     overflow: hidden;
@@ -54,15 +54,15 @@ body {
         linear-gradient(145deg, #151c27 0%, #0d131c 52%, #080c12 100%);
 }
 
-.shinobi-bg::before,
-.shinobi-bg::after {
+.dideban-bg::before ,
+.dideban-bg::after {
     content: "";
     position: absolute;
     z-index: 0;
     pointer-events: none;
 }
 
-.shinobi-bg::before {
+.dideban-bg::before {
     top: 0;
     left: 0;
     width: 42%;
@@ -74,7 +74,7 @@ body {
     mask-image: linear-gradient(135deg, #000, transparent 75%);
 }
 
-.shinobi-bg::after {
+.dideban-bg::after {
     right: -180px;
     bottom: -180px;
     width: 560px;
@@ -87,7 +87,7 @@ body {
         0 0 0 150px rgba(74, 205, 125, 0.015);
 }
 
-.shinobi-bg-shade {
+.dideban-bg-shade {
     position: absolute;
     inset: 0;
     z-index: 0;
