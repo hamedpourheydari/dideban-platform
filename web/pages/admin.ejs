@@ -1,12 +1,13 @@
 <% include blocks/header %>
 <script>$user=<%-JSON.stringify($user)%></script>
 <style>
-.shinobi-bg {
+.dideban-bg {
     background: url(/libs/img/bg.jpg);
     background-size: cover;
     background-position: center;
     position: relative;
-}.shinobi-bg-shade {
+}
+.dideban-bg-shade {
     position: absolute;
     height: 100%;
     width: 100%;
@@ -22,15 +23,15 @@
 <link rel="stylesheet" href="libs/css/fullcalendar.min.css">
 <link rel="stylesheet" href="libs/css/bootstrap-table.min.css">
 <link rel="stylesheet" href="libs/css/main.dash2.css">
-<body class="shinobi-bg">
-    <div class="shinobi-bg-shade">
+<body class="dideban-bg">
+    <div class="dideban-bg-shade">
 <div class="container-fluid">
     <div class="container">
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <a class="navbar-brand" href="/">Shinobi : Admin</a>
+      <a class="navbar-brand" href="/">دیده‌بان | مدیریت</a>
     </div>
 
 
@@ -234,6 +235,12 @@ $.pR.f.submit(function(e){
 
 $('body')
 .on('click','.logout',function(e){
-    localStorage.removeItem('ShinobiLogin_'+location.host);location.href=location.href;
+    var loginStorageKey = 'DidebanLogin_' + location.host
+var legacyLoginStorageKey = 'ShinobiLogin_' + location.host
+
+localStorage.removeItem(loginStorageKey)
+localStorage.removeItem(legacyLoginStorageKey)
+
+location.href = location.href
 })
 </script>
