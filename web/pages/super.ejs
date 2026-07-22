@@ -117,16 +117,16 @@ $.ccio.ws.on('f',function(d){
             $.ccio.tm(4,d.log,'#logs table')
         break;
         case'save_configuration':
-            $.conf.msg.html('Saved, Restart Shinobi to apply changes.')
+            $.conf.msg.html('تنظیمات ذخیره شد. برای اعمال تغییرات، دیده‌بان را مجدداً راه‌اندازی کنید.')
         break;
         case'edit_account':
-            d.msg='Account Edited';
+            d.msg='حساب کاربری ویرایش شد';
             $.each(d.form,function(n,v){
                 $.ccio.accounts[d.ke][n]=v;
             });
         break;
         case'add_account':
-            d.msg='Account Created';
+            d.msg='حساب کاربری ایجاد شد';
             $.ccio.tm(0,d,'#accounts table')
             $.aN.selected=$.ccio.accounts[d.ke];
         break;
@@ -203,10 +203,10 @@ $.ccio.init=function(x,d,z,k){
 $.logs={e:$('#logs')}
 $.logs.e.find('.delete').click(function(e){
     $.confirm.e.modal('show');
-    $.confirm.title.html('Delete Logs <small>'+e.u+'</small>')
-    e.html='Do you want to delete these logs? User logs will <b>not</b> be deleted.'
+    $.confirm.title.html('حذف گزارش‌ها <small>'+e.u+'</small>')
+    e.html='آیا از حذف این گزارش‌ها مطمئن هستید؟ گزارش‌های کاربران <b>حذف نخواهند شد</b>.'
     $.confirm.body.html(e.html)
-    $.confirm.click({title:'Delete',class:'btn-danger'},function(){
+    $.confirm.click({title:'حذف',class:'btn-danger'},function(){
         $.ccio.cx({f:'logs',ff:'delete',ke:'$'})
         $.logs.e.find('table').empty()
     });
@@ -220,11 +220,11 @@ $.conf.draw.keyup(function(){
     var color=''
     try{
         $.parseJSON($.conf.draw.val())
-        msg='Valid JSON'
+        msg='ساختار JSON معتبر است'
         color='success'
         $.conf.valid=1
     }catch(er){
-        msg='Not a valid JSON'
+        msg='ساختار JSON معتبر نیست'
         color='danger'
         $.conf.valid=0
     }
@@ -234,15 +234,15 @@ $.conf.e.submit(function(e){
     e.preventDefault()
     if($.conf.valid===1){
         $.confirm.e.modal('show');
-        $.confirm.title.html('Save Configuration <small>conf.json</small>')
-        e.html='<p>This is a change being applied to the configuration file (conf.json). Are you sure you want to do this? You must restart Shinobi for these changes to take effect. <b>The JSON below is what you are about to save.</b></p>'
+        $.confirm.title.html('ذخیره پیکربندی <small>conf.json</small>')
+        e.html='<p>این تغییر در فایل پیکربندی (conf.json) اعمال خواهد شد. آیا از انجام این کار مطمئن هستید؟ برای اعمال تغییرات باید دیده‌بان را مجدداً راه‌اندازی کنید. <b>محتوای JSON زیر ذخیره خواهد شد.</b></p>'
         e.html+='<pre>'+JSON.stringify($.parseJSON($.conf.draw.val()),null,3)+'</pre>'
         $.confirm.body.html(e.html)
-        $.confirm.click({title:'Save',class:'btn-success'},function(){
+        $.confirm.click({title:'ذخیره',class:'btn-success'},function(){
             $.ccio.cx({f:'system',ff:'configure',data:$.parseJSON($.conf.draw.val())})
         });
     }else{
-        $.conf.msg.text('Invalid JSON Syntax, Cannot Save.')
+        $.conf.msg.text('ساختار JSON نامعتبر است و امکان ذخیره وجود ندارد.')
     }
     return false;
 })
@@ -254,9 +254,9 @@ $.system.e.find('[system]').click(function(e){
             e.distro=$(this).attr('distro')
             if(!e.distro){e.distro='master'}
             $.confirm.e.modal('show')
-            $.confirm.title.html('Update Shinobi?')
-            $.confirm.body.html('Updating Shinobi means overwriting files. If you have modified any files yourself you should update Shinobi manually. The updater will download the latest '+e.distro+' from the <a href="https://github.com/ShinobiCCTV/Shinobi" target="_blank">Pro repository</a>.')
-            $.confirm.click({title:'Update',class:'btn-danger'},function(){
+            $.confirm.title.html('دیده‌بان به‌روزرسانی شود؟')
+            $.confirm.body.html('به‌روزرسانی دیده‌بان باعث بازنویسی فایل‌ها می‌شود. اگر فایل‌ها را شخصاً تغییر داده‌اید، باید دیده‌بان را به‌صورت دستی به‌روزرسانی کنید. به‌روزرسان، آخرین نسخه '+e.distro+' را از <a href="https://github.com/ShinobiCCTV/Shinobi" target="_blank">مخزن حرفه‌ای</a> دریافت خواهد کرد.')
+            $.confirm.click({title:'به‌روزرسانی',class:'btn-danger'},function(){
                 $.ccio.cx({f:'system',ff:'update',distro:e.distro})
             });
         break;
@@ -270,19 +270,19 @@ $.system.e.find('[restart]').click(function(e){
     e.target.forEach(function(v){
         switch(v){
             case'system':
-                e.html+='<p>Do you want to restart the core (camera.js)? plugins will not be restarted. They will reconnect when Shinobi is back online.</p>'
+                e.html+='<p>آیا می‌خواهید هسته اصلی (camera.js) مجدداً راه‌اندازی شود؟ افزونه‌ها مجدداً راه‌اندازی نخواهند شد و پس از در دسترس قرار گرفتن دوباره دیده‌بان، مجدداً متصل خواهند شد.</p>'
             break;
             case'cron':
-                e.html+='<p>Do you want to restart the CRON (cron.js)?</p>'
+                e.html+='<p>آیا می‌خواهید سرویس زمان‌بندی CRON ‏(cron.js) مجدداً راه‌اندازی شود؟</p>'
             break;
             case'logs':
-                e.html+='<p>Flush PM2 console logs? The logs saved in the database will <b>not</b> be deleted.</p>'
+                e.html+='<p>گزارش‌های کنسول PM2 پاک شوند؟ گزارش‌های ذخیره‌شده در پایگاه داده <b>حذف نخواهند شد</b>.</p>'
             break;
         }
     })
-    $.confirm.title.html('Restart?')
+    $.confirm.title.html('راه‌اندازی مجدد؟')
     $.confirm.body.html(e.html)
-    $.confirm.click({title:'Restart',class:'btn-danger'},function(){
+    $.confirm.click({title:'راه‌اندازی مجدد',class:'btn-danger'},function(){
         $.ccio.cx({f:'system',ff:'restart',target:e.target})
     });
 })

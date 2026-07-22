@@ -1,7 +1,7 @@
 {
-  "name": "shinobi",
-  "version": "1.0.37",
-  "description": "CCTV and NVR in Node.js, Version : daf882caf6053a7c2c8f4e69427620356f8a440c",
+  "name": "dideban-platform",
+  "version": "0.1.0",
+  "description": "ersian-first self-hosted video surveillance and NVR platform",
   "main": "camera.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,13 +9,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moeiscool/Shinobi.git"
+    "url": "git+https://github.com/hamedpourheydari/dideban-platform.git"
   },
-  "author": "Moe Alam",
+  "author": "Dideban Platform Team",
   "bugs": {
-    "url": "https://github.com/ShinobiCCTV/Shinobi/issues"
+    "url": "https://github.com/hamedpourheydari/dideban-platform/issues"
   },
-  "homepage": "https://github.com/moeiscool/Shinobi#readme",
+  "homepage": "https://github.com/hamedpourheydari/dideban-platform#readme",
   "dependencies": {
     "body-parser": "^1.15.2",
     "circular-json": "0.3.1",

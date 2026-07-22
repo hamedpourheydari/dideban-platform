@@ -83,7 +83,7 @@ camera/
 Clone the repository
 
 ```bash
-git clone https://github.com/hamedpourheydari/camera.git
+git clone https://github.com/hamedpourheydari/dideban-platform.git
 ```
 
 Install dependencies
