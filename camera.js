@@ -29,7 +29,7 @@ try{
 var os = require('os');
 var URL = require('url');
 var path = require('path');
-var mysql = require('mysql');
+var mysql = require('mysql2');
 var moment = require('moment');
 var request = require("request");
 var express = require('express');
@@ -4245,10 +4245,42 @@ var tx;
                                                     d.form.ke=s.gid()
                                                 }
                                                 //write user to db
-                                                s.sqlQuery('INSERT INTO Users (ke,uid,mail,pass,details) VALUES (?,?,?,?,?)',[d.form.ke,d.form.uid,d.form.mail,s.md5(d.form.pass),d.form.details])
-                                                s.tx({f:'add_account',details:d.form.details,ke:d.form.ke,uid:d.form.uid,mail:d.form.mail},'$');
-                                                //init user
-                                                s.init('group',d.form)
+                                                s.sqlQuery(
+                                                    'INSERT INTO Users (ke,uid,mail,pass,details) VALUES (?,?,?,?,?)',
+                                                    [
+                                                        d.form.ke,
+                                                        d.form.uid,
+                                                        d.form.mail,
+                                                        s.md5(d.form.pass),
+                                                        d.form.details
+                                                    ],
+                                                    function(err,result){
+                                                        console.log('=== INSERT USER ===')
+                                                        console.log('ERR =',err)
+                                                        console.log('RESULT =',result)
+
+                                                        if(err){
+                                                            s.tx({
+                                                                f:'error',
+                                                                ff:'account_register',
+                                                                msg:err.message || err.code || 'Database Insert Failed'
+                                                            },cn.id)
+                                                            return
+                                                        }
+
+                                                        s.tx({
+                                                            f:'add_account',
+                                                            details:d.form.details,
+                                                            ke:d.form.ke,
+                                                            uid:d.form.uid,
+                                                            mail:d.form.mail
+                                                        },'$')
+
+                                                        // Initialize the group only after a successful database insert.
+                                                        s.init('group',d.form)
+                                                    }
+                                                )
+                                                
                                             }
                                         })
                                     }else{
