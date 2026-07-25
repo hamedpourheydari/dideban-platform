@@ -1,4 +1,4 @@
-﻿<% var details=JSON.parse($user.details) %>
+<% var details=JSON.parse($user.details) %>
 <% include blocks/header %>
 <script>var $user=<%- JSON.stringify($user) %>;</script>
 <link rel="stylesheet" href="libs/css/pnotify.custom.min.css">
@@ -150,6 +150,7 @@
         <% include blocks/sidebar.ejs %>
       </div>
       <main class="mdl-layout__content selected" id="main_canvas">
+          <% include blocks/dashboard-overview.ejs %>
           <div class="grid-stack" id="monitors_live"></div>
       </main>
     </div>
