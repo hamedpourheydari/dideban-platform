@@ -122,6 +122,128 @@
         margin-top: 10px;
         padding-top: 8px;
     }
+
+    /*
+     * Shinobi builds the monitor list with GridStack and Bootstrap columns.
+     * In the narrow drawer those rules can reduce each camera to a tiny tile.
+     * The overrides below keep the original data attributes and click handlers,
+     * but render every monitor as a readable full-width card.
+     */
+    .dideban-sidebar #monitors_list,
+    .dideban-sidebar #monitors_list .link-monitors-list {
+        display: block !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        position: relative !important;
+        width: 100% !important;
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block {
+        align-items: stretch;
+        background: rgba(0,0,0,.18);
+        border: 1px solid rgba(255,255,255,.09);
+        border-radius: 6px;
+        box-sizing: border-box;
+        display: flex !important;
+        float: none !important;
+        height: auto !important;
+        left: auto !important;
+        margin: 0 0 8px !important;
+        min-height: 90px;
+        overflow: hidden;
+        padding: 0 !important;
+        position: relative !important;
+        right: auto !important;
+        top: auto !important;
+        transform: none !important;
+        width: 100% !important;
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block:hover {
+        background: rgba(255,255,255,.06);
+        border-color: rgba(255,255,255,.18);
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block > .snapshot {
+        background: #111;
+        cursor: pointer;
+        flex: 0 0 82px;
+        height: 90px !important;
+        margin: 0 !important;
+        max-width: 82px !important;
+        object-fit: cover;
+        order: 1;
+        width: 82px !important;
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block > .box {
+        box-sizing: border-box;
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-width: 0;
+        order: 2;
+        padding: 8px 9px 6px;
+        text-align: right;
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block .title,
+    .dideban-sidebar #monitors_list .monitor_block .monitor_name {
+        direction: auto;
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.5;
+        margin: 0 0 3px;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block .list-data {
+        font-size: 10px;
+        line-height: 1.55;
+        opacity: .78;
+        overflow: hidden;
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block .monitor_mid {
+        direction: ltr;
+        overflow: hidden;
+        text-align: right;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block .icons {
+        margin-top: auto;
+        padding-top: 4px;
+        text-align: right !important;
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block .icons .btn-group {
+        display: flex;
+        gap: 3px;
+    }
+
+    .dideban-sidebar #monitors_list .monitor_block .icons .btn {
+        align-items: center;
+        border-radius: 3px !important;
+        display: inline-flex;
+        height: 22px;
+        justify-content: center;
+        margin: 0 !important;
+        padding: 0;
+        width: 24px;
+    }
+
+    .dideban-sidebar.list-blocks #monitors_list .monitor_block,
+    .dideban-sidebar.list-blocks #monitors_list .monitor_block > .snapshot,
+    .dideban-sidebar.list-blocks #monitors_list .monitor_block > .box {
+        box-sizing: border-box;
+    }
 </style>
 
 <nav class="demo-navigation mdl-navigation side-menu dideban-sidebar" id="left_menu" dir="rtl">
