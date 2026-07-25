@@ -35,6 +35,72 @@ switch($user.details.lang){
     break;
 }
 
+/**
+ * Dideban Persian date/time display layer.
+ * This changes only the visible dashboard header. Server, API and database
+ * timestamps remain Gregorian and unchanged.
+ */
+window.DidebanDate = window.DidebanDate || (function(){
+    var dateFormatter = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    var timeFormatter = new Intl.DateTimeFormat('fa-IR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+
+    function formatHeader(date){
+        return dateFormatter.format(date || new Date());
+    }
+
+    function formatTime(date){
+        return timeFormatter.format(date || new Date());
+    }
+
+    function isEnglishHeaderDate(value){
+        return /^(Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)\s+\d{1,2}\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}$/.test(value);
+    }
+
+    function isHeaderClock(value){
+        return /^\d{1,2}\s*:\s*\d{2}\s*:\s*\d{2}$/.test(value);
+    }
+
+    function updateDashboardHeader(){
+        var now = new Date();
+        var root = document.getElementById('main_header') || document.body;
+        if(!root)return;
+
+        $(root).find('*').addBack().each(function(){
+            if(this.children && this.children.length !== 0)return;
+            var value = $.trim($(this).text());
+            if(isEnglishHeaderDate(value)){
+                $(this).text(formatHeader(now)).attr('dir','rtl');
+            }else if(isHeaderClock(value)){
+                $(this).text(formatTime(now)).attr('dir','ltr');
+            }
+        });
+    }
+
+    return {
+        formatHeader: formatHeader,
+        formatTime: formatTime,
+        updateDashboardHeader: updateDashboardHeader
+    };
+})();
+
+$(function(){
+    window.DidebanDate.updateDashboardHeader();
+    clearInterval(window.didebanHeaderClockInterval);
+    window.didebanHeaderClockInterval = setInterval(function(){
+        window.DidebanDate.updateDashboardHeader();
+    },1000);
+});
+
     $.ccio.log=function(x,y,z){
         if($.ccio.op().browserLog==="1"){
             if(!y){y=''};if(!z){z=''};
