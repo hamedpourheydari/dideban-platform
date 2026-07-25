@@ -714,3 +714,93 @@ ul.msg_list li .message {
 .marc-toggle label:active:after {
     width: 10px;
 }
+
+/* Dideban Persian UI fixes
+   Keep the dashboard layout LTR and apply RTL only to Persian text areas.
+*/
+
+html,
+body {
+    direction: ltr !important;
+}
+
+/* User menu and dropdown menus */
+.dropdown-menu {
+    direction: ltr !important;
+    text-align: left;
+    left: 0;
+    right: auto;
+    min-width: 220px;
+    max-width: 320px;
+    box-sizing: border-box;
+}
+
+.dropdown-menu > li,
+.dropdown-menu > li > a {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.dropdown-menu > li > a {
+    direction: rtl;
+    text-align: right;
+    white-space: normal;
+    overflow-wrap: break-word;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+/* Persian labels and form descriptions */
+label,
+.form-group label,
+.modal label,
+.modal-header,
+.modal-body,
+.modal-footer,
+.panel-heading,
+.panel-body {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Normal Persian text inputs */
+input[type="text"],
+textarea,
+select {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Technical values must remain LTR */
+input[type="url"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[name*="host"],
+input[name*="path"],
+input[name*="port"],
+input[name*="url"],
+code,
+pre {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+/* Prevent menu text from being pushed outside its container */
+.dropdown-menu a,
+.dropdown-menu span {
+    max-width: 100%;
+}
+
+/* Existing dashboard RTL helper */
+.right-to-left {
+    direction: rtl;
+    text-align: right;
+}
+
+.right-to-left input,
+.right-to-left textarea,
+.right-to-left select {
+    direction: rtl;
+    text-align: right;
+}
