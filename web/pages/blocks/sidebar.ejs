@@ -1,0 +1,221 @@
+<style>
+    .dideban-sidebar {
+        box-sizing: border-box;
+        direction: rtl;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 10px;
+        text-align: right;
+    }
+
+    .dideban-sidebar-brand {
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,.12);
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        padding: 4px 6px 12px;
+    }
+
+    .dideban-sidebar-brand > i {
+        font-size: 24px;
+        min-width: 28px;
+        text-align: center;
+    }
+
+    .dideban-sidebar-brand strong,
+    .dideban-sidebar-brand small {
+        display: block;
+    }
+
+    .dideban-sidebar-brand small {
+        font-size: 11px;
+        margin-top: 3px;
+        opacity: .7;
+    }
+
+    .dideban-nav-section {
+        border-bottom: 1px solid rgba(255,255,255,.12);
+        padding-bottom: 8px;
+    }
+
+    .dideban-nav-item {
+        align-items: center;
+        border-radius: 5px;
+        color: inherit;
+        cursor: pointer;
+        display: flex;
+        gap: 10px;
+        margin: 2px 0;
+        min-height: 38px;
+        padding: 8px 10px;
+        text-decoration: none !important;
+        transition: background-color .15s ease;
+        width: 100%;
+    }
+
+    .dideban-nav-item:hover,
+    .dideban-nav-item:focus,
+    .dideban-nav-item.active {
+        background: rgba(255,255,255,.10);
+        color: inherit;
+    }
+
+    .dideban-nav-item > i {
+        font-size: 15px;
+        min-width: 20px;
+        text-align: center;
+    }
+
+    .dideban-monitor-section {
+        padding-top: 10px;
+    }
+
+    .dideban-section-title {
+        align-items: center;
+        display: flex;
+        font-weight: 600;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        padding: 0 5px;
+    }
+
+    .dideban-icon-button {
+        background: transparent;
+        border: 0;
+        border-radius: 4px;
+        color: inherit;
+        height: 30px;
+        opacity: .8;
+        width: 30px;
+    }
+
+    .dideban-icon-button:hover {
+        background: rgba(255,255,255,.10);
+        opacity: 1;
+    }
+
+    .dideban-monitor-search {
+        margin-bottom: 8px;
+        position: relative;
+    }
+
+    .dideban-monitor-search > i {
+        opacity: .65;
+        position: absolute;
+        right: 12px;
+        top: 11px;
+        z-index: 2;
+    }
+
+    .dideban-monitor-search .form-control {
+        direction: rtl;
+        padding-left: 10px;
+        padding-right: 34px;
+        text-align: right;
+    }
+
+    .dideban-sidebar-footer {
+        border-top: 1px solid rgba(255,255,255,.12);
+        margin-top: 10px;
+        padding-top: 8px;
+    }
+</style>
+
+<nav class="demo-navigation mdl-navigation side-menu dideban-sidebar" id="left_menu" dir="rtl">
+    <div class="dideban-sidebar-brand">
+        <i class="fa fa-eye" aria-hidden="true"></i>
+        <div>
+            <strong>&#1583;&#1740;&#1583;&#1607;&#8204;&#1576;&#1575;&#1606;</strong>
+            <small>&#1605;&#1583;&#1740;&#1585;&#1740;&#1578; &#1608; &#1662;&#1575;&#1740;&#1588; &#1583;&#1608;&#1585;&#1576;&#1740;&#1606;&#8204;&#1607;&#1575;</small>
+        </div>
+    </div>
+
+    <div class="dideban-nav-section" aria-label="Dideban Navigation">
+        <a class="dideban-nav-item active" href="javascript:;" data-dideban-view="dashboard">
+            <i class="fa fa-dashboard" aria-hidden="true"></i>
+            <span>&#1583;&#1575;&#1588;&#1576;&#1608;&#1585;&#1583;</span>
+        </a>
+
+        <a class="dideban-nav-item permission_monitor_edit" href="javascript:;" monitor="edit" mid="" ke="">
+            <i class="fa fa-plus-circle" aria-hidden="true"></i>
+            <span>&#1575;&#1601;&#1586;&#1608;&#1583;&#1606; &#1583;&#1608;&#1585;&#1576;&#1740;&#1606;</span>
+        </a>
+
+        <a class="dideban-nav-item" href="javascript:;" data-toggle="modal" data-target="#videos_viewer">
+            <i class="fa fa-film" aria-hidden="true"></i>
+            <span>&#1608;&#1740;&#1583;&#1574;&#1608;&#1607;&#1575;&#1740; &#1590;&#1576;&#1591;&#8204;&#1588;&#1583;&#1607;</span>
+        </a>
+
+        <a class="dideban-nav-item" href="javascript:;" monitor="powerview" mid="" ke="">
+            <i class="fa fa-map-marker" aria-hidden="true"></i>
+            <span>&#1606;&#1605;&#1575;&#1740;&#1588;&#1711;&#1585; &#1585;&#1608;&#1740;&#1583;&#1575;&#1583;&#1607;&#1575;</span>
+        </a>
+
+        <a class="dideban-nav-item" href="javascript:;" monitor="timelapse" mid="" ke="">
+            <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+            <span>&#1578;&#1575;&#1740;&#1605;&#8204;&#1604;&#1662;&#1587;</span>
+        </a>
+
+        <a class="dideban-nav-item" href="javascript:;" data-toggle="modal" data-target="#logs_modal">
+            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+            <span>&#1711;&#1586;&#1575;&#1585;&#1588; &#1585;&#1608;&#1740;&#1583;&#1575;&#1583;&#1607;&#1575;</span>
+        </a>
+
+        <a class="dideban-nav-item" href="javascript:;" data-toggle="modal" data-target="#settings">
+            <i class="fa fa-gears" aria-hidden="true"></i>
+            <span>&#1578;&#1606;&#1592;&#1740;&#1605;&#1575;&#1578;</span>
+        </a>
+
+        <a class="dideban-nav-item" href="javascript:;" data-toggle="modal" data-target="#apis">
+            <i class="fa fa-code" aria-hidden="true"></i>
+            <span>&#1583;&#1587;&#1578;&#1585;&#1587;&#1740; API</span>
+        </a>
+
+        <% if(!details.sub){ %>
+        <a class="dideban-nav-item" href="javascript:;" data-toggle="modal" data-target="#onvif_probe">
+            <i class="fa fa-rss" aria-hidden="true"></i>
+            <span>&#1580;&#1587;&#1578;&#8204;&#1608;&#1580;&#1608;&#1740; ONVIF</span>
+        </a>
+
+        <a class="dideban-nav-item" href="javascript:;" data-toggle="modal" data-target="#probe">
+            <i class="fa fa-search" aria-hidden="true"></i>
+            <span>&#1576;&#1585;&#1585;&#1587;&#1740; &#1580;&#1585;&#1740;&#1575;&#1606; &#1585;&#1587;&#1575;&#1606;&#1607;</span>
+        </a>
+        <% } %>
+    </div>
+
+    <div class="dideban-monitor-section">
+        <div class="dideban-section-title">
+            <span><i class="fa fa-video-camera" aria-hidden="true"></i> &#1583;&#1608;&#1585;&#1576;&#1740;&#1606;&#8204;&#1607;&#1575;</span>
+            <button type="button" class="dideban-icon-button" class_toggle="list-blocks" data-target="#left_menu" title="Change monitor list view">
+                <i class="fa fa-th-list" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div class="dideban-monitor-search">
+            <i class="fa fa-search" aria-hidden="true"></i>
+            <input class="form-control dark" placeholder="&#1580;&#1587;&#1578;&#8204;&#1608;&#1580;&#1608;&#1740; &#1583;&#1608;&#1585;&#1576;&#1740;&#1606;&#8204;&#1607;&#1575;" id="monitors_list_search" autocomplete="off">
+        </div>
+
+        <div id="monitors_list" class="display-table"></div>
+    </div>
+
+    <div class="mdl-layout-spacer"></div>
+
+    <div class="dideban-sidebar-footer">
+        <a class="dideban-nav-item logout" href="javascript:;">
+            <i class="fa fa-sign-out" aria-hidden="true"></i>
+            <span>&#1582;&#1585;&#1608;&#1580; &#1575;&#1586; &#1587;&#1575;&#1605;&#1575;&#1606;&#1607;</span>
+        </a>
+    </div>
+</nav>
+
+<script>
+    $(document).on('click', '.dideban-nav-item:not(.logout)', function () {
+        $('.dideban-nav-item').removeClass('active')
+        $(this).addClass('active')
+    })
+</script>

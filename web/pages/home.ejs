@@ -1,4 +1,4 @@
-<% var details=JSON.parse($user.details) %>
+﻿<% var details=JSON.parse($user.details) %>
 <% include blocks/header %>
 <script>var $user=<%- JSON.stringify($user) %>;</script>
 <link rel="stylesheet" href="libs/css/pnotify.custom.min.css">
@@ -38,8 +38,10 @@
     th.permission_video_delete,td.permission_video_delete{display:table-cell}
 <% } %>
 </style>
-<html lang="en">
+<html lang="fa" dir="rtl">
   <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -145,13 +147,7 @@
             </button>
           </div>
         </header>
-        <nav class="demo-navigation mdl-navigation side-menu" id="left_menu">
-            <div class="form-group col-md-12">
-                <input class="form-control dark" placeholder="Search Monitors" id="monitors_list_search">
-            </div>
-            <div id="monitors_list" class="display-table"></div>
-            <div class="mdl-layout-spacer"></div>
-        </nav>
+        <% include blocks/sidebar.ejs %>
       </div>
       <main class="mdl-layout__content selected" id="main_canvas">
           <div class="grid-stack" id="monitors_live"></div>
@@ -182,6 +178,7 @@
 <script src="libs/js/material.min.js"></script>
 <script src="libs/js/pnotify.custom.min.js"></script>
 <script><% include ../libs/js/moment.js %></script>
+<script src="/libs/js/dideban-date.js"></script>
 <script><% include ../libs/js/livestamp.min.js %></script>
 <script src="libs/js/placeholder.js"></script>
 <script src="libs/js/bootstrap.min.js"></script>
