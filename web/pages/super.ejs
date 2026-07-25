@@ -163,7 +163,7 @@ $.ccio.tm=function(x,d,z,k){
     }
     return tmp;
 }
-users=<%-JSON.stringify(users)%>;
+users=<%-JSON.stringify(users || []) || '[]'%>;
 if(users){
     $.each(users,function(n,v){
         $.ccio.tm(0,v,'#accounts table')
@@ -287,9 +287,11 @@ $.system.e.find('[restart]').click(function(e){
     });
 })
 $(document).ready(function(){
+   /*
     $.each(<%-JSON.stringify(Logs)%>,function(n,v){
         $.ccio.tm(4,v,'#logs table')
     })
+    */
 })
     //
 $('body')
