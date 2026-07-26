@@ -1,6 +1,6 @@
 @echo off
 setlocal
-set "PROJECT_DIR=C:\Users\Fanpars1\Desktop\dideban-platform"
+set "PROJECT_DIR=C:\Users\Fanpars1\Desktop\dideban-clean"
 
 cd /d "%PROJECT_DIR%"
 if errorlevel 1 (
@@ -19,3 +19,4 @@ node camera.js
 echo.
 echo Dideban stopped with exit code %ERRORLEVEL%.
 pause
+

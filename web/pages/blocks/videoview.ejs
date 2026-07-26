@@ -1,69 +1,108 @@
-<!--Videos List Window-->
+<!-- Dideban Recorded Videos Center -->
+<style>
+  #videos_viewer .modal-content,#video_viewer .modal-content{direction:rtl;text-align:right;background:#f4f7fb}
+  #videos_viewer .modal-header,#video_viewer .modal-header{display:flex;align-items:center;border-bottom:1px solid #e5e9f0;background:#fff}
+  #videos_viewer .modal-header .close,#video_viewer .modal-header .close{order:2;margin-right:auto;margin-left:0}
+  #videos_viewer .modal-title,#video_viewer .modal-title{order:1;font-weight:800;color:#182230}
+  #videos_viewer .dideban-video-layout{display:flex;gap:18px;padding:18px}
+  #videos_viewer .dideban-video-filter{width:292px;flex:0 0 292px;background:#fff;border:1px solid #e3e8ef;border-radius:16px;padding:16px;height:max-content;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+  #videos_viewer .dideban-video-results{min-width:0;flex:1;background:transparent;padding:0;overflow:auto}
+  #videos_viewer label{display:block;width:100%;font-weight:700;color:#344054}
+  #videos_viewer label>div:first-child{margin-bottom:7px}
+  #videos_viewer .form-control{border-radius:10px;border-color:#d9e0ea;box-shadow:none}
+  #videos_viewer .dideban-video-filter .form-control{direction:ltr;text-align:left}
+  #videos_viewer_preview{margin-top:16px;border-radius:12px;overflow:hidden;background:#101828;box-shadow:0 8px 20px rgba(15,23,42,.16)}
+  #videos_viewer_preview:empty{display:none}
+  #videos_viewer_preview video{display:block;width:100%;max-height:260px}
+  #videos_viewer .dideban-video-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;background:#fff;border:1px solid #e3e8ef;border-radius:14px;padding:12px 14px;box-shadow:0 4px 14px rgba(15,23,42,.04)}
+  #videos_viewer .dideban-video-toolbar .search-wrap{position:relative;flex:1}
+  #videos_viewer .dideban-video-toolbar .search-wrap i{position:absolute;right:12px;top:11px;color:#98a2b3}
+  #videos_viewer .dideban-video-toolbar input{padding-right:34px;direction:rtl;text-align:right}
+  #videos_viewer .dideban-video-toolbar select{width:180px}
+  #videos_viewer .dideban-video-count{white-space:nowrap;color:#667085;font-size:12px}
+  #videos_viewer .dideban-video-table-wrap{background:#fff;border:1px solid #e3e8ef;border-radius:14px;overflow:auto;box-shadow:0 5px 16px rgba(15,23,42,.05)}
+  #videos_viewer .dideban-video-table{margin:0;min-width:980px}
+  #videos_viewer .dideban-video-table thead th{background:#f8fafc;color:#475467;font-size:12px;font-weight:800;border-bottom:1px solid #e3e8ef;white-space:nowrap;padding:13px 10px;text-align:right}
+  #videos_viewer .dideban-video-table tbody td{vertical-align:middle;padding:11px 10px;border-top:1px solid #eef2f6;color:#344054}
+  #videos_viewer .dideban-video-table tbody tr:hover{background:#f8fbff}
+  #videos_viewer .dideban-video-check{width:42px;text-align:center!important}
+  #videos_viewer .dideban-video-camera{display:flex;align-items:center;gap:7px;font-weight:700;white-space:nowrap}
+  #videos_viewer .dideban-video-camera i{color:#2477c9}
+  #videos_viewer .dideban-video-file{direction:ltr;text-align:left!important;max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:monospace;font-size:11px}
+  #videos_viewer .dideban-video-size{direction:ltr;white-space:nowrap}
+  #videos_viewer .dideban-video-actions{white-space:nowrap}
+  #videos_viewer .dideban-video-actions .btn{border-radius:8px;min-width:34px}
+  #videos_viewer .dideban-video-card{background:#fff;border:1px solid #e3e8ef;border-radius:16px;overflow:hidden;box-shadow:0 5px 16px rgba(15,23,42,.05);transition:.18s ease;position:relative}
+  #videos_viewer .dideban-video-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(15,23,42,.10);border-color:#cbd5e1}
+  #videos_viewer .dideban-video-thumb{height:148px;background:linear-gradient(135deg,#172033,#34435e);display:flex;align-items:center;justify-content:center;position:relative;color:#fff;cursor:pointer;overflow:hidden}
+  #videos_viewer .dideban-video-thumb:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.18),transparent 34%)}
+  #videos_viewer .dideban-video-thumb .play{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.93);color:#2477c9;font-size:20px;box-shadow:0 8px 22px rgba(0,0,0,.2);z-index:1}
+  #videos_viewer .dideban-video-thumb .camera-chip{position:absolute;right:10px;top:10px;background:rgba(15,23,42,.72);backdrop-filter:blur(4px);border-radius:20px;padding:5px 9px;font-size:11px;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1}
+  #videos_viewer .dideban-video-thumb .size-chip{position:absolute;left:10px;bottom:10px;background:rgba(15,23,42,.72);border-radius:7px;padding:4px 7px;font-size:11px;direction:ltr;z-index:1}
+  #videos_viewer .dideban-video-select{position:absolute;left:11px;top:11px;z-index:3;background:#fff;border-radius:7px;padding:4px 6px;box-shadow:0 3px 10px rgba(0,0,0,.15)}
+  #videos_viewer .dideban-video-select input{margin:0}
+  #videos_viewer .dideban-video-body{padding:13px 14px 14px}
+  #videos_viewer .dideban-video-title{font-weight:800;color:#1d2939;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:10px;direction:ltr;text-align:left;font-size:12px}
+  #videos_viewer .dideban-video-meta{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+  #videos_viewer .dideban-video-meta-item{background:#f8fafc;border-radius:9px;padding:8px}
+  #videos_viewer .dideban-video-meta-label{font-size:10px;color:#98a2b3;margin-bottom:3px}
+  #videos_viewer .dideban-video-meta-value{font-size:11px;color:#344054;font-weight:700;direction:ltr;text-align:right;white-space:nowrap}
+  #videos_viewer .dideban-video-card-actions{display:grid;grid-template-columns:1fr 1fr 42px;gap:7px}
+  #videos_viewer .dideban-video-card-actions .btn{border-radius:9px;padding:7px 8px}
+  #videos_viewer .dideban-video-empty{background:#fff;border:1px dashed #cbd5e1;border-radius:16px;text-align:center;padding:55px 20px;color:#667085}
+  #videos_viewer .dideban-video-empty i{font-size:42px;color:#cbd5e1;display:block;margin-bottom:12px}
+  #videos_viewer .dideban-jalali-date{direction:ltr;display:inline-block;font-variant-numeric:tabular-nums}
+  #videos_viewer .modal-footer{background:#fff;border-top:1px solid #e5e9f0}
+  #videos_viewer_pages{direction:ltr}
+  #videos_viewer_pages .btn{margin:2px;border-radius:7px}
+  #video_viewer .modal-body{background:#101828}
+  #video_viewer .modal-body video{max-width:100%;max-height:72vh}
+  @media(max-width:900px){#videos_viewer .dideban-video-layout{display:block;padding:10px}#videos_viewer .dideban-video-filter{width:100%;margin-bottom:12px}#videos_viewer .dideban-video-toolbar{flex-wrap:wrap}#videos_viewer .dideban-video-toolbar select{width:100%}}
+  @media(max-width:520px){#videos_viewer .dideban-video-grid{grid-template-columns:1fr}#videos_viewer .dideban-video-meta{grid-template-columns:1fr}}
+</style>
 <div class="modal full fade" id="videos_viewer" role="dialog" aria-labelledby="videos_viewerLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <form class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <h4 class="modal-title" id="videos_viewerLabel"><i class="fa fa-film"></i> &nbsp; <%-lang.Videos%> <small> <span class="video_viewer_total"></span> <%-lang.total%></small></h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="videos_viewerLabel"><i class="fa fa-film"></i>&nbsp; &#1605;&#1585;&#1705;&#1586; &#1608;&#1740;&#1583;&#1574;&#1608;&#1607;&#1575;&#1740; &#1590;&#1576;&#1591;&#8204;&#1588;&#1583;&#1607; <small>(<span class="video_viewer_total"></span> &#1605;&#1608;&#1585;&#1583;)</small></h4>
       </div>
       <div class="modal-body flex-container-modal-body">
-          <div style="padding:20px 0" class="flex-block flex-modal-block">
-              <div class="col-md-3">
-
-                  <div class="form-group">
-                    <label><div><span><%-lang['Date Range']%></span></div>
-                        <div><input type="text" id="videos_viewer_daterange" class="form-control" value="" /></div>
-                    </label>
-                  </div>
-                  <div class="form-group">
-                    <label><div><span><%-lang['Video Limit']%></span></div>
-                        <div><input id="videos_viewer_limit" value="100" class="form-control" placeholder="0 for No Limit" localStorage="videosViewerLimit" /></div>
-                    </label>
-                  </div>
-                  <div id="videos_viewer_preview" class="text-center"></div>
-              </div>
-              <div class="col-md-9">
-                  <div class="contents"></div>
-              </div>
-          </div>
+        <div class="dideban-video-layout">
+          <aside class="dideban-video-filter">
+            <div class="form-group">
+              <label><div><i class="fa fa-calendar"></i>&nbsp; &#1576;&#1575;&#1586;&#1607; &#1586;&#1605;&#1575;&#1606;&#1740;</div><div><input type="text" id="videos_viewer_daterange" class="form-control" value="" /></div></label>
+            </div>
+            <div class="form-group">
+              <label><div><i class="fa fa-list-ol"></i>&nbsp; &#1578;&#1593;&#1583;&#1575;&#1583; &#1606;&#1578;&#1575;&#1740;&#1580;</div><div><input id="videos_viewer_limit" value="100" class="form-control" placeholder="0 = &#1576;&#1583;&#1608;&#1606; &#1605;&#1581;&#1583;&#1608;&#1583;&#1740;&#1578;" localStorage="videosViewerLimit" /></div></label>
+            </div>
+            <div class="text-muted small"><i class="fa fa-info-circle"></i>&nbsp; &#1578;&#1575;&#1585;&#1740;&#1582;&#8204;&#1607;&#1575; &#1583;&#1585; &#1606;&#1605;&#1575;&#1740;&#1588; &#1576;&#1607;&#8204;&#1589;&#1608;&#1585;&#1578; &#1588;&#1605;&#1587;&#1740; &#1606;&#1588;&#1575;&#1606; &#1583;&#1575;&#1583;&#1607; &#1605;&#1740;&#8204;&#1588;&#1608;&#1606;&#1583;.</div>
+            <div id="videos_viewer_preview" class="text-center"></div>
+          </aside>
+          <section class="dideban-video-results">
+            <div class="dideban-video-toolbar">
+              <div class="search-wrap"><i class="fa fa-search"></i><input type="search" id="dideban_video_search" class="form-control" placeholder="&#1580;&#1587;&#1578;&#8204;&#1608;&#1580;&#1608; &#1583;&#1585; &#1606;&#1575;&#1605; &#1583;&#1608;&#1585;&#1576;&#1740;&#1606; &#1740;&#1575; &#1601;&#1575;&#1740;&#1604;..." /></div>
+              <select id="dideban_video_camera_filter" class="form-control"><option value="">&#1607;&#1605;&#1607; &#1583;&#1608;&#1585;&#1576;&#1740;&#1606;&#8204;&#1607;&#1575;</option></select>
+              <span class="dideban-video-count"><span class="dideban-video-visible-count">0</span>&nbsp; &#1608;&#1740;&#1583;&#1574;&#1608;</span>
+            </div>
+            <div class="contents"></div>
+          </section>
+        </div>
       </div>
       <div class="modal-footer">
-          <div class="row">
-              <div class="col-md-4 text-left">
-                  <a class="btn btn-danger delete_selected"><i class="fa fa-trash-o"></i> &nbsp; <%-lang['Delete selected']%></a> 
-              </div>
-              <div class="col-md-4">
-                  <div class="text-center" id="videos_viewer_pages"></div>
-              </div>
-              <div class="col-md-4">
-                  <button type="button" class="btn btn-danger" data-dismiss="modal"><%-lang.Close%></button>
-              </div>
-          </div>
+        <div class="row">
+          <div class="col-md-4 text-right"><a class="btn btn-danger delete_selected"><i class="fa fa-trash-o"></i>&nbsp; &#1581;&#1584;&#1601; &#1605;&#1608;&#1575;&#1585;&#1583; &#1575;&#1606;&#1578;&#1582;&#1575;&#1576;&#8204;&#1588;&#1583;&#1607;</a></div>
+          <div class="col-md-4"><div class="text-center" id="videos_viewer_pages"></div></div>
+          <div class="col-md-4 text-left"><button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i>&nbsp; &#1576;&#1587;&#1578;&#1606;</button></div>
+        </div>
       </div>
     </form>
   </div>
 </div>
-<!--Video File Window-->
 <div class="modal full fade dark" id="video_viewer" role="dialog" aria-labelledby="video_viewerLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <h4 class="modal-title" id="video_viewerLabel"><i class="fa fa-play-circle"></i> &nbsp; <span></span></h4>
-      </div>
-      <div class="modal-body text-center"></div>
-      <div class="modal-footer">
-        <a class="btn btn-danger pull-left" video="delete" data-dismiss="modal"><%-lang.Delete%></a>
-          <div class="btn-group">
-              <a class="btn btn-primary download_link"><i class="fa fa-download"></i> &nbsp; <%-lang.Save%></a>
-              <% if(config.DropboxAppKey){ %><a class="btn btn-primary" monitor="download" host="dropbox"><i class="fa fa-dropbox"></i> &nbsp; Dropbox</a><% } %>
-              <button type="button" class="btn btn-default" data-dismiss="modal"><%-lang.Close%></button>
-          </div>
-      </div>
-    </div>
-  </div>
+  <div class="modal-dialog" role="document"><div class="modal-content">
+    <div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="video_viewerLabel"><i class="fa fa-play-circle"></i>&nbsp; <span></span></h4></div>
+    <div class="modal-body text-center"></div>
+    <div class="modal-footer"><a class="btn btn-danger pull-right" video="delete" data-dismiss="modal"><i class="fa fa-trash"></i>&nbsp; &#1581;&#1584;&#1601;</a><div class="btn-group"><a class="btn btn-primary download_link"><i class="fa fa-download"></i>&nbsp; &#1583;&#1575;&#1606;&#1604;&#1608;&#1583;</a><% if(config.DropboxAppKey){ %><a class="btn btn-primary" monitor="download" host="dropbox"><i class="fa fa-dropbox"></i>&nbsp; Dropbox</a><% } %><button type="button" class="btn btn-default" data-dismiss="modal">&#1576;&#1587;&#1578;&#1606;</button></div></div>
+  </div></div>
 </div>
