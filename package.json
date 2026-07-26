@@ -1,6 +1,6 @@
 {
   "name": "dideban-platform",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "ersian-first self-hosted video surveillance and NVR platform",
   "main": "camera.js",
   "scripts": {
