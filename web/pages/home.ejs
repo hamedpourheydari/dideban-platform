@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="libs/css/gridstack-extra.min.css">
 <link rel="stylesheet" href="libs/css/bootstrap-table.min.css">
 <link rel="stylesheet" href="libs/css/main.dash2.css">
+<link rel="stylesheet" href="libs/css/dideban-modern-ui.css?v=10.0.0">
 <style id="theme">
 <% if(details.theme&&details.theme!==''){ %><%- include(__dirname+'/web/libs/themes/'+details.theme+'/style.css'); %><% } %>
 </style>
@@ -60,7 +61,7 @@
                 <a title="<%-lang['Monitor Groups']%>" id="group_list_button" class="mdl-js-button">&nbsp;<i class="fa fa-video-camera"></i>&nbsp;</a>
                 <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="group_list_button" id="group_list"></ul>
             </li>
-            <li class="os_bars hidden-xs">
+            <li class="os_bars hidden-xs dideban-hidden-system-bars" aria-hidden="true">
                 <div class="display-table">
                     <div class="cpu_load display-table-cell">
                         <span class="pull-right percent"></span>
@@ -151,8 +152,41 @@
         <% include blocks/sidebar.ejs %>
       </div>
       <main class="mdl-layout__content selected" id="main_canvas">
+          <section class="dideban-live-zone" aria-label="نمایش زنده دوربین‌ها">
+              <div class="dideban-live-main">
+                  <div class="dideban-live-heading">
+                      <div>
+                          <strong><i class="fa fa-video-camera"></i> دوربین‌های فعال <span id="dideban_live_count" class="dideban-live-count">0</span></strong>
+                          <small>نمایش زنده و دسترسی سریع به دوربین‌ها</small>
+                      </div>
+                      <div class="dideban-live-actions">
+                          <div class="dideban-view-switch" aria-label="نوع نمایش">
+                              <button type="button" class="active" data-dideban-view="grid" title="نمایش شبکه‌ای"><i class="fa fa-th-large"></i></button>
+                              <button type="button" data-dideban-view="list" title="نمایش فهرستی"><i class="fa fa-list"></i></button>
+                          </div>
+                          <button type="button" class="dideban-live-add permission_monitor_edit" monitor="edit" mid="" ke="">
+                              <i class="fa fa-plus"></i><span>افزودن دوربین</span>
+                          </button>
+                      </div>
+                  </div>
+                  <div class="dideban-camera-stage">
+                      <div class="grid-stack" id="monitors_live"></div>
+                  </div>
+              </div>
+
+              <aside class="dideban-quick-note" aria-label="یادداشت سریع">
+                  <div class="dideban-note-header">
+                      <div><i class="fa fa-thumb-tack"></i><strong>یادداشت سریع</strong></div>
+                      <button type="button" id="dideban_note_clear" title="پاک کردن یادداشت"><i class="fa fa-trash-o"></i></button>
+                  </div>
+                  <textarea id="dideban_quick_note" maxlength="4000" placeholder="اینجا یادداشت خود را بنویسید..."></textarea>
+                  <div class="dideban-note-footer">
+                      <span id="dideban_note_status">یادداشت فقط در همین مرورگر ذخیره می‌شود</span>
+                      <button type="button" id="dideban_note_save"><i class="fa fa-floppy-o"></i> ذخیره یادداشت</button>
+                  </div>
+              </aside>
+          </section>
           <% include blocks/dashboard-overview.ejs %>
-          <div class="grid-stack" id="monitors_live"></div>
       </main>
     </div>
   </body>
@@ -201,5 +235,172 @@
 <script src="libs/js/lodash.min.js"></script>
 <script src="libs/js/gridstack.min.js"></script>
 <script src="libs/js/gridstack.jQueryUI.min.js"></script>
+<script>
+(function () {
+    // Phase 7: the desktop sidebar is part of the approved permanent layout.
+    // Clear an old saved `hide-side` state without changing camera logic.
+    var layout = document.querySelector('.mdl-js-layout')
+    if (layout) layout.classList.remove('hide-side')
+
+    var viewButtons = document.querySelectorAll('[data-dideban-view]')
+    Array.prototype.forEach.call(viewButtons, function (button) {
+        button.addEventListener('click', function () {
+            var zone = document.querySelector('.dideban-live-main')
+            if (!zone) return
+            Array.prototype.forEach.call(viewButtons, function (item) { item.classList.remove('active') })
+            button.classList.add('active')
+            zone.setAttribute('data-view', button.getAttribute('data-dideban-view'))
+        })
+    })
+
+    function ensureDesktopSidebar () {
+        var layout = document.querySelector('.mdl-js-layout')
+        var drawer = document.querySelector('.demo-drawer')
+        var menu = document.getElementById('left_menu')
+        if (layout) layout.classList.remove('hide-side')
+        if (drawer) {
+            drawer.classList.add('is-visible')
+            drawer.setAttribute('aria-hidden', 'false')
+        }
+        if (menu) menu.style.removeProperty('display')
+    }
+
+    var pendingCameraStarts = {}
+
+    function getCameraKey (element) {
+        if (!element) return ''
+        return (element.getAttribute('ke') || '') + ':' + (element.getAttribute('mid') || '')
+    }
+
+    // Open up to four registered monitors automatically. Shinobi normally restores only
+    // monitors saved in watch_on, which made a registered second camera appear as an
+    // empty placeholder. This uses Shinobi's existing watch button and stream pipeline;
+    // it does not create a second streaming implementation.
+    function ensureFourCameraStreams () {
+        var live = document.getElementById('monitors_live')
+        var list = document.getElementById('monitors_list')
+        if (!live || !list) return
+
+        var visibleKeys = {}
+        var visible = live.querySelectorAll(':scope > .monitor_item, :scope > .grid-stack-item:not(.dideban-camera-placeholder)')
+        Array.prototype.forEach.call(visible, function (camera) {
+            var key = getCameraKey(camera)
+            if (key) {
+                visibleKeys[key] = true
+                delete pendingCameraStarts[key]
+            }
+        })
+
+        var occupied = visible.length + Object.keys(pendingCameraStarts).length
+        if (occupied >= 4) return
+
+        var blocks = list.querySelectorAll('.monitor_block[mid][ke]')
+        Array.prototype.some.call(blocks, function (block) {
+            if (occupied >= 4) return true
+            var key = getCameraKey(block)
+            if (!key || visibleKeys[key] || pendingCameraStarts[key]) return false
+
+            var launcher = block.querySelector('[monitor="watch"]')
+            if (!launcher) return false
+
+            pendingCameraStarts[key] = Date.now()
+            occupied += 1
+            launcher.click()
+            return false
+        })
+
+        // Permit a retry when a monitor could not start (offline, denied, or timed out).
+        var now = Date.now()
+        Object.keys(pendingCameraStarts).forEach(function (key) {
+            if (now - pendingCameraStarts[key] > 15000) delete pendingCameraStarts[key]
+        })
+    }
+
+    function syncCameraSlots () {
+        var live = document.getElementById('monitors_live')
+        if (!live) return
+        var cameras = live.querySelectorAll(':scope > .monitor_item, :scope > .grid-stack-item:not(.dideban-camera-placeholder)')
+        var count = cameras.length
+        var badge = document.getElementById('dideban_live_count')
+        if (badge) badge.textContent = count
+
+        Array.prototype.slice.call(live.querySelectorAll(':scope > .dideban-camera-placeholder')).forEach(function (item) {
+            item.parentNode.removeChild(item)
+        })
+        var emptySlots = Math.max(0, 4 - count)
+        for (var i = 0; i < emptySlots; i += 1) {
+            var placeholder = document.createElement('button')
+            placeholder.type = 'button'
+            placeholder.className = 'dideban-camera-placeholder permission_monitor_edit'
+            placeholder.setAttribute('monitor', 'edit')
+            placeholder.setAttribute('mid', '')
+            placeholder.setAttribute('ke', '')
+            placeholder.innerHTML = '<span class="dideban-placeholder-icon"><i class="fa fa-plus"></i></span><strong>افزودن دوربین</strong><small>جایگاه دوربین ' + (count + i + 1) + '</small>'
+            live.appendChild(placeholder)
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        ensureDesktopSidebar()
+        ensureFourCameraStreams()
+        syncCameraSlots()
+        var live = document.getElementById('monitors_live')
+        if (live && window.MutationObserver) {
+            new MutationObserver(function () { window.requestAnimationFrame(syncCameraSlots) }).observe(live, { childList: true })
+        }
+    })
+    window.setInterval(function () {
+        ensureDesktopSidebar()
+        ensureFourCameraStreams()
+        syncCameraSlots()
+    }, 2000)
+})()
+</script>
+<script>
+(function () {
+    'use strict'
+    var storageKey = 'DidebanQuickNote'
+    var saveTimer = null
+
+    function setStatus(message) {
+        var status = document.getElementById('dideban_note_status')
+        if (status) status.textContent = message
+    }
+
+    function saveNote() {
+        var note = document.getElementById('dideban_quick_note')
+        if (!note) return
+        try {
+            localStorage.setItem(storageKey, note.value)
+            setStatus('ذخیره شد')
+        } catch (error) {
+            setStatus('ذخیره یادداشت در مرورگر ممکن نیست')
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var note = document.getElementById('dideban_quick_note')
+        var save = document.getElementById('dideban_note_save')
+        var clear = document.getElementById('dideban_note_clear')
+        if (!note) return
+
+        try { note.value = localStorage.getItem(storageKey) || '' } catch (error) {}
+
+        note.addEventListener('input', function () {
+            setStatus('در حال نوشتن...')
+            window.clearTimeout(saveTimer)
+            saveTimer = window.setTimeout(saveNote, 700)
+        })
+        if (save) save.addEventListener('click', saveNote)
+        if (clear) clear.addEventListener('click', function () {
+            if (!window.confirm('یادداشت پاک شود؟')) return
+            note.value = ''
+            try { localStorage.removeItem(storageKey) } catch (error) {}
+            setStatus('یادداشت پاک شد')
+            note.focus()
+        })
+    })
+})()
+</script>
 <script><% include ../libs/js/main.dash2.js %></script>
 <% include blocks/help.ejs %>

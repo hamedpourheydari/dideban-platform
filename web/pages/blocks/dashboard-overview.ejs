@@ -1,169 +1,53 @@
-<style>
-    .dideban-overview {
-        direction: rtl;
-        padding: 16px 16px 6px;
-        text-align: right;
-    }
-
-    .dideban-overview-header {
-        align-items: center;
-        display: flex;
-        gap: 12px;
-        justify-content: space-between;
-        margin-bottom: 12px;
-    }
-
-    .dideban-overview-title {
-        margin: 0;
-    }
-
-    .dideban-overview-title strong,
-    .dideban-overview-title small {
-        display: block;
-    }
-
-    .dideban-overview-title strong {
-        font-size: 17px;
-    }
-
-    .dideban-overview-title small {
-        margin-top: 4px;
-        opacity: .65;
-    }
-
-    .dideban-overview-actions {
-        display: flex;
-        gap: 6px;
-    }
-
-    .dideban-overview-button {
-        background: rgba(255,255,255,.06);
-        border: 1px solid rgba(255,255,255,.12);
-        border-radius: 5px;
-        color: inherit;
-        cursor: pointer;
-        height: 34px;
-        min-width: 34px;
-        padding: 0 10px;
-    }
-
-    .dideban-overview-button:hover,
-    .dideban-overview-button:focus {
-        background: rgba(255,255,255,.12);
-    }
-
-    .dideban-stat-grid {
-        display: grid;
-        gap: 10px;
-        grid-template-columns: repeat(6, minmax(120px, 1fr));
-    }
-
-    .dideban-stat-card {
-        align-items: center;
-        background: rgba(255,255,255,.055);
-        border: 1px solid rgba(255,255,255,.09);
-        border-radius: 7px;
-        display: flex;
-        gap: 12px;
-        min-height: 76px;
-        padding: 12px;
-    }
-
-    .dideban-stat-icon {
-        align-items: center;
-        background: rgba(255,255,255,.08);
-        border-radius: 50%;
-        display: flex;
-        flex: 0 0 38px;
-        height: 38px;
-        justify-content: center;
-        width: 38px;
-    }
-
-    .dideban-stat-value,
-    .dideban-stat-label {
-        display: block;
-    }
-
-    .dideban-stat-value {
-        font-size: 19px;
-        font-weight: 700;
-        line-height: 1.2;
-    }
-
-    .dideban-stat-label {
-        font-size: 11px;
-        margin-top: 5px;
-        opacity: .7;
-    }
-
-    .dideban-overview.is-collapsed .dideban-stat-grid,
-    .dideban-overview.is-collapsed .dideban-overview-title small {
-        display: none;
-    }
-
-    .dideban-overview.is-collapsed {
-        padding-bottom: 0;
-    }
-
-    @media (max-width: 1200px) {
-        .dideban-stat-grid {
-            grid-template-columns: repeat(3, minmax(130px, 1fr));
-        }
-    }
-
-    @media (max-width: 700px) {
-        .dideban-overview {
-            padding: 10px 8px 4px;
-        }
-
-        .dideban-stat-grid {
-            grid-template-columns: repeat(2, minmax(110px, 1fr));
-        }
-    }
-</style>
-
-<section class="dideban-overview" id="dideban_overview" aria-label="Dideban dashboard summary">
-    <div class="dideban-overview-header">
-        <div class="dideban-overview-title">
-            <strong>&#1608;&#1590;&#1593;&#1740;&#1578; &#1587;&#1575;&#1605;&#1575;&#1606;&#1607;</strong>
-            <small>&#1582;&#1604;&#1575;&#1589;&#1607; &#1604;&#1581;&#1592;&#1607;&#8204;&#1575;&#1740; &#1583;&#1608;&#1585;&#1576;&#1740;&#1606;&#8204;&#1607;&#1575; &#1608; &#1605;&#1606;&#1575;&#1576;&#1593; &#1587;&#1740;&#1587;&#1578;&#1605;</small>
+<section class="dideban-overview" id="dideban_overview" aria-label="خلاصه وضعیت سامانه">
+    <div class="dideban-overview-shell">
+        <div class="dideban-overview-header">
+            <div class="dideban-overview-title">
+                <strong>مرکز کنترل دیده‌بان</strong>
+                <small>نمای لحظه‌ای دوربین‌ها و منابع سامانه</small>
+            </div>
+            <span class="dideban-system-health"><i class="fa fa-shield"></i> همه سیستم‌ها عادی است</span>
         </div>
 
-        <div class="dideban-overview-actions">
-            <button type="button" class="dideban-overview-button" id="dideban_overview_refresh" title="Refresh dashboard summary">
-                <i class="fa fa-refresh" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="dideban-overview-button" id="dideban_overview_toggle" title="Collapse dashboard summary" aria-expanded="true">
-                <i class="fa fa-chevron-up" aria-hidden="true"></i>
-            </button>
+        <div class="dideban-stat-grid">
+            <article class="dideban-stat-card is-total">
+                <div class="dideban-stat-heading"><span class="dideban-stat-icon"><i class="fa fa-video-camera"></i></span><strong>کل دوربین‌ها</strong></div>
+                <span class="dideban-stat-value" id="dideban_stat_total">0</span>
+                <span class="dideban-stat-label">دوربین ثبت‌شده در سامانه</span>
+            </article>
+            <article class="dideban-stat-card is-active">
+                <div class="dideban-stat-heading"><span class="dideban-stat-icon"><i class="fa fa-play"></i></span><strong>دوربین‌های آنلاین</strong></div>
+                <span class="dideban-stat-value" id="dideban_stat_active">0</span>
+                <span class="dideban-stat-label">دوربین فعال و در دسترس</span>
+            </article>
+            <article class="dideban-stat-card is-recording">
+                <div class="dideban-stat-heading"><span class="dideban-stat-icon"><i class="fa fa-circle"></i></span><strong>ضبط فعال</strong></div>
+                <span class="dideban-stat-value" id="dideban_stat_recording">0</span>
+                <span class="dideban-stat-label">در حال ضبط و ذخیره‌سازی</span>
+            </article>
+            <article class="dideban-stat-card is-cpu has-ring">
+                <div class="dideban-stat-heading"><span class="dideban-stat-icon"><i class="fa fa-microchip"></i></span><strong>پردازنده CPU</strong></div>
+                <div class="dideban-ring" id="dideban_ring_cpu"><span id="dideban_stat_cpu">--</span></div>
+                <span class="dideban-stat-label">مصرف لحظه‌ای پردازنده</span>
+            </article>
+            <article class="dideban-stat-card is-ram has-ring">
+                <div class="dideban-stat-heading"><span class="dideban-stat-icon"><i class="fa fa-tasks"></i></span><strong>حافظه RAM</strong></div>
+                <div class="dideban-ring" id="dideban_ring_ram"><span id="dideban_stat_ram">--</span></div>
+                <span class="dideban-stat-label">حافظه در حال استفاده</span>
+            </article>
+            <article class="dideban-stat-card is-disk has-ring">
+                <div class="dideban-stat-heading"><span class="dideban-stat-icon"><i class="fa fa-hdd-o"></i></span><strong>فضای ذخیره‌سازی</strong></div>
+                <div class="dideban-ring" id="dideban_ring_disk"><span id="dideban_stat_disk">--</span></div>
+                <span class="dideban-stat-label">فضای مصرف‌شده دیسک</span>
+            </article>
         </div>
-    </div>
 
-    <div class="dideban-stat-grid">
-        <div class="dideban-stat-card">
-            <span class="dideban-stat-icon"><i class="fa fa-video-camera"></i></span>
-            <span><span class="dideban-stat-value" id="dideban_stat_total">0</span><span class="dideban-stat-label">&#1705;&#1604; &#1583;&#1608;&#1585;&#1576;&#1740;&#1606;&#8204;&#1607;&#1575;</span></span>
-        </div>
-        <div class="dideban-stat-card">
-            <span class="dideban-stat-icon"><i class="fa fa-play-circle"></i></span>
-            <span><span class="dideban-stat-value" id="dideban_stat_active">0</span><span class="dideban-stat-label">&#1583;&#1608;&#1585;&#1576;&#1740;&#1606;&#8204;&#1607;&#1575;&#1740; &#1601;&#1593;&#1575;&#1604;</span></span>
-        </div>
-        <div class="dideban-stat-card">
-            <span class="dideban-stat-icon"><i class="fa fa-circle"></i></span>
-            <span><span class="dideban-stat-value" id="dideban_stat_recording">0</span><span class="dideban-stat-label">&#1581;&#1575;&#1604; &#1590;&#1576;&#1591;</span></span>
-        </div>
-        <div class="dideban-stat-card">
-            <span class="dideban-stat-icon"><i class="fa fa-microchip"></i></span>
-            <span><span class="dideban-stat-value" id="dideban_stat_cpu">--</span><span class="dideban-stat-label">&#1605;&#1589;&#1585;&#1601; CPU</span></span>
-        </div>
-        <div class="dideban-stat-card">
-            <span class="dideban-stat-icon"><i class="fa fa-tasks"></i></span>
-            <span><span class="dideban-stat-value" id="dideban_stat_ram">--</span><span class="dideban-stat-label">&#1605;&#1589;&#1585;&#1601; RAM</span></span>
-        </div>
-        <div class="dideban-stat-card">
-            <span class="dideban-stat-icon"><i class="fa fa-hdd-o"></i></span>
-            <span><span class="dideban-stat-value" id="dideban_stat_disk">--</span><span class="dideban-stat-label">&#1605;&#1589;&#1585;&#1601; &#1584;&#1582;&#1740;&#1585;&#1607;&#8204;&#1587;&#1575;&#1586;</span></span>
+        <div class="dideban-quick-actions">
+            <a class="dideban-quick-action permission_monitor_edit primary" href="javascript:;" monitor="edit" mid="" ke=""><i class="fa fa-plus-circle"></i><span><strong>افزودن دوربین</strong><small>تعریف دوربین جدید</small></span></a>
+            <a class="dideban-quick-action" href="javascript:;" monitor="powerview" mid="" ke=""><i class="fa fa-rss"></i><span><strong>پخش زنده</strong><small>مشاهده آنلاین دوربین‌ها</small></span></a>
+            <a class="dideban-quick-action" href="javascript:;" data-toggle="modal" data-target="#videos_viewer"><i class="fa fa-film"></i><span><strong>آرشیو ویدئوها</strong><small>مشاهده ویدئوهای ضبط‌شده</small></span></a>
+            <a class="dideban-quick-action" href="javascript:;" monitor="powerview" mid="" ke=""><i class="fa fa-bell-o"></i><span><strong>رویدادها</strong><small>مشاهده رویدادهای اخیر</small></span></a>
+            <a class="dideban-quick-action" href="javascript:;" data-toggle="modal" data-target="#logs_modal"><i class="fa fa-bar-chart"></i><span><strong>گزارش‌ها</strong><small>گزارش و آمار سامانه</small></span></a>
+            <a class="dideban-quick-action" href="javascript:;" data-toggle="modal" data-target="#settings"><i class="fa fa-gears"></i><span><strong>تنظیمات</strong><small>مدیریت تنظیمات سامانه</small></span></a>
         </div>
     </div>
 </section>
@@ -171,81 +55,23 @@
 <script>
 (function () {
     'use strict'
-
-    function text(selector) {
-        var element = document.querySelector(selector)
-        return element ? element.textContent.trim() : ''
-    }
-
-    function normalisePercent(value) {
-        if (!value) return '--'
-        return value.indexOf('%') === -1 ? value + '%' : value
-    }
-
-    function getMonitors() {
-        if (!window.$ || !$.ccio || !$.ccio.mon) return []
-        var result = []
-        $.each($.ccio.mon, function (_, monitor) {
-            if (monitor && monitor.mid) result.push(monitor)
-        })
-        return result
-    }
-
+    function text(selector) { var e = document.querySelector(selector); return e ? e.textContent.trim() : '' }
+    function percentValue(value) { var n = parseFloat(String(value || '').replace('%','')); return isNaN(n) ? 0 : Math.max(0, Math.min(100,n)) }
+    function displayPercent(value) { return value ? (String(value).indexOf('%') === -1 ? value + '%' : value) : '--' }
+    function getMonitors() { var r=[]; if(window.$ && $.ccio && $.ccio.mon) $.each($.ccio.mon,function(_,m){if(m&&m.mid)r.push(m)}); return r }
+    function setRing(id,value){var e=document.getElementById(id);if(e)e.style.setProperty('--value',percentValue(value))}
     function updateOverview() {
-        var monitors = getMonitors()
-        var active = 0
-        var recording = 0
-
-        monitors.forEach(function (monitor) {
-            var mode = String(monitor.mode || '').toLowerCase()
-            if (mode && mode !== 'stop' && mode !== 'disabled') active += 1
-            if (mode === 'record') recording += 1
-        })
-
-        document.getElementById('dideban_stat_total').textContent = monitors.length
-        document.getElementById('dideban_stat_active').textContent = active
-        document.getElementById('dideban_stat_recording').textContent = recording
-        document.getElementById('dideban_stat_cpu').textContent = normalisePercent(text('.cpu_load .percent'))
-        document.getElementById('dideban_stat_ram').textContent = normalisePercent(text('.ram_load .percent'))
-        document.getElementById('dideban_stat_disk').textContent = normalisePercent(text('.diskUsed .percent'))
+        var monitors=getMonitors(),active=0,recording=0
+        monitors.forEach(function(m){var mode=String(m.mode||'').toLowerCase();if(mode&&mode!=='stop'&&mode!=='disabled')active++;if(mode==='record')recording++})
+        var cpu=text('.cpu_load .percent'),ram=text('.ram_load .percent'),disk=text('.diskUsed .percent')
+        document.getElementById('dideban_stat_total').textContent=monitors.length
+        document.getElementById('dideban_stat_active').textContent=active
+        document.getElementById('dideban_stat_recording').textContent=recording
+        document.getElementById('dideban_stat_cpu').textContent=displayPercent(cpu)
+        document.getElementById('dideban_stat_ram').textContent=displayPercent(ram)
+        document.getElementById('dideban_stat_disk').textContent=displayPercent(disk)
+        setRing('dideban_ring_cpu',cpu);setRing('dideban_ring_ram',ram);setRing('dideban_ring_disk',disk)
     }
-
-    function setCollapsed(collapsed) {
-        var overview = document.getElementById('dideban_overview')
-        var button = document.getElementById('dideban_overview_toggle')
-        if (!overview || !button) return
-
-        overview.classList.toggle('is-collapsed', collapsed)
-        button.setAttribute('aria-expanded', collapsed ? 'false' : 'true')
-        button.querySelector('i').className = collapsed ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
-        try {
-            localStorage.setItem('DidebanDashboardOverviewCollapsed', collapsed ? '1' : '0')
-        } catch (error) {}
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        var refresh = document.getElementById('dideban_overview_refresh')
-        var toggle = document.getElementById('dideban_overview_toggle')
-        var dashboardLink = document.querySelector('[data-dideban-view="dashboard"]')
-        var collapsed = false
-
-        try {
-            collapsed = localStorage.getItem('DidebanDashboardOverviewCollapsed') === '1'
-        } catch (error) {}
-
-        setCollapsed(collapsed)
-        updateOverview()
-
-        if (refresh) refresh.addEventListener('click', updateOverview)
-        if (toggle) toggle.addEventListener('click', function () {
-            setCollapsed(!document.getElementById('dideban_overview').classList.contains('is-collapsed'))
-        })
-        if (dashboardLink) dashboardLink.addEventListener('click', function () {
-            setCollapsed(false)
-            document.getElementById('dideban_overview').scrollIntoView({behavior: 'smooth', block: 'start'})
-        })
-
-        window.setInterval(updateOverview, 5000)
-    })
+    document.addEventListener('DOMContentLoaded',function(){updateOverview();window.setInterval(updateOverview,5000)})
 })()
 </script>
