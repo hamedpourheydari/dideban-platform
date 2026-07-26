@@ -1,89 +1,154 @@
-# دیده‌بان | Dideban
+<div align="center">
 
-> A modern video surveillance platform designed for secure monitoring, centralized camera management, and Persian-first user experience.
+<p align="center">
+  <img src="docs/images/banner.png" alt="Dideban Platform Banner" width="100%">
+</p>
 
-![Status](https://img.shields.io/badge/status-under%20development-orange)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-blue)
+# دیده‌بان | Dideban Platform
+
+### Enterprise Video Management System (VMS / NVR)
+
+Modern, Persian-first Video Surveillance Platform built on the Shinobi Engine.
+
+<p>
+
+![License](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)
+![Node.js](https://img.shields.io/badge/Node.js-18+-green)
+![Platform](https://img.shields.io/badge/Linux-Windows-lightgrey)
+![Version](https://img.shields.io/badge/version-1.0-orange)
+
+</p>
+
+A modern enterprise Video Management System with a redesigned Persian-first user experience.
+
+</div>
 
 ---
 
 # Overview
 
-Dideban is a self-hosted video surveillance platform developed to provide reliable camera monitoring, recording, and management capabilities.
+Dideban Platform is a modern Video Management System (VMS/NVR) designed for enterprise surveillance systems.
 
-The project is designed with a focus on:
+Built on the powerful Shinobi engine, Dideban focuses on improving usability, localization, and visual design while preserving the mature and reliable backend.
 
-- Persian-first user interface
-- Right-to-left (RTL) support
-- Modern and intuitive user experience
-- Secure architecture
-- High maintainability
-- Enterprise-ready deployment
-
-The project is currently under active development.
+The project introduces a redesigned dashboard, Persian RTL interface, cleaner workflows and an enterprise-grade user experience suitable for organizations and security operations centers.
 
 ---
 
-# Features
+# Highlights
 
-- 🎥 Live camera monitoring
-- 📹 Video recording and playback
-- 👥 Multi-user management
-- 🔐 Secure authentication
-- 🌐 Web-based management panel
-- 🖥️ Cross-platform support
-- 🇮🇷 Persian (RTL) interface
-- ⚙️ Flexible configuration
-
----
-
-# Current Progress
-
-- ✅ Development environment configured
-- ✅ Dependencies installed
-- ✅ FFmpeg configured
-- ✅ Server startup verified
-- ✅ Git workflow established
-- ✅ Initial Persian interface implementation
-- ⏳ Complete UI redesign
-- ⏳ Branding
-- ⏳ Security review
-- ⏳ Production release
+- 🇮🇷 Persian First (RTL)
+- 🎥 Multi Camera Monitoring
+- 📹 RTSP Streaming
+- 🔍 ONVIF Discovery
+- 💾 Continuous Recording
+- 🚨 Motion Detection
+- 📁 Event Management
+- 👥 Multi User Support
+- ⚡ Live Dashboard
+- 🖥 Linux & Windows
+- 🎨 Modern Enterprise UI
 
 ---
 
-# Repository Structure
+# Screenshots
 
-```text
-camera/
-│
-├── docs/
-├── ffmpeg/
-├── languages/
-├── libs/
-├── plugins/
-├── web/
-├── conf.json
-├── camera.js
-└── README.md
+## Dashboard
+
+<p align="center">
+<img src="docs/images/dashboard.png" width="90%">
+</p>
+
+---
+
+## Monitor Management
+
+<p align="center">
+<img src="docs/images/monitor.png" width="90%">
+</p>
+
+---
+
+## Archive
+
+<p align="center">
+<img src="docs/images/archive.png" width="90%">
+</p>
+
+---
+
+## Events
+
+<p align="center">
+<img src="docs/images/events.png" width="90%">
+</p>
+
+---
+
+# Why Dideban?
+
+Compared to the original Shinobi interface, Dideban introduces:
+
+| Shinobi | Dideban |
+|---------|----------|
+| Classic UI | Modern Enterprise UI |
+| English-first | Persian-first |
+| Traditional Layout | Redesigned Dashboard |
+| Generic Branding | Dideban Identity |
+| Legacy Components | Modern Components |
+| Basic UX | Enterprise UX |
+
+---
+
+# Architecture
+
+```
+IP Cameras
+      │
+      ▼
+ ONVIF / RTSP
+      │
+      ▼
+ Shinobi Engine
+      │
+      ▼
+ Dideban Platform
+      │
+ ├──────── Dashboard
+ ├──────── Archive
+ ├──────── Events
+ ├──────── Users
+ └──────── Live View
 ```
 
 ---
 
-# Requirements
+# Technology Stack
 
-- Node.js
-- FFmpeg
-- Git
+| Layer | Technology |
+|--------|------------|
+| Backend | Node.js |
+| Database | MariaDB / MySQL |
+| Streaming | FFmpeg |
+| Frontend | HTML + CSS + JavaScript |
+| Realtime | Socket.IO |
+| Camera Protocols | RTSP / ONVIF |
 
 ---
 
 # Installation
 
-Clone the repository
+## Requirements
+
+- Node.js 18+
+- FFmpeg
+- MariaDB / MySQL
+
+Clone repository
 
 ```bash
 git clone https://github.com/hamedpourheydari/dideban-platform.git
+cd dideban-platform
 ```
 
 Install dependencies
@@ -92,106 +157,105 @@ Install dependencies
 npm install
 ```
 
-Create configuration
-
-```bash
-copy conf.sample.json conf.json
-```
-
-Run
+Start
 
 ```bash
 node camera.js
 ```
 
-Open
-
-```
-http://localhost:8080
-```
-
 ---
 
-# Documentation
+# Project Structure
 
-Documentation is available in the `docs` directory.
-
-Contents include:
-
-- Development Log
-- Software Architecture
-- Installation Guide
-- Branding Guide
-- Test Reports
-- Release Notes
-
----
-
-# Development Principles
-
-- Clean Architecture
-- Continuous Documentation
-- Conventional Commits
-- Incremental Development
-- Security by Design
+```
+camera.js
+conf.sample.json
+languages/
+definitions/
+plugins/
+web/
+libs/
+```
 
 ---
 
 # Roadmap
 
-## Phase 1
+## Version 1.0
 
-- Environment setup
-- Persian interface
-- Branding
+- ✅ Persian Localization
+- ✅ Branding
+- ✅ Dashboard Redesign
+- ✅ Sidebar Redesign
+- ✅ Statistics Widgets
 
-## Phase 2
+---
 
-- UI redesign
-- Performance improvements
-- Feature completion
+## Version 1.1
 
-## Phase 3
+- ⏳ Camera Wizard
+- ⏳ Monitor Editor
+- ⏳ Settings Redesign
+- ⏳ User Management
 
-- Security hardening
-- Production optimization
-- Stable release
+---
+
+## Version 1.2
+
+- ⏳ Archive
+- ⏳ Timeline
+- ⏳ Playback
+- ⏳ Search
+
+---
+
+## Version 2.0
+
+- ⏳ Theme Engine
+- ⏳ Widget System
+- ⏳ Plugin Marketplace
+- ⏳ Dashboard Personalization
+
+---
+
+# Contributing
+
+Contributions are welcome.
+
+1. Fork the project
+2. Create your feature branch
+3. Commit your changes
+4. Push the branch
+5. Open a Pull Request
+
+---
+
+# Credits
+
+Dideban Platform is built upon the Shinobi Open Source NVR engine.
+
+Special thanks to the Shinobi developers and community.
 
 ---
 
 # License
 
-This project is distributed under the terms described in the LICENSE file.
+This project is derived from Shinobi.
 
+Please ensure that all license obligations of the upstream project are respected.
 
-## پیش‌نیاز FFmpeg
+See the LICENSE file for details.
 
-دیده‌بان برای پردازش، ضبط و بررسی جریان‌های ویدئویی به FFmpeg نیاز دارد.
+---
 
-فایل‌های اجرایی FFmpeg به دلیل حجم بالا و وابستگی به سیستم‌عامل، داخل مخزن Git نگهداری نمی‌شوند.
+<div align="center">
 
-### راه‌اندازی در ویندوز
+## Dideban Platform
 
-نسخه مناسب FFmpeg را دانلود و استخراج کنید. سپس فایل‌های زیر را در پوشه `ffmpeg` در ریشه پروژه قرار دهید:
+Enterprise Video Management System
 
-```text
-dideban-platform/
-└── ffmpeg/
-    ├── ffmpeg.exe
-    └── ffprobe.exe
-```
+Built on Shinobi
 
-برای بررسی نصب:
+Made with ❤️ in Iran
 
-```powershell
-.\ffmpeg\ffmpeg.exe -version
-.\ffmpeg\ffprobe.exe -version
-```
-
-پوشه `ffmpeg/` و فایل‌های ZIP مربوط به آن به‌صورت عمدی توسط Git نادیده گرفته می‌شوند.
-
-## مستندات نصب
-
-برای نصب روی ویندوز و رفع خطاهای MySQL، راهنمای زیر را مطالعه کنید:
-
-[راهنمای نصب دیده‌بان روی ویندوز](docs/windows-installation.md)
+</div>
