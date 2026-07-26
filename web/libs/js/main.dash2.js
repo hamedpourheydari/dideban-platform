@@ -4008,79 +4008,246 @@ $.sM.e.find('.linkShinobi .add').click(function(){
     $.sM.linkChange()
 })
 //videos window
-$.vidview={e:$('#videos_viewer'),pages:$('#videos_viewer_pages'),limit:$('#videos_viewer_limit'),dr:$('#videos_viewer_daterange'),preview:$('#videos_viewer_preview')};
-$.vidview.f=$.vidview.e.find('form')
-$.vidview.dr.daterangepicker({
-    startDate:$.ccio.timeObject().subtract(moment.duration("24:00:00")),
-    endDate:$.ccio.timeObject().add(moment.duration("24:00:00")),
-    timePicker: true,
-    timePickerIncrement: 30,
-    locale: {
-        format: 'MM/DD/YYYY h:mm A'
+$.vidview={
+    e:$('#videos_viewer'),
+    pages:$('#videos_viewer_pages'),
+    limit:$('#videos_viewer_limit'),
+    dr:$('#videos_viewer_daterange'),
+    preview:$('#videos_viewer_preview'),
+    current_page:1,
+    currentContext:null,
+    activeRequest:null
+};
+$.vidview.f=$.vidview.e.find('form');
+$.vidview.getUser=function(context){
+    if(context&&context.auth&&$.users[context.auth])return $.users[context.auth];
+    return $user;
+};
+$.vidview.escapeHtml=function(value){
+    return $('<div>').text(value == null ? '' : String(value)).html();
+};
+$.vidview.getLimitState=function(resetOffset){
+    var raw=String($.vidview.limit.val()||'100').replace(/\s/g,'');
+    var parts=raw.split(',');
+    var size=parseInt(parts.length>1?parts[1]:parts[0],10);
+    if(!isFinite(size)||size<0)size=100;
+    var offset=parts.length>1?parseInt(parts[0],10):0;
+    if(!isFinite(offset)||offset<0)offset=0;
+    if(resetOffset===true)offset=0;
+    if(size===0){
+        $.vidview.limit.val('0');
+        return {offset:0,size:0,apiValue:'0'};
     }
-},function(start, end, label){
-    $.vidview.launcher.click()
-    $.vidview.dr.focus()
-});
-$.vidview.e.on('change','#videos_select_all',function(e){
-    e.e=$(this);
-    e.p=e.e.prop('checked')
-    e.a=$.vidview.e.find('input[type=checkbox][name]')
-    if(e.p===true){
-        e.a.prop('checked',true)
-    }else{
-        e.a.prop('checked',false)
-    }
-})
-$.vidview.f.submit(function(e){
-    e.preventDefault();
-    $.vidview.launcher.click()
-    return false;
-})
-$('#videos_viewer_limit,#videos_viewer_daterange').change(function(){
-    $.vidview.f.submit()
-})
-$.vidview.e.find('.delete_selected').click(function(e){
-    e.s={}
-    $.vidview.f.find('[data-ke] input:checked').each(function(n,v){
-        v=$(v).parents('tr')
-        e.s[v.attr('data-file')]={mid:v.attr('data-mid'),auth:v.attr('data-auth')}
-    })
-    $.confirm.e.modal('show');
-    $.confirm.title.text('<%-cleanLang(lang['Delete Selected Videos'])%>')
-    e.html='<%-cleanLang(lang.DeleteSelectedVideosMsg)%><div style="margin-bottom:15px"></div>'
-    $.each(e.s,function(n,v){
-        e.html+=n+'<br>';
-    })
-    $.confirm.body.html(e.html)
-    $.confirm.click({title:'Delete Video',class:'btn-danger'},function(){
-        $.each(e.s,function(n,v){
-            $.getJSON($.ccio.init('location',$.users[v.auth])+v.auth+'/videos/'+$user.ke+'/'+v.mid+'/'+n+'/delete',function(d){
-                $.ccio.log(d)
-            })
-        })
+    $.vidview.limit.val(offset+','+size);
+    return {offset:offset,size:size,apiValue:offset+','+size};
+};
+$.vidview.getDateRange=function(){
+    var picker=$.vidview.dr.data('daterangepicker');
+    if(!picker||!moment.isMoment(picker.startDate)||!moment.isMoment(picker.endDate))return null;
+    var start=picker.startDate.clone();
+    var end=picker.endDate.clone();
+    if(!start.isValid()||!end.isValid())return null;
+    if(!end.isAfter(start))end=start.clone().add(1,'minute');
+    return {start:start,end:end,picker:picker};
+};
+$.vidview.buildVideoUrl=function(context,limitState,dateRange){
+    var user=$.vidview.getUser(context);
+    var base=$.ccio.init('location',user)+user.auth_token+'/videos/'+encodeURIComponent(context.ke)+'/'+encodeURIComponent(context.mid);
+    return base+'?'+$.param({
+        limit:limitState.apiValue,
+        start:$.ccio.init('th',dateRange.start),
+        end:$.ccio.init('th',dateRange.end)
     });
-})
-$.vidview.pages.on('click','[page]',function(e){
-    e.limit=$.vidview.limit.val();
-    e.page=$(this).attr('page');
-    $.vidview.current_page=e.page;
-    if(e.limit.replace(/ /g,'')===''){
-        e.limit='100';
+};
+$.vidview.drawPages=function(total,limitState){
+    $.vidview.pages.empty();
+    if(limitState.size===0)return;
+    var pageCount=Math.max(1,Math.ceil(Number(total||0)/limitState.size));
+    $.vidview.page_count=pageCount;
+    for(var page=1;page<=pageCount;page++){
+        $.vidview.pages.append('<a class="btn btn-primary'+(page===$.vidview.current_page?' active':'')+'" page="'+page+'">'+page+'</a> ');
     }
-    if(e.limit.indexOf(',')>-1){
-        e.limit=parseInt(e.limit.split(',')[1])
+};
+$.vidview.formatFaDate=function(value){
+    if(!value)return '-';
+    try{
+        return new Intl.DateTimeFormat('fa-IR-u-ca-persian',{
+            year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
+        }).format(new Date(value));
+    }catch(err){return String(value)}
+};
+$.vidview.renderTable=function(data,context,user){
+    var body=$.vidview.e.find('.modal-body .contents');
+    var rows=[];
+    var cameras={};
+    var videosArray=(data&&Array.isArray(data.videos))?data.videos:[];
+    $.each(videosArray,function(index,v){
+        if(!v||parseInt(v.status,10)===0)return;
+        var monitor=$.ccio.mon[v.ke+v.mid+user.auth_token]||{};
+        var monitorName=monitor.name||v.mid||'دوربین';
+        var authToken=(monitor.user&&monitor.user.auth_token)?monitor.user.auth_token:user.auth_token;
+        var filename=(v.href||'').split('/').pop()||((v.time||'video').replace(/[:]/g,'-')+'.'+(v.ext||'mp4'));
+        var href=v.href||'';
+        if(href&&!/^https?:\/\//i.test(href))href=$.ccio.init('location',user)+href.replace(/^\//,'');
+        var safeName=$.vidview.escapeHtml(monitorName);
+        var safeFile=$.vidview.escapeHtml(filename);
+        var sizeMb=(Number(v.size||0)/1048576).toFixed(2);
+        cameras[v.mid]=safeName;
+        rows.push(
+          '<tr class="dideban-video-row" data-ke="'+$.vidview.escapeHtml(v.ke)+'" data-status="'+$.vidview.escapeHtml(v.status)+'" data-mid="'+$.vidview.escapeHtml(v.mid)+'" data-file="'+safeFile+'" data-auth="'+$.vidview.escapeHtml(authToken)+'" data-camera="'+$.vidview.escapeHtml(v.mid)+'" data-search="'+safeName+' '+safeFile+'">'+
+          '<td class="dideban-video-check"><input name="'+safeFile+'" value="'+$.vidview.escapeHtml(v.mid)+'" type="checkbox"></td>'+ 
+          '<td><div class="dideban-video-camera"><i class="fa fa-video-camera"></i><span>'+safeName+'</span></div></td>'+ 
+          '<td class="dideban-video-file" title="'+safeFile+'">'+safeFile+'</td>'+ 
+          '<td class="dideban-jalali-date" title="'+$.vidview.escapeHtml(v.time)+'">'+$.vidview.formatFaDate(v.time)+'</td>'+ 
+          '<td class="dideban-jalali-date" title="'+$.vidview.escapeHtml(v.end)+'">'+$.vidview.formatFaDate(v.end)+'</td>'+ 
+          '<td class="dideban-video-size">'+sizeMb+' MB</td>'+ 
+          '<td class="dideban-video-actions">'+
+            '<a class="btn btn-sm btn-default preview" href="'+$.vidview.escapeHtml(href)+'" title="پیش‌نمایش"><i class="fa fa-eye"></i></a> '+
+            '<a class="btn btn-sm btn-primary" video="launch" href="'+$.vidview.escapeHtml(href)+'" title="مشاهده"><i class="fa fa-play-circle"></i></a> '+
+            '<a class="btn btn-sm btn-success" download="'+$.vidview.escapeHtml(v.mid)+'-'+safeFile+'" href="'+$.vidview.escapeHtml(href)+'" title="دانلود"><i class="fa fa-download"></i></a> '+
+            '<a class="btn btn-sm btn-danger permission_video_delete" video="delete" title="حذف"><i class="fa fa-trash"></i></a>'+ 
+          '</td></tr>'
+        );
+    });
+    var cameraOptions='<option value="">همه دوربین‌ها</option>';
+    $.each(cameras,function(mid,name){cameraOptions+='<option value="'+$.vidview.escapeHtml(mid)+'">'+name+'</option>'});
+    $.vidview.e.find('#dideban_video_camera_filter').html(cameraOptions);
+    $.vidview.e.find('#dideban_video_search').val('');
+    if(rows.length){
+        body.html('<div class="dideban-video-table-wrap"><table class="table dideban-video-table"><thead><tr>'+ 
+          '<th class="dideban-video-check"><input id="videos_select_all" type="checkbox"></th><th>دوربین</th><th>نام فایل</th><th>شروع</th><th>پایان</th><th>حجم</th><th>عملیات</th>'+ 
+          '</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>');
+        $.vidview.e.find('.dideban-video-visible-count').text(rows.length);
     }else{
-        e.limit=parseInt(e.limit)
+        body.html('<div class="dideban-video-empty"><i class="fa fa-film"></i><strong>ویدئویی در این بازه پیدا نشد</strong><div class="small">بازه زمانی را بررسی کرده و دوباره جست‌وجو کنید.</div></div>');
+        $.vidview.e.find('.dideban-video-visible-count').text('0');
     }
-    $.vidview.limit.val((parseInt(e.page)-1)+'00,'+e.limit)
-    $.vidview.launcher.click()
-})
-$.vidview.e.on('click','.preview',function(e){
-    e.preventDefault()
-    e=$(this)
-    $.vidview.preview.html('<video class="video_video" video="'+e.attr('href')+'" preload controls autoplay><source src="'+e.attr('href')+'" type="video/mp4"></video>')
-})
+};
+$.vidview.renderCalendar=function(data,context,user){
+    var body=$.vidview.e.find('.modal-body .contents');
+    var events=[];
+    if(data.videos&&data.videos[0]){
+        $.each(data.videos,function(n,v){
+            if(v.status!==0){
+                var monitor=$.ccio.mon[v.ke+v.mid+user.auth_token];
+                if(monitor)v.title=monitor.name+' - '+(parseInt(v.size,10)/1000000).toFixed(2)+'mb';
+                v.start=v.time;
+                v.filename=$.ccio.init('tf',v.time)+'.'+v.ext;
+                events.push(v);
+            }
+        });
+        body.html('');
+        try{body.fullCalendar('destroy')}catch(er){}
+        body.fullCalendar({
+            header:{left:'prev,next today',center:'title',right:'month,agendaWeek,agendaDay,listWeek'},
+            defaultDate:$.ccio.timeObject(data.videos[0].time).format('YYYY-MM-DD'),
+            navLinks:true,eventLimit:true,events:events,
+            eventClick:function(f){
+                $('#temp').html('<div mid="'+f.mid+'" ke="'+f.ke+'" auth="'+user.auth_token+'" file="'+f.filename+'"><div video="launch" href="'+f.href+'"></div></div>').find('[video="launch"]').click();
+                $(this).css('border-color','red');
+            }
+        });
+        setTimeout(function(){body.fullCalendar('changeView','month');body.find('.fc-scroller').css('height','auto');if(window.DidebanDate)window.DidebanDate.updateFullCalendar(body,body.fullCalendar('getView'))},500);
+    }else{
+        body.html('<div class="text-center">در این بازه زمانی ویدئویی پیدا نشد.</div>');
+    }
+};
+$.vidview.load=function(options){
+    options=options||{};
+    var context=options.context||$.vidview.currentContext;
+    if(!context||!context.ke||!context.mid)return;
+    $.vidview.currentContext=context;
+    var user=$.vidview.getUser(context);
+    var resetOffset=options.resetOffset===true;
+    if(options.resetPage===true)$.vidview.current_page=1;
+    var limitState=$.vidview.getLimitState(resetOffset);
+    var dateRange=$.vidview.getDateRange();
+    if(!dateRange){
+        $.vidview.e.find('.modal-body .contents').html('<div class="alert alert-danger">بازه زمانی انتخاب‌شده معتبر نیست.</div>');
+        return;
+    }
+    var url=$.vidview.buildVideoUrl(context,limitState,dateRange);
+    if($.vidview.activeRequest&&$.vidview.activeRequest.readyState!==4)$.vidview.activeRequest.abort();
+    $.vidview.e.modal('show');
+    $.vidview.e.find('.modal-title i').attr('class',context.action==='calendar'?'fa fa-calendar':'fa fa-film');
+    $.vidview.e.find('.modal-body .contents').html('<div class="text-center" style="padding:35px"><i class="fa fa-spinner fa-spin"></i>&nbsp; در حال دریافت ویدئوها...</div>');
+    $.vidview.activeRequest=$.ajax({url:url,dataType:'json',cache:false})
+    .done(function(data){
+        $('.video_viewer_total').text(Number(data&&data.total||0));
+        $.vidview.drawPages(data&&data.total,limitState);
+        if(context.action==='calendar')$.vidview.renderCalendar(data||{},context,user);
+        else $.vidview.renderTable(data||{},context,user);
+    })
+    .fail(function(xhr,status,error){
+        if(status==='abort')return;
+        console.error('Dideban Video Center request failed:',status,error,url,xhr&&xhr.responseText);
+        $.vidview.e.find('.modal-body .contents').html('<div class="alert alert-danger" style="direction:rtl;text-align:right">دریافت فهرست ویدئوها با خطا مواجه شد.</div>');
+    });
+};
+
+$.vidview.e.off('shown.bs.modal.didebanVideoAutoLoad').on('shown.bs.modal.didebanVideoAutoLoad',function(){
+    if($.vidview.currentContext)return;
+    var launcher=$('.monitor_block [monitor="videos_table"],.monitor_item [monitor="videos_table"],#monitor_list [monitor="videos_table"]').first();
+    if(!launcher.length){
+        $.vidview.e.find('.modal-body .contents').html('<div class="dideban-video-empty"><i class="fa fa-video-camera"></i><strong>هیچ دوربینی برای نمایش ویدئوها در دسترس نیست.</strong></div>');
+        $.vidview.e.find('.dideban-video-visible-count').text('0');
+        $('.video_viewer_total').text('0');
+        return;
+    }
+    var parent=launcher.parents('[mid]').first();
+    $.vidview.load({context:{ke:parent.attr('ke'),mid:parent.attr('mid'),auth:parent.attr('auth')||$user.auth_token,action:'videos_table'},resetPage:true,resetOffset:true});
+});
+
+var didebanVideoToday=$.ccio.timeObject();
+$.vidview.dr.didebanJalaliRangePicker({
+    startDate:didebanVideoToday.clone().startOf('day'),
+    endDate:didebanVideoToday.clone().endOf('day'),
+    timePicker:true,
+    timePickerIncrement:30
+});
+$.vidview.dr.off('dideban:rangeApplied.didebanVideoFilter').on('dideban:rangeApplied.didebanVideoFilter',function(event,start,end){
+    var picker=$(this).data('daterangepicker');
+    if(!picker||!start||!end)return;
+    picker.startDate=moment(start);
+    picker.endDate=moment(end);
+    $.vidview.load({resetPage:true,resetOffset:true});
+});
+$.vidview.e.on('change','#videos_select_all',function(){
+    $.vidview.e.find('input[type=checkbox][name]').prop('checked',$(this).prop('checked'));
+});
+$.vidview.applyTableFilters=function(){
+    var q=($('#dideban_video_search').val()||'').toLowerCase().trim();
+    var camera=$('#dideban_video_camera_filter').val()||'';
+    var visible=0;
+    $.vidview.e.find('.dideban-video-row').each(function(){
+        var row=$(this),text=(row.attr('data-search')||'').toLowerCase(),rowCamera=row.attr('data-camera')||'';
+        var show=(!q||text.indexOf(q)>-1)&&(!camera||rowCamera===camera);
+        row.toggle(show);if(show)visible++;
+    });
+    $.vidview.e.find('.dideban-video-visible-count').text(visible);
+};
+$.vidview.e.on('input','#dideban_video_search',$.vidview.applyTableFilters);
+$.vidview.e.on('change','#dideban_video_camera_filter',$.vidview.applyTableFilters);
+$.vidview.f.submit(function(e){e.preventDefault();$.vidview.load({resetPage:true,resetOffset:true});return false});
+$('#videos_viewer_limit').change(function(){$.vidview.load({resetPage:true,resetOffset:true})});
+$.vidview.e.find('.delete_selected').click(function(e){
+    e.s={};
+    $.vidview.f.find('[data-ke] input:checked').each(function(){var v=$(this).closest('[data-ke]');e.s[v.attr('data-file')]={mid:v.attr('data-mid'),auth:v.attr('data-auth')}});
+    $.confirm.e.modal('show');$.confirm.title.text('<%-cleanLang(lang['Delete Selected Videos'])%>');
+    e.html='<%-cleanLang(lang.DeleteSelectedVideosMsg)%><div style="margin-bottom:15px"></div>';
+    $.each(e.s,function(n){e.html+=n+'<br>'});$.confirm.body.html(e.html);
+    $.confirm.click({title:'Delete Video',class:'btn-danger'},function(){
+        $.each(e.s,function(n,v){$.getJSON($.ccio.init('location',$.users[v.auth])+v.auth+'/videos/'+$user.ke+'/'+v.mid+'/'+n+'/delete',function(d){$.ccio.log(d)})});
+    });
+});
+$.vidview.pages.on('click','[page]',function(){
+    var page=parseInt($(this).attr('page'),10)||1;
+    var state=$.vidview.getLimitState(false);
+    $.vidview.current_page=page;
+    if(state.size>0)$.vidview.limit.val(((page-1)*state.size)+','+state.size);
+    $.vidview.load();
+});
+$.vidview.e.on('click','.preview',function(e){e.preventDefault();var a=$(this);$.vidview.preview.html('<video class="video_video" video="'+a.attr('href')+'" preload controls autoplay><source src="'+a.attr('href')+'" type="video/mp4"></video>')});
 //Timelapse Window
 $.timelapse={e:$('#timelapse')}
 $.timelapse.f=$.timelapse.e.find('form'),
@@ -5089,131 +5256,10 @@ $('body')
             $.ccio.cx({f:'monitor',ff:'control',direction:e.a,mid:e.mid,ke:e.ke},user)
         break;
         case'videos_table':case'calendar'://call videos table or calendar
-            $.vidview.launcher=$(this);
-            e.limit=$.vidview.limit.val();
-            if(!$.vidview.current_mid||$.vidview.current_mid!==e.mid){
-                $.vidview.current_mid=e.mid
-                $.vidview.current_page=1;
-                if(e.limit.replace(/ /g,'')===''){
-                    e.limit='100';
-                }
-                if(e.limit.indexOf(',')===-1){
-                    e.limit='0,'+e.limit
-                }else{
-                    e.limit='0,'+e.limit.split(',')[1]
-                }
-                if(e.limit=='0,0'){
-                    e.limit='0'
-                }
-                $.vidview.limit.val(e.limit)
-            }
-            e.dateRange=$('#videos_viewer_daterange').data('daterangepicker');
-            e.videoURL=$.ccio.init('location',user)+user.auth_token+'/videos/'+e.ke+'/'+e.mid+'?limit='+e.limit+'&start='+$.ccio.init('th',e.dateRange.startDate)+'&end='+$.ccio.init('th',e.dateRange.endDate);
-            $.getJSON(e.videoURL,function(d){
-                d.pages=d.total/100;
-                $('.video_viewer_total').text(d.total)
-                if(d.pages+''.indexOf('.')>-1){++d.pages}
-                $.vidview.page_count=d.pages;
-                d.count=1
-                $.vidview.pages.empty()
-                d.fn=function(drawOne){
-                    if(d.count<=$.vidview.page_count){
-                        $.vidview.pages.append('<a class="btn btn-primary" page="'+d.count+'">'+d.count+'</a> ')
-                        ++d.count;
-                        d.fn()
-                    }
-                }
-                d.fn()
-                $.vidview.pages.find('[page="'+$.vidview.current_page+'"]').addClass('active')
-                e.v=$.vidview.e;
-                e.b=e.v.modal('show').find('.modal-body .contents');
-                e.t=e.v.find('.modal-title i');
-                switch(e.a){
-                    case'calendar':
-                       e.t.attr('class','fa fa-calendar')
-                       e.ar=[];
-                        if(d.videos[0]){
-                            $.each(d.videos,function(n,v){
-                                if(v.status!==0){
-                                    var n=$.ccio.mon[v.ke+v.mid+user.auth_token];
-                                    if(n){v.title=n.name+' - '+(parseInt(v.size)/1000000).toFixed(2)+'mb';}
-                                    v.start=v.time;
-                                    v.filename=$.ccio.init('tf',v.time)+'.'+v.ext;
-                                    e.ar.push(v);
-                                }
-                            })
-                            e.b.html('')
-                            try{e.b.fullCalendar('destroy')}catch(er){}
-                            e.b.fullCalendar({
-                                header: {
-                                    left: 'prev,next today',
-                                    center: 'title',
-                                    right: 'month,agendaWeek,agendaDay,listWeek'
-                                },
-                                defaultDate: $.ccio.timeObject(d.videos[0].time).format('YYYY-MM-DD'),
-                                navLinks: true,
-                                eventLimit: true,
-                                events:e.ar,
-                                eventClick:function(f){
-                                    $('#temp').html('<div mid="'+f.mid+'" ke="'+f.ke+'" auth="'+user.auth_token+'" file="'+f.filename+'"><div video="launch" href="'+f.href+'"></div></div>').find('[video="launch"]').click();
-                                    $(this).css('border-color', 'red');
-                                }
-                            });
-                            setTimeout(function(){e.b.fullCalendar('changeView','month');e.b.find('.fc-scroller').css('height','auto')},500)
-                        }else{
-                            e.b.html('<div class="text-center"><%-cleanLang(lang.NoVideosFoundForDateRange)%></div>')
-                        }
-                    break;
-                    case'videos_table':
-                        e.t.attr('class','fa fa-film')
-                        e.tmp='<table class="table table-striped" style="max-height:500px">';
-                        e.tmp+='<thead>';
-                        e.tmp+='<tr>';
-                        e.tmp+='<th><div class="checkbox"><input id="videos_select_all" type="checkbox"><label for="videos_select_all"></label></div></th>';
-                        e.tmp+='<th data-field="Closed" data-sortable="true"><%-cleanLang(lang.Closed)%></th>';
-                        e.tmp+='<th data-field="Ended" data-sortable="true"><%-cleanLang(lang.Ended)%></th>';
-                        e.tmp+='<th data-field="Started" data-sortable="true"><%-cleanLang(lang.Started)%></th>';
-                        e.tmp+='<th data-field="Monitor" data-sortable="true"><%-cleanLang(lang.Monitor)%></th>';
-                        e.tmp+='<th data-field="Filename" data-sortable="true"><%-cleanLang(lang.Filename)%></th>';
-                        e.tmp+='<th data-field="Size" data-sortable="true"><%-cleanLang(lang['Size (mb)'])%></th>';
-                        e.tmp+='<th data-field="Preview" data-sortable="true"><%-cleanLang(lang.Preview)%></th>';
-                        e.tmp+='<th data-field="Watch" data-sortable="true"><%-cleanLang(lang.Watch)%></th>';
-                        e.tmp+='<th data-field="Download" data-sortable="true"><%-cleanLang(lang.Download)%></th>';
-                        e.tmp+='<th class="permission_video_delete" data-field="Delete" data-sortable="true"><%-cleanLang(lang.Delete)%></th>';
-//                        e.tmp+='<th class="permission_video_delete" data-field="Fix" data-sortable="true"><%-cleanLang(lang.Fix)%></th>';
-                        e.tmp+='</tr>';
-                        e.tmp+='</thead>';
-                        e.tmp+='<tbody>';
-                        $.each(d.videos,function(n,v){
-                            if(v.status!==0){
-                                var href = $.ccio.init('location',user)+v.href
-                                v.mon=$.ccio.mon[v.ke+v.mid+user.auth_token];
-                                v.start=v.time;
-                                v.filename=$.ccio.init('tf',v.time)+'.'+v.ext;
-                                e.tmp+='<tr data-ke="'+v.ke+'" data-status="'+v.status+'" data-mid="'+v.mid+'" data-file="'+v.filename+'" data-auth="'+v.mon.user.auth_token+'">';
-                                e.tmp+='<td><div class="checkbox"><input id="'+v.ke+'_'+v.filename+'" name="'+v.filename+'" value="'+v.mid+'" type="checkbox"><label for="'+v.ke+'_'+v.filename+'"></label></div></td>';
-                                e.tmp+='<td><span class="livestamp" title="'+v.end+'"></span></td>';
-                                e.tmp+='<td title="'+v.end+'">'+$.ccio.timeObject(v.end).format('h:mm:ss A, MMMM Do YYYY')+'</td>';
-                                e.tmp+='<td title="'+v.time+'">'+$.ccio.timeObject(v.time).format('h:mm:ss A, MMMM Do YYYY')+'</td>';
-                                e.tmp+='<td>'+v.mon.name+'</td>';
-                                e.tmp+='<td>'+v.filename+'</td>';
-                                e.tmp+='<td>'+(parseInt(v.size)/1000000).toFixed(2)+'</td>';
-                                e.tmp+='<td><a class="btn btn-sm btn-default preview" href="'+href+'">&nbsp;<i class="fa fa-play-circle"></i>&nbsp;</a></td>';
-                                e.tmp+='<td><a class="btn btn-sm btn-primary" video="launch" href="'+href+'">&nbsp;<i class="fa fa-play-circle"></i>&nbsp;</a></td>';
-                                e.tmp+='<td><a class="btn btn-sm btn-success" download="'+v.mid+'-'+v.filename+'" href="'+href+'">&nbsp;<i class="fa fa-download"></i>&nbsp;</a></td>';
-                                e.tmp+='<td class="permission_video_delete"><a class="btn btn-sm btn-danger" video="delete">&nbsp;<i class="fa fa-trash"></i>&nbsp;</a></td>';
-//                                e.tmp+='<td class="permission_video_delete"><a class="btn btn-sm btn-warning" video="fix">&nbsp;<i class="fa fa-wrench"></i>&nbsp;</a></td>';
-                                e.tmp+='</tr>';
-                            }
-                        })
-                        e.tmp+='</tbody>';
-                        e.tmp+='</table>';
-                        e.b.html(e.tmp);delete(e.tmp)
-                        $.ccio.init('ls');
-                        $.vidview.e.find('table').bootstrapTable();
-                    break;
-                }
-            })
+            $.vidview.currentContext={ke:e.ke,mid:e.mid,auth:e.auth||user.auth_token,action:e.a};
+            $.vidview.current_mid=e.mid;
+            $.vidview.current_page=1;
+            $.vidview.load({context:$.vidview.currentContext,resetPage:true,resetOffset:true});
         break;
         case'fullscreen':
             e.e=e.e.parents('.monitor_item');
