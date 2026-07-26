@@ -1,68 +1,68 @@
 {
    "Monitor Settings": {
-      "section": "Monitor Settings",
+      "section": "تنظیمات دوربین",
       "blocks": {
          "Identity": {
-            "name": "Identity",
+            "name": "مشخصات",
             "color": "",
             "info": [
                {
                   "name": "mode",
-                  "field": "Mode",
-                  "description": "This is the primary task of the monitor.",
+                  "field": "حالت",
+                  "description": "وظیفه اصلی دوربین را مشخص می‌کند.",
                   "default": "Disabled",
                   "example": "",
                   "possible": [
                      {
                         "name": "Disabled",
-                        "info": "Inactive monitor, no process will be created in this mode."
+                        "info": "دوربین غیرفعال است و در این حالت هیچ فرایندی ایجاد نمی‌شود."
                      },
                      {
                         "name": "Watch-Only",
-                        "info": "Monitor will only stream, no recording will occur unless otherwise ordered by API or Detector."
+                        "info": "دوربین فقط تصویر زنده پخش می‌کند و ضبط تنها با فرمان API یا تشخیص‌دهنده انجام می‌شود."
                      },
                      {
                         "name": "Record",
-                        "info": "Continuous Recording. Segments are made every 15 minutes by default."
+                        "info": "ضبط پیوسته؛ به‌طور پیش‌فرض هر ۱۵ دقیقه یک قطعه جدید ساخته می‌شود."
                      }
                   ]
                },
                {
                   "name": "mid",
-                  "field": "Monitor ID",
-                  "description": "This is a non-changeable identifier for the monitor. You can duplicate a monitor by double clicking the Monitor ID and changing it.",
+                  "field": "شناسه دوربین",
+                  "description": "این شناسه ثابت دوربین است و پس از ایجاد قابل تغییر نیست. برای ساخت نسخه مشابه، روی شناسه دوربین دوبار کلیک کرده و آن را تغییر دهید.",
                   "default": "<i>Provided by Server</i>",
                   "example": "awFST99MGn",
                   "possible": ""
                },
                {
                   "name": "name",
-                  "field": "Name",
-                  "description": "This is the human-readable display name for the monitor.",
+                  "field": "نام",
+                  "description": "نام نمایشی و قابل‌فهم دوربین را مشخص می‌کند.",
                   "default": "",
                   "example": "Bunny",
                   "possible": ""
                },
                {
                   "name": "detail=fatal_max",
-                  "field": "Retry Connection",
-                  "description": "The number of times to retry for network connection between the server and camera before setting the monitor to Disabled. No decimals. Set to 0 to retry forever.",
+                  "field": "تعداد تلاش مجدد اتصال",
+                  "description": "تعداد تلاش‌های مجدد برای برقراری اتصال شبکه میان سرور و دوربین، پیش از غیرفعال‌شدن دوربین. فقط عدد صحیح وارد کنید؛ مقدار ۰ یعنی تلاش نامحدود.",
                   "default": "10",
                   "example": "100000",
                   "possible": ""
                },
                {
                   "name": "detail=notes",
-                  "field": "Notes",
-                  "description": "Comments you want to leave for this camera.",
+                  "field": "یادداشت‌ها",
+                  "description": "یادداشت‌ها و توضیحات مربوط به این دوربین را وارد کنید.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=dir",
-                  "field": "Storage Location",
-                  "description": "Location of where recorded files will be saved. You can configure more locations with the <code>addStorage</code> variable.",
+                  "field": "محل ذخیره‌سازی",
+                  "description": "محل ذخیره فایل‌های ضبط‌شده را مشخص می‌کند. می‌توانید با متغیر <code>addStorage</code> محل‌های بیشتری تعریف کنید.",
                   "default": "",
                   "example": "",
                   "possible": ""
@@ -70,280 +70,280 @@
             ]
          },
          "Input": {
-            "name": "Input",
+            "name": "ورودی",
             "color": "forestgreen",
             "info": [
                {
                   "name": "type",
-                  "field": "Input Type",
-                  "description": "The method that will used to consume the video stream.",
+                  "field": "نوع ورودی",
+                  "description": "روش دریافت و پردازش جریان ویدئویی را مشخص می‌کند.",
                   "default": "JPEG",
                   "example": "",
                   "possible": [
                      {
                         "name": "JPEG",
-                        "info": "Reading snapshots from a URL and making a stream and/or video from them."
+                        "info": "تصاویر لحظه‌ای را از یک URL دریافت کرده و از آن‌ها پخش زنده یا ویدئو می‌سازد."
                      },
                      {
                         "name": "MJPEG",
-                        "info": "Similar to JPEG except the frame handling is done by FFMPEG, not Shinobi."
+                        "info": "مشابه JPEG است، با این تفاوت که پردازش فریم‌ها توسط FFMPEG انجام می‌شود."
                      },
                      {
                         "name": "H.264",
-                        "info": "Reading a high quality video streas that sometimes include audio."
+                        "info": "برای دریافت جریان ویدئویی باکیفیت که ممکن است صدا نیز داشته باشد."
                      },
                      {
                         "name": "Local",
-                        "info": "Reading Capture Cards, Webcams, or Integrated Cameras."
+                        "info": "برای دریافت تصویر از کارت کپچر، وب‌کم یا دوربین داخلی."
                      },
                      {
                         "name": "Shinobi Streamer",
-                        "info": "Continuous Recording. Segments are made every 15 minutes by default."
+                        "info": "ضبط پیوسته؛ به‌طور پیش‌فرض هر ۱۵ دقیقه یک قطعه جدید ساخته می‌شود."
                      }
                   ]
                },
                {
                   "name": "detail=auto_host_enable",
-                  "field": "Automatic",
-                  "description": "Feed the individual pieces required to build a stream URL or provide the full URL and allow Shinobi to parse it for you.",
+                  "field": "تنظیم خودکار",
+                  "description": "اجزای لازم برای ساخت نشانی جریان را جداگانه وارد کنید، یا نشانی کامل را بدهید تا دیده‌بان آن را تجزیه کند.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=auto_host",
-                  "field": "Full URL Path",
-                  "description": "The full Stream URL.",
+                  "field": "نشانی کامل جریان",
+                  "description": "نشانی کامل جریان ویدئویی.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=accelerator",
-                  "field": "Accelerator",
-                  "description": "Hardware Acceleration (HWAccel) for decoding streams.",
+                  "field": "شتاب‌دهنده سخت‌افزاری",
+                  "description": "شتاب‌دهی سخت‌افزاری (HWAccel) برای رمزگشایی جریان‌های ویدئویی.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "protocol",
-                  "field": "Connection Type",
-                  "description": "The protocol that will used to consume the video stream.",
+                  "field": "نوع اتصال",
+                  "description": "پروتکل مورد استفاده برای دریافت جریان ویدئویی را مشخص می‌کند.",
                   "default": "HTTP",
                   "example": "",
                   "possible": [
                      {
                         "name": "HTTP",
-                        "info": "Standard connection method."
+                        "info": "روش اتصال استاندارد."
                      },
                      {
                         "name": "HTTPS",
-                        "info": "Standard connection method with SSL."
+                        "info": "روش اتصال استاندارد همراه با SSL."
                      },
                      {
                         "name": "RTSP",
-                        "info": "Real Time Streaming Protocol"
+                        "info": "پروتکل پخش زنده بلادرنگ."
                      },
                      {
                         "name": "UDP",
-                        "info": "Near restrictionless data transfer method."
+                        "info": "روش انتقال داده با محدودیت بسیار کم."
                      }
                   ]
                },
                {
                   "name": "detail=muser",
-                  "field": "Username",
-                  "description": "The user login for your camera",
+                  "field": "نام کاربری",
+                  "description": "نام کاربری ورود به دوربین.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=mpass",
-                  "field": "Password",
-                  "description": "The password for your camera",
+                  "field": "رمز عبور",
+                  "description": "رمز عبور دوربین.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "host",
-                  "field": "Host",
-                  "description": "Connection address",
+                  "field": "میزبان",
+                  "description": "نشانی اتصال دوربین را وارد کنید.",
                   "default": "",
                   "example": "111.111.111.111",
                   "possible": ""
                },
                {
                   "name": "port",
-                  "field": "Port",
-                  "description": "Port number that your camera is streaming out on.",
+                  "field": "پورت",
+                  "description": "شماره پورتی که دوربین جریان تصویر را از طریق آن ارائه می‌کند.",
                   "default": "80",
                   "example": "554",
                   "possible": "1-65535"
                },
                {
                   "name": "detail=port_force",
-                  "field": "Force Port",
-                  "description": "Using the default web port can allow automatic switch to other ports for streams like RTSP.",
+                  "field": "اجبار استفاده از پورت",
+                  "description": "استفاده از پورت پیش‌فرض وب می‌تواند امکان تغییر خودکار به پورت‌های دیگر برای جریان‌هایی مانند RTSP را فراهم کند.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "path",
-                  "field": "Path",
-                  "description": "The path to your camera",
+                  "field": "مسیر",
+                  "description": "مسیر جریان دوربین.",
                   "default": "",
                   "example": "/video.h264",
                   "possible": ""
                },
                {
                   "name": "detail=aduration",
-                  "field": "Analyzation Duration",
-                  "description": "Specify how many microseconds are analyzed to probe the input. Set to 100000 if you are using RTSP and having stream issues.",
+                  "field": "مدت تحلیل ورودی",
+                  "description": "مدت تحلیل اولیه ورودی را برحسب میکروثانیه مشخص می‌کند. در صورت بروز مشکل با RTSP، مقدار 100000 را امتحان کنید.",
                   "default": "",
                   "example": "100000",
                   "possible": ""
                },
                {
                   "name": "detail=probesize",
-                  "field": "Probe Size",
-                  "description": "Specify how big to make the analyzation probe for the input. Set to 100000 if you are using RTSP and having stream issues.",
+                  "field": "اندازه نمونه‌برداری",
+                  "description": "اندازه داده مورد استفاده برای بررسی ورودی را مشخص می‌کند. در صورت بروز مشکل با RTSP، مقدار 100000 را امتحان کنید.",
                   "default": "",
                   "example": "100000",
                   "possible": ""
                },
                {
                   "name": "detail=rtsp_transport",
-                  "field": "RTSP Transport",
-                  "description": "The transport protocol your camera will use. TCP is usually the best choice.",
+                  "field": "روش انتقال RTSP",
+                  "description": "پروتکل انتقال مورد استفاده دوربین را مشخص می‌کند. معمولاً TCP بهترین انتخاب است.",
                   "default": "",
                   "example": "",
                   "possible": [
                      {
                         "name": "Auto",
-                        "info": "Let FFMPEG decide. Normally it will try UDP first."
+                        "info": "انتخاب را به FFMPEG واگذار می‌کند؛ معمولاً ابتدا UDP آزمایش می‌شود."
                      },
                      {
                         "name": "TCP",
-                        "info": "Set it to this if UDP starts giving undesired results."
+                        "info": "اگر UDP نتیجه مناسبی نمی‌دهد، این گزینه را انتخاب کنید."
                      },
                      {
                         "name": "UDP",
-                        "info": "FFMPEG tries this first."
+                        "info": "FFMPEG ابتدا این روش را امتحان می‌کند."
                      },
                      {
                         "name": "HTTP",
-                        "info": "Standard connection method."
+                        "info": "روش اتصال استاندارد."
                      }
                   ]
                }
             ]
          },
          "Stream": {
-            "name": "Stream",
+            "name": "پخش زنده",
             "color": "blue",
             "info": [
                {
                   "name": "detail=stream_type",
-                  "field": "Stream  Type",
-                  "description": "The method that will used to consume the video stream.",
+                  "field": "نوع پخش زنده",
+                  "description": "روش دریافت و پردازش جریان ویدئویی را مشخص می‌کند.",
                   "default": "HLS",
                   "example": "",
                   "possible": [
                      {
                         "name": "MJPEG",
-                        "info": "Standard Motion JPEG image. No audio."
+                        "info": "جریان استاندارد Motion JPEG بدون صدا."
                      },
                      {
                         "name": "HLS",
-                        "info": "Similar method to facebook live streams. <b>Includes audio</b> if input provides it. There is a delay of about 4-6 seconds because this method records segments then pushes them to the client rather than push as while it creates them."
+                        "info": "روشی مشابه پخش زنده شبکه‌های اجتماعی است. اگر ورودی صدا داشته باشد، <b>صدا نیز پخش می‌شود</b>. به‌دلیل ساخت قطعه‌های ویدئویی، حدود ۴ تا ۶ ثانیه تأخیر دارد."
                      },
                      {
                         "name": "Base64",
-                        "info": "Sending Base64 encoded frames over WebSocket. This avoids caching but there is no audio."
+                        "info": "فریم‌های کدگذاری‌شده Base64 را از طریق WebSocket ارسال می‌کند؛ کش ایجاد نمی‌شود اما صدا وجود ندارد."
                      },
                      {
                         "name": "FLV",
-                        "info": "Sending FLV encoded frames over WebSocket."
+                        "info": "فریم‌های کدگذاری‌شده FLV را از طریق WebSocket ارسال می‌کند."
                      },
                      {
                         "name": "kVid",
-                        "info": "Using Kevin Godell's custom JavaScript MP4 segmenting engine."
+                        "info": "از موتور سفارشی JavaScript ساخته Kevin Godell برای قطعه‌بندی MP4 استفاده می‌کند."
                      }
                   ]
                },
                {
                   "name": "detail=signal_check",
-                  "field": "Check Signal Interval",
-                  "description": "How often your client will check each stream to see if it is alive. This is calculated in minutes.",
+                  "field": "فاصله بررسی سیگنال",
+                  "description": "فاصله زمانی بررسی فعال‌بودن هر جریان در سمت کاربر را برحسب دقیقه مشخص می‌کند.",
                   "default": "10",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=stream_flv_type",
-                  "field": "FLV Stream Type",
-                  "description": "The method you will view your FLV stream. Both methods are always active for each stream regardless of your viewing choice for the Shinobi Dashboard.",
+                  "field": "نوع پخش FLV",
+                  "description": "روش نمایش جریان FLV را مشخص می‌کند. هر دو روش برای هر جریان همواره فعال هستند، صرف‌نظر از گزینه انتخاب‌شده در داشبورد دیده‌بان.",
                   "default": "10",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=signal_check_log",
-                  "field": "Log Signal Event",
-                  "description": "This is for the client side only. It will display in the log thread when client side signal checks occur.",
+                  "field": "ثبت رویداد بررسی سیگنال",
+                  "description": "این گزینه فقط مربوط به سمت کاربر است و هنگام بررسی سیگنال در گزارش‌ها نمایش داده می‌شود.",
                   "default": "No",
                   "example": "",
                   "possible": [
                      {
                         "name": "No",
-                        "info": "No signal check."
+                        "info": "بررسی سیگنال انجام نمی‌شود."
                      },
                      {
                         "name": "Yes",
-                        "info": "Check signal based on the number of minutes provided."
+                        "info": "بررسی سیگنال براساس فاصله زمانی تعیین‌شده انجام می‌شود."
                      }
                   ]
                },
                {
                   "name": "detail=stream_quality",
-                  "field": "Quality",
-                  "description": "Low number means higher quality. Higher number means less quality.",
+                  "field": "کیفیت",
+                  "description": "عدد کمتر به معنی کیفیت بیشتر و عدد بزرگ‌تر به معنی کیفیت کمتر است.",
                   "default": "15",
                   "example": "1",
                   "possible": "1-23"
                },
                {
                   "name": "detail=stream_fps",
-                  "field": "Rate (FPS)",
-                  "description": "The speed in which frames are displayed to clients, in Frames Per Second. Be aware there is no default. This can lead to high bandwidth usage.",
+                  "field": "نرخ فریم (FPS)",
+                  "description": "سرعت نمایش فریم‌ها برای کاربران را برحسب فریم‌برثانیه مشخص می‌کند. مقدار پیش‌فرضی وجود ندارد و مقدار زیاد می‌تواند مصرف پهنای باند را افزایش دهد.",
                   "default": "",
                   "example": "1",
                   "possible": ""
                },
                {
                   "name": "height",
-                  "field": "Height",
-                  "description": "Height of the stream image.",
+                  "field": "ارتفاع",
+                  "description": "ارتفاع تصویر جریان ویدئویی.",
                   "default": "640",
                   "example": "1280",
                   "possible": ""
                },
                {
                   "name": "width",
-                  "field": "Width",
-                  "description": "Width of the stream image.",
+                  "field": "عرض",
+                  "description": "عرض تصویر جریان ویدئویی.",
                   "default": "480",
                   "example": "720",
                   "possible": ""
                },
                {
                   "name": "detail=svf",
-                  "field": "Video Filter",
-                  "description": "Place FFMPEG video filters in this box to affect the streaming portion. No spaces.",
+                  "field": "فیلتر ویدئو",
+                  "description": "فیلترهای ویدئویی FFMPEG مربوط به پخش زنده را در این قسمت وارد کنید. از فاصله استفاده نکنید.",
                   "default": "",
                   "example": "",
                   "possible": ""
@@ -351,143 +351,143 @@
             ]
          },
          "Stream - HLS": {
-            "name": "Stream - HLS",
+            "name": "پخش زنده - HLS",
             "color": "blue",
             "info": [
                {
                   "name": "detail=stream_vcodec",
-                  "field": "Video Codec",
-                  "description": "Video codec for streaming.",
+                  "field": "کُدک ویدئویی",
+                  "description": "کُدک ویدئویی مورد استفاده برای پخش زنده را مشخص می‌کند.",
                   "default": "copy",
                   "example": "",
                   "possible": [
                      {
                         "name": "Default",
-                        "info": "Let Shinobi choose."
+                        "info": "انتخاب را به دیده‌بان واگذار می‌کند."
                      },
                      {
                         "name": "Auto",
-                        "info": "Let FFMPEG choose."
+                        "info": "انتخاب را به FFMPEG واگذار می‌کند."
                      },
                      {
                         "name": "libvpx",
-                        "info": "Used for WebM video."
+                        "info": "برای ویدئوی WebM استفاده می‌شود."
                      },
                      {
                         "name": "libvpx-vp9",
-                        "info": "Used for WebM video."
+                        "info": "برای ویدئوی WebM استفاده می‌شود."
                      },
                      {
                         "name": "libx264",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "libx265",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "copy",
-                        "info": "Used for MP4 video. Has very low CPU usage but cannot use video filters and filesizes may be gigantic.  Best to setup your MP4 settings camera-side when using this option."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود. مصرف پردازنده بسیار کم است، اما امکان استفاده از فیلتر ویدئو وجود ندارد و فایل‌ها ممکن است بسیار حجیم شوند. بهتر است تنظیمات MP4 در خود دوربین انجام شود."
                      }
                   ]
                },
                {
                   "name": "detail=stream_acodec",
-                  "field": "Audio Codec",
-                  "description": "Audio codec for streaming.",
+                  "field": "کُدک صوتی",
+                  "description": "کُدک صوتی مورد استفاده برای پخش زنده را مشخص می‌کند.",
                   "default": "No Audio",
                   "example": "",
                   "possible": [
                      {
                         "name": "Default",
-                        "info": "Let Shinobi choose."
+                        "info": "انتخاب را به دیده‌بان واگذار می‌کند."
                      },
                      {
                         "name": "Auto",
-                        "info": "Let FFMPEG choose."
+                        "info": "انتخاب را به FFMPEG واگذار می‌کند."
                      },
                      {
                         "name": "No Audio",
-                        "info": "No Audio, this is an option that must be set in some parts of the world due to legal reasons."
+                        "info": "صدا غیرفعال است؛ در برخی مناطق به دلایل قانونی لازم است این گزینه انتخاب شود."
                      },
                      {
                         "name": "libvorbis",
-                        "info": "Used for WebM video."
+                        "info": "برای ویدئوی WebM استفاده می‌شود."
                      },
                      {
                         "name": "libopus",
-                        "info": "Used for WebM video."
+                        "info": "برای ویدئوی WebM استفاده می‌شود."
                      },
                      {
                         "name": "libmp3lame",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "aac",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "ac3",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "copy",
-                        "info": "Used for MP4 video. Has very low CPU usage but some audio codecs need custom flags like <code>-strict 2</code> for aac."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود. مصرف پردازنده کم است، اما برخی کُدک‌های صوتی مانند AAC به پارامتر سفارشی <code>-strict 2</code> نیاز دارند."
                      }
                   ]
                },
                {
                   "name": "detail=hls_time",
-                  "field": "HLS Segment Length",
-                  "description": "How long each video segment should be, in minutes. Each segment will be drawn by the client through an m3u8 file. Shorter segments take less space.",
+                  "field": "طول قطعه HLS",
+                  "description": "مدت هر قطعه ویدئو را برحسب دقیقه تعیین می‌کند. قطعه‌ها از طریق فایل m3u8 در سمت کاربر دریافت می‌شوند. قطعه‌های کوتاه‌تر فضای کمتری اشغال می‌کنند.",
                   "default": "2",
                   "example": "3",
                   "possible": ""
                },
                {
                   "name": "detail=hls_list_size",
-                  "field": "HLS List Size",
-                  "description": "The number of segments maximum before deleting old segments automatically.",
+                  "field": "تعداد قطعه‌های فهرست HLS",
+                  "description": "حداکثر تعداد قطعه‌های HLS پیش از حذف خودکار قطعه‌های قدیمی.",
                   "default": "2",
                   "example": "3",
                   "possible": ""
                },
                {
                   "name": "detail=preset_stream",
-                  "field": "HLS Preset",
-                  "description": "Preset flag for certain video encoders. If you find your camera is crashing every few seconds : try leaving it blank.",
+                  "field": "پیش‌تنظیم HLS",
+                  "description": "پیش‌تنظیم مربوط به برخی رمزگذارهای ویدئویی. اگر دوربین هر چند ثانیه متوقف می‌شود، این قسمت را خالی بگذارید.",
                   "default": "",
                   "example": "ultrafast",
                   "possible": ""
                },
                {
                   "name": "detail=stream_scale_x",
-                  "field": "Width",
-                  "description": "Width of the stream image.",
+                  "field": "عرض",
+                  "description": "عرض تصویر جریان ویدئویی.",
                   "default": "640",
                   "example": "640",
                   "possible": ""
                },
                {
                   "name": "detail=stream_scale_y",
-                  "field": "Height",
-                  "description": "Height of the stream image.",
+                  "field": "ارتفاع",
+                  "description": "ارتفاع تصویر جریان ویدئویی.",
                   "default": "480",
                   "example": "480",
                   "possible": ""
                },
                {
                   "name": "detail=tv_channel",
-                  "field": "TV Channel",
-                  "description": "This monitor will have TV Channel features enabled. You will be able to view it in your TV Channel list.",
+                  "field": "کانال تلویزیونی",
+                  "description": "امکانات کانال تلویزیونی را برای این دوربین فعال می‌کند تا در فهرست کانال‌ها نمایش داده شود.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=tv_channel_id",
-                  "field": "TV Channel ID",
-                  "description": "A Custom ID for the Channel.",
+                  "field": "شناسه کانال تلویزیونی",
+                  "description": "یک شناسه سفارشی برای کانال تعیین می‌کند.",
                   "default": "",
                   "example": "",
                   "possible": ""
@@ -495,177 +495,177 @@
             ]
          },
          "Recording": {
-            "name": "Recording",
+            "name": "ضبط",
             "color": "red",
             "info": [
                {
                   "name": "ext",
-                  "field": "Record File Type",
-                  "description": "The file type for your recorded video file.",
+                  "field": "نوع فایل ضبط",
+                  "description": "نوع فایل ویدئوی ضبط‌شده را مشخص می‌کند.",
                   "default": "MP4",
                   "example": "",
                   "possible": [
                      {
                         "name": "MP4",
-                        "info": "This file type is playable is almost all modern web browsers, that includes mobile. The filesize just tends to be larger unless you lower the quality."
+                        "info": "این نوع فایل در تقریباً همه مرورگرهای جدید، از جمله موبایل، قابل پخش است؛ مگر با کاهش کیفیت، حجم فایل معمولاً بیشتر خواهد بود."
                      },
                      {
                         "name": "WebM",
-                        "info": "Small filesize, low client compatibility. Good for uploading to sites like YouTube."
+                        "info": "حجم فایل کم است اما سازگاری کمتری با دستگاه‌های کاربر دارد؛ برای بارگذاری در سرویس‌هایی مانند YouTube مناسب است."
                      }
                   ]
                },
                {
                   "name": "detail=vcodec",
-                  "field": "Video Codec",
-                  "description": "Video codec for recording.",
+                  "field": "کُدک ویدئویی",
+                  "description": "کُدک ویدئویی مورد استفاده برای ضبط را مشخص می‌کند.",
                   "default": "copy",
                   "example": "",
                   "possible": [
                      {
                         "name": "Default",
-                        "info": "Let Shinobi choose."
+                        "info": "انتخاب را به دیده‌بان واگذار می‌کند."
                      },
                      {
                         "name": "Auto",
-                        "info": "Let FFMPEG choose."
+                        "info": "انتخاب را به FFMPEG واگذار می‌کند."
                      },
                      {
                         "name": "libvpx",
-                        "info": "Used for WebM video."
+                        "info": "برای ویدئوی WebM استفاده می‌شود."
                      },
                      {
                         "name": "libvpx-vp9",
-                        "info": "Used for WebM video."
+                        "info": "برای ویدئوی WebM استفاده می‌شود."
                      },
                      {
                         "name": "libx264",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "libx265",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "copy",
-                        "info": "Used for MP4 video. Has very low CPU usage but cannot use video filters and filesizes may be gigantic.  Best to setup your MP4 settings camera-side when using this option."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود. مصرف پردازنده بسیار کم است، اما امکان استفاده از فیلتر ویدئو وجود ندارد و فایل‌ها ممکن است بسیار حجیم شوند. بهتر است تنظیمات MP4 در خود دوربین انجام شود."
                      }
                   ]
                },
                {
                   "name": "detail=acodec",
-                  "field": "Audio Codec",
-                  "description": "Audio codec for recording.",
+                  "field": "کُدک صوتی",
+                  "description": "کُدک صوتی مورد استفاده برای ضبط را مشخص می‌کند.",
                   "default": "No Audio",
                   "example": "",
                   "possible": [
                      {
                         "name": "Default",
-                        "info": "Let Shinobi choose."
+                        "info": "انتخاب را به دیده‌بان واگذار می‌کند."
                      },
                      {
                         "name": "Auto",
-                        "info": "Let FFMPEG choose."
+                        "info": "انتخاب را به FFMPEG واگذار می‌کند."
                      },
                      {
                         "name": "No Audio",
-                        "info": "No Audio, this is an option that must be set in some parts of the world due to legal reasons."
+                        "info": "صدا غیرفعال است؛ در برخی مناطق به دلایل قانونی لازم است این گزینه انتخاب شود."
                      },
                      {
                         "name": "libvorbis",
-                        "info": "Used for WebM video."
+                        "info": "برای ویدئوی WebM استفاده می‌شود."
                      },
                      {
                         "name": "libopus",
-                        "info": "Used for WebM video."
+                        "info": "برای ویدئوی WebM استفاده می‌شود."
                      },
                      {
                         "name": "libmp3lame",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "aac",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "ac3",
-                        "info": "Used for MP4 video."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود."
                      },
                      {
                         "name": "copy",
-                        "info": "Used for MP4 video. Has very low CPU usage but some audio codecs need custom flags like <code>-strict 2</code> for aac."
+                        "info": "برای ویدئوی MP4 استفاده می‌شود. مصرف پردازنده کم است، اما برخی کُدک‌های صوتی مانند AAC به پارامتر سفارشی <code>-strict 2</code> نیاز دارند."
                      }
                   ]
                },
                {
                   "name": "crf",
-                  "field": "Quality",
-                  "description": "Low number means higher quality. Higher number means less quality.",
+                  "field": "کیفیت",
+                  "description": "عدد کمتر به معنی کیفیت بیشتر و عدد بزرگ‌تر به معنی کیفیت کمتر است.",
                   "default": "15",
                   "example": "1",
                   "possible": "1-23"
                },
                {
                   "name": "preset_record",
-                  "field": "Preset",
-                  "description": "Preset flag for certain video encoders. If you find your camera is crashing every few seconds : try leaving it blank.",
+                  "field": "پیش‌تنظیم",
+                  "description": "پیش‌تنظیم مربوط به برخی رمزگذارهای ویدئویی. اگر دوربین هر چند ثانیه متوقف می‌شود، این قسمت را خالی بگذارید.",
                   "default": "",
                   "example": "ultrafast",
                   "possible": ""
                },
                {
                   "name": "fps",
-                  "field": "Video Record Rate (FPS)",
-                  "description": "The speed in which frames are recorded to files, Frames Per Second. Be aware there is no default. This can lead to large files. Best to set this camera-side.",
+                  "field": "نرخ ضبط ویدئو (FPS)",
+                  "description": "نرخ ذخیره فریم‌ها در فایل را برحسب فریم‌برثانیه مشخص می‌کند. مقدار پیش‌فرضی وجود ندارد و مقدار زیاد باعث تولید فایل‌های حجیم می‌شود. بهتر است این گزینه در خود دوربین تنظیم شود.",
                   "default": "",
                   "example": "2",
                   "possible": ""
                },
                {
                   "name": "height",
-                  "field": "Record Height",
-                  "description": "Height of the stream image.",
+                  "field": "ارتفاع ضبط",
+                  "description": "ارتفاع تصویر جریان ویدئویی.",
                   "default": "640",
                   "example": "1280",
                   "possible": ""
                },
                {
                   "name": "width",
-                  "field": "Record Width",
-                  "description": "Width of the stream image.",
+                  "field": "عرض ضبط",
+                  "description": "عرض تصویر جریان ویدئویی.",
                   "default": "480",
                   "example": "720",
                   "possible": ""
                },
                {
                   "name": "detail=cutoff",
-                  "field": "Recording Segment Interval",
-                  "description": "In minutes. When to slice off and start a new video file.",
+                  "field": "فاصله قطعه‌بندی ضبط",
+                  "description": "فاصله زمانی ایجاد فایل ضبط جدید را برحسب دقیقه مشخص می‌کند.",
                   "default": "15",
                   "example": "60",
                   "possible": ""
                },
                {
                   "name": "detail=dqf",
-                  "field": "Double Quote Directory",
-                  "description": "Some directories have spaces depending on how you setup your OS.",
+                  "field": "قرار دادن مسیر در نقل‌قول",
+                  "description": "در برخی سیستم‌عامل‌ها مسیر پوشه‌ها دارای فاصله است؛ این گزینه مسیر را در علامت نقل‌قول قرار می‌دهد.",
                   "default": "No",
                   "example": "",
                   "possible": [
                      {
                         "name": "No",
-                        "info": "No is the default."
+                        "info": "خیر، مقدار پیش‌فرض است."
                      },
                      {
                         "name": "Yes",
-                        "info": "Using this may crash some cameras."
+                        "info": "فعال‌کردن این گزینه ممکن است باعث توقف برخی دوربین‌ها شود."
                      }
                   ]
                },
                {
                   "name": "detail=vf",
-                  "field": "Record Video Filter",
-                  "description": "Place FFMPEG video filters in this box to affect the recording portion. No spaces.",
+                  "field": "فیلتر ویدئوی ضبط",
+                  "description": "فیلترهای ویدئویی FFMPEG مربوط به ضبط را در این قسمت وارد کنید. از فاصله استفاده نکنید.",
                   "default": "",
                   "example": "",
                   "possible": ""
@@ -673,53 +673,53 @@
             ]
          },
          "Timestamp": {
-            "name": "Timestamp",
+            "name": "برچسب زمانی",
             "color": "red",
             "info": [
                {
                   "name": "detail=timestamp_font",
-                  "field": "Font Path",
-                  "description": "Font File to style your timestamp.",
+                  "field": "مسیر فونت",
+                  "description": "مسیر فایل فونت مورد استفاده برای برچسب زمانی را مشخص کنید.",
                   "default": "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=timestamp_font_size",
-                  "field": "Font Size",
-                  "description": "Font size in pt.",
+                  "field": "اندازه فونت",
+                  "description": "اندازه فونت برحسب پوینت.",
                   "default": "10",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=timestamp_color",
-                  "field": "Text Color",
-                  "description": "Timstamp text color.",
+                  "field": "رنگ متن",
+                  "description": "رنگ متن برچسب زمانی.",
                   "default": "white",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=timestamp_box_color",
-                  "field": "Text Box Color",
-                  "description": "Timstamp backdrop color.",
+                  "field": "رنگ پس‌زمینه متن",
+                  "description": "رنگ پس‌زمینه برچسب زمانی.",
                   "default": "0x00000000@1",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=timestamp_x",
-                  "field": "Position X",
-                  "description": "Horiztonal Position of Timestamp",
+                  "field": "موقعیت افقی (X)",
+                  "description": "موقعیت افقی برچسب زمانی.",
                   "default": "(w-tw)/2",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=timestamp_y",
-                  "field": "Position Y",
-                  "description": "Vertical Position of Timestamp",
+                  "field": "موقعیت عمودی (Y)",
+                  "description": "موقعیت عمودی برچسب زمانی.",
                   "default": "0",
                   "example": "",
                   "possible": ""
@@ -727,193 +727,193 @@
             ]
          },
          "Detector": {
-            "name": "Detector",
+            "name": "تشخیص حرکت",
             "color": "orange",
             "info": [
                {
                   "name": "detail=detector",
-                  "field": "Enabled",
-                  "description": "This will add another output in the FFMPEG command for the motion detector. A detector plugin must be connected for this to have any effect.",
+                  "field": "فعال‌سازی",
+                  "description": "یک خروجی دیگر به فرمان FFMPEG برای تشخیص حرکت اضافه می‌کند. برای عملکرد این گزینه باید افزونه تشخیص‌دهنده متصل باشد.",
                   "default": "No",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=detector_pam",
-                  "field": "Use Built-In",
-                  "description": "Use Kevin Godell's Motion Detector. This is built into Shinobi and requires no other configuration to activate.",
+                  "field": "استفاده از تشخیص‌دهنده داخلی",
+                  "description": "از تشخیص‌دهنده حرکت داخلی Kevin Godell استفاده می‌کند. این قابلیت در دیده‌بان داخلی است و برای فعال‌شدن به تنظیمات دیگری نیاز ندارد.",
                   "default": "No",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=detector_trigger",
-                  "field": "Trigger Record",
-                  "description": "This will order the camera to record if it is set to \"Watch-Only\" when a motion even is detected.",
+                  "field": "ضبط هنگام تشخیص",
+                  "description": "اگر دوربین در حالت «فقط نمایش» باشد، هنگام تشخیص حرکت فرمان ضبط صادر می‌شود.",
                   "default": "No",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=detector_timeout",
-                  "field": "Recording Timeout",
-                  "description": "The length of time \"Trigger Record\" will run for. This is read in minutes.",
+                  "field": "مهلت ضبط",
+                  "description": "مدت ادامه ضبط پس از فعال‌شدن رویداد را برحسب دقیقه مشخص می‌کند.",
                   "default": "10",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=watchdog_reset",
-                  "field": "Timeout Reset on Next Event",
-                  "description": "If there is an overlap in trigger record should it reset.",
+                  "field": "بازنشانی مهلت با رویداد بعدی",
+                  "description": "مشخص می‌کند با وقوع رویداد جدید در هنگام ضبط رویدادمحور، زمان‌سنج از نو آغاز شود یا خیر.",
                   "default": "No",
                   "example": "1",
                   "possible": [
                      {
                         "name": "No",
-                        "info": "Finish the current 10 minute order.."
+                        "info": "فرایند فعلی ده‌دقیقه‌ای را کامل می‌کند."
                      },
                      {
                         "name": "Yes",
-                        "info": "Reset the timer"
+                        "info": "زمان‌سنج را بازنشانی می‌کند."
                      }
                   ]
                },
                {
                   "name": "detail=detector_save",
-                  "field": "Save Events to SQL",
-                  "description": "Save Motion Events in SQL. This will allow display of motion over video during the time motion events occured in the Power Viewer.",
+                  "field": "ذخیره رویدادها در SQL",
+                  "description": "رویدادهای حرکت را در SQL ذخیره می‌کند تا زمان وقوع حرکت روی ویدئو در نمایشگر پیشرفته قابل مشاهده باشد.",
                   "default": "Yes",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=detector_send_frames",
-                  "field": "Send Frames",
-                  "description": "Push frames to the connected plugin to be analyzed.",
+                  "field": "ارسال فریم‌ها",
+                  "description": "فریم‌ها را برای تحلیل به افزونه متصل ارسال می‌کند.",
                   "default": "No",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=detector_frame_save",
-                  "field": "Save Frames to Events",
-                  "description": "Save frames to the event row in the database as a base64 string. Enabling this can drain performance.",
+                  "field": "ذخیره فریم‌ها در رویدادها",
+                  "description": "فریم‌ها را به‌صورت رشته Base64 در رکورد رویداد پایگاه داده ذخیره می‌کند. فعال‌سازی آن می‌تواند عملکرد سیستم را کاهش دهد.",
                   "default": "No",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=detector_mail",
-                  "field": "Email on Trigger",
-                  "description": "Recieve an email of an image during a motion event to the master account for the camera group. You must setup SMTP details in conf.json.",
+                  "field": "ارسال ایمیل هنگام رویداد",
+                  "description": "هنگام تشخیص حرکت، یک تصویر به ایمیل حساب اصلی گروه دوربین ارسال می‌شود. تنظیمات SMTP باید در فایل conf.json وارد شده باشد.",
                   "default": "No",
                   "example": "1",
                   "possible": [
                      {
                         "name": "No",
-                        "info": "Finish the current 10 minute order."
+                        "info": "فرایند فعلی ده‌دقیقه‌ای را کامل می‌کند."
                      },
                      {
                         "name": "Yes",
-                        "info": "Reset the timer"
+                        "info": "زمان‌سنج را بازنشانی می‌کند."
                      }
                   ]
                },
                {
                   "name": "detail=detector_mail_timeout",
-                  "field": "Allow Next Email",
-                  "description": "The amount of time until a trigger is allowed to send another email with motion details and another image.",
+                  "field": "زمان مجاز برای ایمیل بعدی",
+                  "description": "مدت زمانی که باید بگذرد تا رویداد بعدی اجازه ارسال ایمیل دیگری همراه با جزئیات حرکت و تصویر را داشته باشد.",
                   "default": "10",
                   "example": "0.5",
                   "possible": ""
                },
                {
                   "name": "detail=detector_fps",
-                  "field": "Detector Rate (FPS)",
-                  "description": "How many frames a second to send to the motion detector; 1 is the default.",
+                  "field": "نرخ تشخیص (FPS)",
+                  "description": "تعداد فریم‌هایی که در هر ثانیه برای تشخیص حرکت ارسال می‌شوند؛ مقدار پیش‌فرض ۱ است.",
                   "default": "1",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=detector_scale_x",
-                  "field": "Feed-in Image Width",
-                  "description": "Width of the image being detected. Smaller sizes take less CPU.",
+                  "field": "عرض تصویر ورودی تشخیص",
+                  "description": "عرض تصویر مورد تحلیل را مشخص می‌کند. اندازه کمتر، پردازنده کمتری مصرف می‌کند.",
                   "default": "",
                   "example": "640",
                   "possible": ""
                },
                {
                   "name": "detail=detector_scale_y",
-                  "field": "Feed-in Image Height",
-                  "description": "Height of the image being detected. Smaller sizes take less CPU.",
+                  "field": "ارتفاع تصویر ورودی تشخیص",
+                  "description": "ارتفاع تصویر مورد تحلیل را مشخص می‌کند. اندازه کمتر، پردازنده کمتری مصرف می‌کند.",
                   "default": "",
                   "example": "480",
                   "possible": ""
                },
                {
                   "name": "detail=detector_frame",
-                  "field": "Full Frame Detection",
-                  "description": "This will read the entire frame for pixel differences.",
+                  "field": "تشخیص در کل تصویر",
+                  "description": "کل تصویر را برای یافتن تفاوت‌های پیکسلی تحلیل می‌کند.",
                   "default": "Yes",
                   "example": "",
                   "possible": [
                      {
                         "name": "No",
-                        "info": "Makes motion detector do nothing if regions are not specified. Which is a stupid option to have if motion detection is on. One day we will remove this option."
+                        "info": "اگر ناحیه‌ای تعریف نشده باشد، تشخیص حرکت انجام نمی‌شود. هنگام فعال‌بودن تشخیص حرکت بهتر است ناحیه‌ها را مشخص کنید."
                      },
                      {
                         "name": "Yes",
-                        "info": "Read entire frame."
+                        "info": "تمام تصویر تحلیل می‌شود."
                      }
                   ]
                },
                {
                   "name": "detail=detector_sensitivity",
-                  "field": "Indifference",
-                  "description": "How much Shinobi doesn't care about motion before doing something. The opposite of sensitivity; a lower number means it will trigger sooner. The value ranges up to 15(+) decimal places.  10 is default, 0.005 is pretty sensitive to motion changes.  Note: If using Region Editor, leave this blank, and set indifference in the Region Editor (below).",
+                  "field": "آستانه بی‌تفاوتی",
+                  "description": "میزان تغییر تصویری که پیش از فعال‌شدن رویداد نادیده گرفته می‌شود. این مقدار برعکس حساسیت عمل می‌کند؛ عدد کمتر باعث تشخیص سریع‌تر می‌شود. مقدار پیش‌فرض ۱۰ است و ۰٫۰۰۵ حساسیت زیادی دارد. هنگام استفاده از ویرایشگر ناحیه، این بخش را خالی بگذارید و آستانه را در همان ویرایشگر تنظیم کنید.",
                   "default": "10",
                   "example": "10",
                   "possible": ""
                },
                {
                   "name": "detail=detector_webhook",
-                  "field": "Webhook",
-                  "description": "Send a GET request to a URL with some values from the event.",
-                  "default":"No",
+                  "field": "وب‌هوک",
+                  "description": "یک درخواست GET شامل برخی اطلاعات رویداد به نشانی مشخص‌شده ارسال می‌کند.",
+                  "default": "No",
                   "example": "",
-                  "possible":""
+                  "possible": ""
                },
                {
                   "name": "detail=detector_command_enable",
-                  "field": "Detector Command",
-                  "description": "You may use this to trigger a script on command.",
+                  "field": "فرمان تشخیص‌دهنده",
+                  "description": "برای اجرای یک اسکریپت هنگام وقوع رویداد استفاده می‌شود.",
                   "default": "No",
                   "example": "",
                   "possible": [
                      {
                         "name": "No",
-                        "info": "No script will run."
+                        "info": "هیچ اسکریپتی اجرا نمی‌شود."
                      },
                      {
                         "name": "Yes",
-                        "info": "Trigger the script that is set in the <b>Command</b> option. <b>Command</b> is only visible when selecting this option."
+                        "info": "اسکریپت تنظیم‌شده در گزینه <b>فرمان</b> اجرا می‌شود. گزینه فرمان فقط پس از فعال‌سازی این بخش نمایش داده می‌شود."
                      }
                   ]
                },
                {
                   "name": "detail=detector_command",
-                  "field": "Command",
-                  "description": "The command that will run. This is the equivalent of running a shell command from terminal.",
+                  "field": "فرمان",
+                  "description": "فرمانی که اجرا خواهد شد؛ معادل اجرای یک فرمان Shell در ترمینال است.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=detector_command_timeout",
-                  "field": "Allow Next Command",
-                  "description": "This value is a timer to allow the next running of your script. This value is in minutes.",
+                  "field": "زمان مجاز برای فرمان بعدی",
+                  "description": "این زمان‌سنج، فاصله مجاز تا اجرای بعدی اسکریپت را برحسب دقیقه مشخص می‌کند.",
                   "default": "10",
                   "example": "0.1",
                   "possible": "Any number."
@@ -921,21 +921,21 @@
             ]
          },
          "\"No Motion\" Detector": {
-            "name": "\"No Motion\" Detector",
+            "name": "تشخیص «عدم حرکت»",
             "color": "orange",
             "info": [
                {
                   "name": "detail=detector_notrigger_mail",
-                  "field": "Email on \"No Motion\"",
-                  "description": "If motion has not been detected after the timeout period you will recieve an email.",
+                  "field": "ارسال ایمیل هنگام «عدم حرکت»",
+                  "description": "اگر تا پایان مهلت تعیین‌شده حرکتی شناسایی نشود، ایمیل ارسال خواهد شد.",
                   "default": "No",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=detector_notrigger_timeout",
-                  "field": "Timeout",
-                  "description": "Timeout is calculated in minutes.",
+                  "field": "مهلت زمانی",
+                  "description": "مهلت زمانی برحسب دقیقه محاسبه می‌شود.",
                   "default": "1",
                   "example": "",
                   "possible": ""
@@ -943,53 +943,53 @@
             ]
          },
          "Custom": {
-            "name": "Custom",
+            "name": "تنظیمات سفارشی",
             "color": "navy",
             "info": [
                {
                   "name": "detail=cust_input",
-                  "field": "Input Flags",
-                  "description": "Custom Flags that bind to the Input of the FFMPEG process.",
+                  "field": "پارامترهای ورودی",
+                  "description": "پارامترهای سفارشی که به ورودی فرایند FFMPEG افزوده می‌شوند.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=cust_snap",
-                  "field": "Snapshot Flags",
-                  "description": "Custom Flags that bind to the Snapshots.",
+                  "field": "پارامترهای تصویر لحظه‌ای",
+                  "description": "پارامترهای سفارشی مربوط به تصاویر لحظه‌ای.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=cust_detect",
-                  "field": "Detector Flags",
-                  "description": "Custom Flags that bind to the stream Detector uses for analyzation.",
+                  "field": "پارامترهای تشخیص‌دهنده",
+                  "description": "پارامترهای سفارشی جریان تصویری که تشخیص‌دهنده برای تحلیل استفاده می‌کند.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=cust_stream",
-                  "field": "Stream Flags",
-                  "description": "Custom Flags that bind to the Stream (client side view) of the FFMPEG process.",
+                  "field": "پارامترهای پخش زنده",
+                  "description": "پارامترهای سفارشی مربوط به خروجی پخش زنده FFMPEG برای نمایش در سمت کاربر.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=cust_record",
-                  "field": "Recording Flags",
-                  "description": "Custom Flags that bind to the recording of the FFMPEG process.",
+                  "field": "پارامترهای ضبط",
+                  "description": "پارامترهای سفارشی مربوط به ضبط در فرایند FFMPEG.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=custom_output",
-                  "field": "Output Method",
-                  "description": "Add a custom output like JPEG frames or send data straight to another server.",
+                  "field": "روش خروجی",
+                  "description": "یک خروجی سفارشی، مانند فریم‌های JPEG، اضافه کنید یا داده را مستقیماً به سرور دیگری بفرستید.",
                   "default": "",
                   "example": "",
                   "possible": ""
@@ -997,52 +997,52 @@
             ]
          },
          "Logging": {
-            "name": "Logging",
+            "name": "گزارش‌گیری",
             "color": "green",
             "info": [
                {
                   "name": "detail=loglevel",
-                  "field": "Log Level",
-                  "description": "The amount of data to provide while doing the job.",
+                  "field": "سطح گزارش",
+                  "description": "میزان جزئیات گزارش‌های تولیدشده هنگام اجرای فرایند را مشخص می‌کند.",
                   "default": "No",
                   "example": "",
                   "possible": [
                      {
                         "name": "Silent",
-                        "info": "None. This will silence all logging."
+                        "info": "هیچ گزارشی ثبت نمی‌شود."
                      },
                      {
                         "name": "Fatal",
-                        "info": "Display only fatal errors."
+                        "info": "فقط خطاهای بحرانی را نمایش می‌دهد."
                      },
                      {
                         "name": "On Error",
-                        "info": "Display all important errors. Note : this doesn't always show important information."
+                        "info": "همه خطاهای مهم را نمایش می‌دهد؛ ممکن است همیشه تمام اطلاعات ضروری را نشان ندهد."
                      },
                      {
                         "name": "All Warnings",
-                        "info": "Display all warnings. Use this if you can't find out what's wrong with your camera."
+                        "info": "همه هشدارها را نمایش می‌دهد؛ برای عیب‌یابی مشکلات نامشخص دوربین مناسب است."
                      },
                      {
                         "name": "Debug",
-                        "info": "Show all information FFMPEG can provide on STDERR while doing the job."
+                        "info": "تمام اطلاعاتی را که FFMPEG هنگام اجرا در STDERR ارائه می‌کند نمایش می‌دهد."
                      }
                   ]
                },
                {
                   "name": "detail=sqllog",
-                  "field": "Save Log in SQL",
-                  "description": "Use this with caution as FFMPEG likes to throw up superfluous data at times which can lead to a lot of database rows.",
+                  "field": "ذخیره گزارش در SQL",
+                  "description": "این گزینه را با احتیاط فعال کنید؛ زیرا FFMPEG ممکن است داده‌های زیادی تولید کند و تعداد رکوردهای پایگاه داده به‌شدت افزایش یابد.",
                   "default": "No",
                   "example": "",
                   "possible": [
                      {
                         "name": "No",
-                        "info": "No is the default."
+                        "info": "خیر، مقدار پیش‌فرض است."
                      },
                      {
                         "name": "Yes",
-                        "info": "Do this if you are having recurring issues only."
+                        "info": "فقط هنگام بروز مشکلات تکرارشونده از این گزینه استفاده کنید."
                      }
                   ]
                }
@@ -1051,56 +1051,56 @@
       }
    },
    "Account Settings": {
-      "section": "Account Settings",
+      "section": "تنظیمات حساب کاربری",
       "blocks": {
          "Profile": {
-            "name": "Profile",
+            "name": "پروفایل",
             "color": "grey",
             "info": [
                {
                   "name": "mail",
-                  "field": "Email",
-                  "description": "The login for accounts. The main account holder's email address will get notifications.",
+                  "field": "ایمیل",
+                  "description": "نشانی ایمیل برای ورود به حساب استفاده می‌شود و اعلان‌ها برای ایمیل صاحب حساب اصلی ارسال می‌شوند.",
                   "default": "",
                   "example": "ccio@m03.ca",
                   "possible": "Email compliant string."
                },
                {
                   "name": "pass",
-                  "field": "Password",
-                  "description": "Leave blank to keep the same password during settings modification.",
+                  "field": "رمز عبور",
+                  "description": "برای حفظ رمز عبور فعلی هنگام ویرایش تنظیمات، این قسمت را خالی بگذارید.",
                   "default": "",
                   "example": "ccio@m03.ca",
                   "possible": ""
                },
                {
                   "name": "detail=size",
-                  "field": "Max Storage Amount",
-                  "description": "The amount max space Shinobi will allow to be consumed before purging. This value is read in megabytes.",
+                  "field": "حداکثر فضای ذخیره‌سازی",
+                  "description": "حداکثر فضایی که دیده‌بان پیش از پاک‌سازی فایل‌های قدیمی استفاده می‌کند. این مقدار برحسب مگابایت است.",
                   "default": "10000",
                   "example": "600000",
                   "possible": "Up to 95% of your maximum storage space if only one master account exists."
                },
                {
                   "name": "detail=days",
-                  "field": "Number of Days to keep Videos",
-                  "description": "The number of days to keep videos before purging.",
+                  "field": "تعداد روزهای نگهداری ویدئوها",
+                  "description": "تعداد روزهای نگهداری ویدئوها پیش از پاک‌سازی.",
                   "default": "7",
                   "example": "30",
                   "possible": ""
                },
                {
                   "name": "detail=event_days",
-                  "field": "Number of Days to keep Events",
-                  "description": "The number of days to keep events before purging.",
+                  "field": "تعداد روزهای نگهداری رویدادها",
+                  "description": "تعداد روزهای نگهداری رویدادها پیش از پاک‌سازی.",
                   "default": "7",
                   "example": "30",
                   "possible": ""
                },
                {
                   "name": "detail=log_days",
-                  "field": "Number of Days to keep Logs",
-                  "description": "The number of days to keep logs before purging.",
+                  "field": "تعداد روزهای نگهداری گزارش‌ها",
+                  "description": "تعداد روزهای نگهداری گزارش‌ها پیش از پاک‌سازی.",
                   "default": "7",
                   "example": "30",
                   "possible": ""
@@ -1108,19 +1108,19 @@
             ]
          },
          "Monitor Groups": {
-            "name": "Monitor Groups",
+            "name": "گروه‌های دوربین",
             "color": "blue",
             "info": [
                {
-                  "field": "Groups",
-                  "description": "The list of groups you have created.",
+                  "field": "گروه‌ها",
+                  "description": "فهرست گروه‌هایی که ایجاد کرده‌اید.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
-                  "field": "Group Name",
-                  "description": "Name of selected group.",
+                  "field": "نام گروه",
+                  "description": "نام گروه انتخاب‌شده.",
                   "default": "",
                   "example": "",
                   "possible": ""
@@ -1133,40 +1133,40 @@
             "info": [
                {
                   "name": "detail=webdav_url",
-                  "field": "URL",
-                  "description": "The connection URL for your WebDAV server.",
+                  "field": "نشانی URL",
+                  "description": "نشانی اتصال سرور WebDAV.",
                   "default": "",
                   "example": "http://owncloud.server/remote.php/webdav/",
                   "possible": ""
                },
                {
                   "name": "detail=webdav_user",
-                  "field": "Username",
-                  "description": "The username required to access this server.",
+                  "field": "نام کاربری",
+                  "description": "نام کاربری لازم برای دسترسی به این سرور.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=webdav_pass",
-                  "field": "Password",
-                  "description": "The password required to access this server.",
+                  "field": "رمز عبور",
+                  "description": "رمز عبور لازم برای دسترسی به این سرور.",
                   "default": "",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=webdav_save",
-                  "field": "Autosave",
-                  "description": "Whether or not the server should auto upload videos as they are finished.",
+                  "field": "ذخیره خودکار",
+                  "description": "مشخص می‌کند ویدئوها پس از تکمیل به‌صورت خودکار روی سرور بارگذاری شوند یا خیر.",
                   "default": "No",
                   "example": "",
                   "possible": ""
                },
                {
                   "name": "detail=webdav_dir",
-                  "field": "Save Directory",
-                  "description": "The directory where videos will be saved.",
+                  "field": "پوشه ذخیره‌سازی",
+                  "description": "پوشه‌ای که ویدئوها در آن ذخیره می‌شوند.",
                   "default": "/",
                   "example": "/videos",
                   "possible": ""
@@ -1174,13 +1174,13 @@
             ]
          },
          "Custom Styles": {
-            "name": "Custom Styles",
+            "name": "سبک‌های سفارشی",
             "color": "navy",
             "info": [
                {
                   "name": "detail=css",
                   "field": "CSS",
-                  "description": "Add custom colors to your dashboard. This field should only be used by advanced users.",
+                  "description": "رنگ‌های سفارشی را به داشبورد اضافه کنید. این بخش فقط برای کاربران حرفه‌ای توصیه می‌شود.",
                   "default": "",
                   "example": "",
                   "possible": ""

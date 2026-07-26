@@ -193,7 +193,7 @@ s.loadedDefinitons={}
 s.loadedDefinitons[config.language]=definitions;
 s.getDefinitonFile=function(rule){
     if(rule&&rule!==''){
-        var file=s.loadedDefinitons[file]
+        var file=s.loadedDefinitons[rule]
         if(!file){
             try{
                 s.loadedDefinitons[rule]=require(location.definitions+'/'+rule+'.json')

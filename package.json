@@ -1,7 +1,7 @@
 {
   "name": "dideban-platform",
   "version": "1.0.0",
-  "description": "ersian-first self-hosted video surveillance and NVR platform",
+  "description": "Persian-first self-hosted video surveillance and NVR platform",
   "main": "camera.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

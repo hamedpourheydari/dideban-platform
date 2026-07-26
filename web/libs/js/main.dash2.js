@@ -5289,19 +5289,47 @@ $('body')
         case'watch_off':
             $.ccio.cx({f:'monitor',ff:'watch_off',id:e.mid},user)
         break;
-        case'delete':
+                case'delete':
             e.m=$('#confirm_window').modal('show');e.f=e.e.attr('file');
             $.confirm.title.text('<%-cleanLang(lang['Delete Monitor'])%> : '+e.mon.name)
             e.html='<%-cleanLang(lang.DeleteMonitorText)%>'
             e.html+='<table class="info-table table table-striped"><tr>';
+
+            var monitorFieldLabels = {
+                mid: 'شناسه دوربین',
+                ke: 'شناسه گروه',
+                name: 'نام دوربین',
+                type: 'نوع ورودی',
+                ext: 'پسوند فایل',
+                protocol: 'پروتکل',
+                host: 'نشانی میزبان',
+                path: 'مسیر جریان',
+                port: 'پورت',
+                fps: 'نرخ فریم',
+                mode: 'وضعیت',
+                width: 'عرض تصویر',
+                height: 'ارتفاع تصویر'
+            };
+
+            var monitorValueLabels = {
+                stop: 'متوقف',
+                start: 'فعال',
+                record: 'در حال ضبط',
+                idle: 'آماده‌به‌کار'
+            };
+
             $.each($.ccio.init('cleanMon',e.mon),function(n,v,g){
                 if(n==='host'&&v.indexOf('@')>-1){g=v.split('@')[1]}else{g=v};
                 try{JSON.parse(g);return}catch(err){}
-                e.html+='<tr><td><b>'+n+'</b></td><td>'+g+'</td></tr>';
+
+                var fieldLabel = monitorFieldLabels[n] || n;
+                var fieldValue = monitorValueLabels[g] || g;
+
+                e.html+='<tr><td><b>'+fieldLabel+'</b></td><td>'+fieldValue+'</td></tr>';
             })
             e.html+='</tr></table>';
             $.confirm.body.html(e.html)
-            $.confirm.click({title:'Delete Monitor',class:'btn-danger'},function(){
+            $.confirm.click({title:'<%-cleanLang(lang['Delete Monitor'])%>',class:'btn-danger'},function(){
                 $.get($.ccio.init('location',user)+user.auth_token+'/configureMonitor/'+user.ke+'/'+e.mon.mid+'/delete',function(d){
                     $.ccio.log(d)
                 })
