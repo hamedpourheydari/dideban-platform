@@ -82,3 +82,6 @@ desktop.ini
 /build/
 
 /shinobi-brand-audit.txt
+# Downloaded update packages
+updates/downloads/*
+!updates/downloads/.gitkeep

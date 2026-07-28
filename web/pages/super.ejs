@@ -183,7 +183,7 @@ body.super-page:before{
 .update-status{display:flex;align-items:center;gap:10px;padding:12px;border-radius:11px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#bfdbfe}
 .update-status.success{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.22);color:#bbf7d0}.update-status.warning{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.22);color:#fde68a}.update-status.danger{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.22);color:#fecaca}
 .update-changelog{display:none;padding:12px;border:1px solid var(--super-border);border-radius:11px;background:rgba(255,255,255,.02)}.update-changelog h4{font-size:12px;margin:0 0 8px}.update-changelog ul{margin:0;padding-right:18px;color:#cbd5e1;font-size:11px;line-height:1.9}
-.update-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.update-actions .btn{border-radius:9px}.update-source{font-size:9px;color:var(--super-muted);direction:ltr;word-break:break-all}
+.update-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.update-actions .btn{border-radius:9px}.update-source{font-size:9px;color:var(--super-muted);direction:ltr;word-break:break-all}.update-progress-wrap{display:none}.update-progress-track{height:9px;background:#07111c;border:1px solid var(--super-border);border-radius:99px;overflow:hidden}.update-progress-bar{height:100%;width:0;background:linear-gradient(90deg,#2563eb,#22c55e);transition:width .2s}.update-progress-text{font-size:10px;color:#cbd5e1;margin-top:6px;display:flex;justify-content:space-between;gap:10px}
 @media(max-width:600px){.update-version-grid{grid-template-columns:1fr}}
 
 </style>
@@ -364,10 +364,13 @@ body.super-page:before{
                     </div>
                     <div class="update-status"><i class="fa fa-info-circle"></i><span>برای دریافت اطلاعات نسخه جدید، دکمه بررسی به‌روزرسانی را بزنید.</span></div>
                     <div class="update-changelog"><h4><i class="fa fa-list-ul"></i> تغییرات این نسخه</h4><ul></ul></div>
+                    <div class="update-progress-wrap"><div class="update-progress-track"><div class="update-progress-bar"></div></div><div class="update-progress-text"><span class="update-progress-label">در حال آماده‌سازی...</span><span class="update-progress-percent">0%</span></div></div>
                     <div class="update-actions">
-                        <button type="button" class="btn btn-primary update-check"><i class="fa fa-refresh"></i> بررسی به‌روزرسانی</button>
-                        <button type="button" class="btn btn-success update-download" style="display:none" disabled><i class="fa fa-download"></i> دانلود نسخه جدید</button>
-                        <span class="update-phase-note">در فاز فعلی فقط بررسی نسخه فعال است؛ نصب امن در فاز بعد اضافه می‌شود.</span>
+                        <button type="button" class="btn btn-success update-auto"><i class="fa fa-refresh"></i> بررسی و به‌روزرسانی خودکار</button>
+                        <button type="button" class="btn btn-primary update-check"><i class="fa fa-search"></i> فقط بررسی نسخه</button>
+                        <button type="button" class="btn btn-warning update-offline"><i class="fa fa-usb"></i> نصب بسته آفلاین (USB/ZIP)</button>
+                        <input type="file" class="update-offline-file" accept=".zip,application/zip" style="display:none">
+                        <span class="update-phase-note">برای اینترنت از به‌روزرسانی خودکار و برای شبکه ایزوله از بسته ZIP روی USB استفاده کنید. در هر دو روش، بکاپ و نصب به‌صورت خودکار انجام می‌شود.</span>
                     </div>
                     <div class="update-source"></div>
                 </div>
@@ -475,7 +478,22 @@ $.ccio.ws.on('f',function(d){
             $.softwareUpdate.render(d)
         break;
         case'software_update_error':
-            $.softwareUpdate.error(d.msg||'بررسی به‌روزرسانی انجام نشد.')
+            $.softwareUpdate.error(d.msg||'عملیات به‌روزرسانی انجام نشد.')
+        break;
+        case'software_update_progress':
+            $.softwareUpdate.progress(d)
+        break;
+        case'software_update_downloaded':
+            $.softwareUpdate.downloaded(d)
+        break;
+        case'software_update_installing':
+            $.softwareUpdate.installing(d)
+        break;
+        case'software_update_offline_upload_ready':
+            $.softwareUpdate.uploadOffline(d)
+        break;
+        case'software_update_offline_ready':
+            $.softwareUpdate.offlineReady(d)
         break;
         case'instructions_list':
             $.instructions.draw(d.instructions||[])
@@ -896,7 +914,7 @@ $.conf.e.submit(function(e){
     return false
 })
 
-// Dideban software update checker (Phase 25: check and display only)
+// Dideban software update center (Phase 26: secure download and SHA-256 verification)
 $.softwareUpdate={e:$('#software_update'),data:null}
 $.softwareUpdate.setBusy=function(busy){
     this.e.find('.update-check').prop('disabled',busy).html(busy?'<i class="fa fa-spinner fa-spin"></i> در حال بررسی...':'<i class="fa fa-refresh"></i> بررسی به‌روزرسانی')
@@ -914,17 +932,112 @@ $.softwareUpdate.render=function(d){
     var list=this.e.find('.update-changelog ul').empty(),changes=Array.isArray(d.changelog)?d.changelog:[]
     changes.forEach(function(item){$('<li>').text(item).appendTo(list)})
     this.e.find('.update-changelog').toggle(changes.length>0)
-    this.e.find('.update-download').toggle(!!d.updateAvailable).prop('disabled',true)
+    this.e.find('.update-auto,.update-offline').prop('disabled',false)
     if(d.checkedAt)this.e.find('.update-last-check').text('آخرین بررسی: '+new Date(d.checkedAt).toLocaleString('fa-IR'))
 }
 $.softwareUpdate.error=function(message){
     this.setBusy(false)
+    this.e.find('.update-auto,.update-offline').prop('disabled',false);this.e.find('.update-auto').html('<i class="fa fa-refresh"></i> بررسی و به‌روزرسانی خودکار')
     this.e.find('.update-status').removeClass('success warning').addClass('danger').html('<i class="fa fa-exclamation-circle"></i><span></span>').find('span').text(message)
+}
+$.softwareUpdate.formatBytes=function(bytes){
+    bytes=Number(bytes||0);if(!bytes)return '0 B';var units=['B','KB','MB','GB'],i=Math.min(units.length-1,Math.floor(Math.log(bytes)/Math.log(1024)));return (bytes/Math.pow(1024,i)).toFixed(i?1:0)+' '+units[i]
+}
+$.softwareUpdate.progress=function(d){
+    this.setBusy(true);this.e.find('.update-auto,.update-offline').prop('disabled',true);this.e.find('.update-auto').html('<i class="fa fa-spinner fa-spin"></i> در حال به‌روزرسانی...')
+    var wrap=this.e.find('.update-progress-wrap').show(),percent=d.percent===null||d.percent===undefined?0:Number(d.percent||0)
+    wrap.find('.update-progress-bar').css('width',Math.max(0,Math.min(100,percent))+'%')
+    wrap.find('.update-progress-percent').text(d.percent===null||d.percent===undefined?'...':percent+'%')
+    var label=d.stage==='offline_prepare'?'در حال آماده‌سازی بارگذاری آفلاین...':d.stage==='offline_upload'?'بارگذاری '+this.formatBytes(d.receivedBytes)+(d.totalBytes?' از '+this.formatBytes(d.totalBytes):''):d.stage==='offline_install'?'در حال آغاز نصب بسته آفلاین...':d.stage==='starting'?'در حال اتصال به سرور انتشار...':'دریافت '+this.formatBytes(d.receivedBytes)+(d.totalBytes?' از '+this.formatBytes(d.totalBytes):'')
+    wrap.find('.update-progress-label').text(label)
+}
+$.softwareUpdate.downloaded=function(d){
+    this.setBusy(false)
+    this.e.find('.update-auto').prop('disabled',false).html('<i class="fa fa-refresh"></i> بررسی و به‌روزرسانی خودکار')
+    this.e.find('.update-offline').prop('disabled',false).html('<i class="fa fa-usb"></i> نصب بسته آفلاین (USB/ZIP)')
+    this.e.find('.update-progress-wrap').show().find('.update-progress-bar').css('width','100%')
+    this.e.find('.update-progress-percent').text('100%');this.e.find('.update-progress-label').text('دانلود و بررسی SHA-256 کامل شد — '+this.formatBytes(d.size))
+    this.e.find('.update-status').removeClass('warning danger').addClass('success').html('<i class="fa fa-check-circle"></i><span></span>').find('span').text(d.message||'بسته به‌روزرسانی آماده نصب است.')
+    this.e.find('.update-phase-note').text('فایل '+(d.fileName||'به‌روزرسانی')+' آماده نصب است.')
 }
 $.softwareUpdate.e.on('click','.update-check',function(){
     $.softwareUpdate.setBusy(true)
     $.ccio.cx({f:'software_update',ff:'check'})
 })
+$.softwareUpdate.e.on('click','.update-auto',function(){
+    $.confirm.title.html('به‌روزرسانی خودکار دیده‌بان')
+    $.confirm.body.html('<p>سیستم به‌صورت خودکار نسخه جدید را بررسی می‌کند، بسته را دانلود و اعتبارسنجی می‌کند، از فایل‌های برنامه نسخه پشتیبان می‌گیرد و پس از نصب سرویس را دوباره راه‌اندازی می‌کند.</p><p><b>داده‌های کاربران، تنظیمات، ویدئوها و فایل‌های پیوست حذف یا جایگزین نمی‌شوند.</b></p>')
+    $.confirm.click({title:'شروع به‌روزرسانی',class:'btn-success'},function(){$.softwareUpdate.progress({stage:'starting',percent:0});$.ccio.cx({f:'software_update',ff:'auto_install'})})
+    $.confirm.e.modal('show')
+})
+$.softwareUpdate.compareVersions=function(a,b){
+    var ap=String(a||'0').replace(/^v/i,'').split('-')[0].split('.'),bp=String(b||'0').replace(/^v/i,'').split('-')[0].split('.'),n=Math.max(ap.length,bp.length)
+    for(var i=0;i<n;i++){var av=parseInt(ap[i]||0,10)||0,bv=parseInt(bp[i]||0,10)||0;if(av>bv)return 1;if(av<bv)return -1}return 0
+}
+$.softwareUpdate.e.on('click','.update-offline',function(){
+    $.softwareUpdate.e.find('.update-offline-file').val('').trigger('click')
+})
+$.softwareUpdate.e.on('change','.update-offline-file',function(){
+    var file=this.files&&this.files[0]
+    if(!file)return
+    if(!/\.zip$/i.test(file.name)){return $.softwareUpdate.error('فقط فایل ZIP بسته به‌روزرسانی دیده‌بان قابل انتخاب است.')}
+    $.softwareUpdate.offlineFile=file
+    $.confirm.title.html('بارگذاری بسته آفلاین')
+    $.confirm.body.html('<p>فایل <b></b> از USB یا دیسک محلی بارگذاری و سپس ساختار، محصول و نسخه آن بررسی می‌شود.</p><p>تا پایان بارگذاری صفحه را نبندید.</p>').find('b').text(file.name)
+    $.confirm.click({title:'بررسی بسته',class:'btn-warning'},function(){
+        $.softwareUpdate.progress({stage:'offline_prepare',percent:0})
+        $.ccio.cx({f:'software_update',ff:'offline_prepare'})
+    })
+    $.confirm.e.modal('show')
+})
+$.softwareUpdate.uploadOffline=function(d){
+    var file=this.offlineFile
+    if(!file)return this.error('فایل بسته آفلاین انتخاب نشده است.')
+    if(d.maxBytes&&file.size>d.maxBytes)return this.error('حجم فایل بیشتر از حد مجاز سامانه است.')
+    var xhr=new XMLHttpRequest(),self=this
+    xhr.open('POST',d.url,true)
+    xhr.setRequestHeader('Content-Type','application/octet-stream')
+    xhr.setRequestHeader('X-Dideban-File-Name',encodeURIComponent(file.name))
+    xhr.upload.onprogress=function(e){self.progress({stage:'offline_upload',receivedBytes:e.loaded,totalBytes:e.total||file.size,percent:e.lengthComputable?Math.floor(e.loaded*100/e.total):null})}
+    xhr.onerror=function(){self.error('ارتباط هنگام بارگذاری بسته آفلاین قطع شد.')}
+    xhr.onload=function(){
+        if(xhr.status<200||xhr.status>=300){var msg='بارگذاری بسته آفلاین ناموفق بود.';try{msg=JSON.parse(xhr.responseText).msg||msg}catch(e){};self.error(msg)}
+        else{self.e.find('.update-progress-label').text('بارگذاری کامل شد؛ در حال بررسی ساختار بسته...')}
+    }
+    xhr.send(file)
+}
+$.softwareUpdate.offlineReady=function(d){
+    this.offlinePackage=d
+    this.setBusy(false)
+    this.e.find('.update-auto,.update-offline,.update-check').prop('disabled',false)
+    this.e.find('.update-progress-wrap').show().find('.update-progress-bar').css('width','100%')
+    this.e.find('.update-progress-percent').text('100%')
+    this.e.find('.update-progress-label').text('بسته آفلاین بررسی شد — '+this.formatBytes(d.size))
+    this.e.find('.latest-version').text(d.version||'نامشخص')
+    this.e.find('.update-status').removeClass('warning danger').addClass('success').html('<i class="fa fa-check-circle"></i><span></span>').find('span').text(d.message)
+    var changes=Array.isArray(d.changelog)?d.changelog:[],list=this.e.find('.update-changelog ul').empty()
+    changes.forEach(function(x){$('<li>').text(x).appendTo(list)});this.e.find('.update-changelog').toggle(changes.length>0)
+    var cmp=this.compareVersions(d.version,d.currentVersion),warning=''
+    if(cmp<0)warning='<p class="text-danger"><b>هشدار:</b> نسخه انتخاب‌شده قدیمی‌تر از نسخه نصب‌شده است و نصب آن به معنی بازگشت نسخه خواهد بود.</p>'
+    else if(cmp===0)warning='<p class="text-warning"><b>توجه:</b> نسخه انتخاب‌شده با نسخه فعلی یکسان است.</p>'
+    $.confirm.title.html('نصب بسته آفلاین دیده‌بان')
+    $.confirm.body.html('<p>نسخه فعلی: <b class="offline-current"></b></p><p>نسخه بسته: <b class="offline-new"></b></p>'+warning+'<p>پس از تأیید، سامانه بکاپ می‌گیرد، فایل‌ها را نصب می‌کند و سرویس را دوباره راه‌اندازی می‌کند. داده‌های کاربران محفوظ می‌ماند.</p>')
+    $.confirm.body.find('.offline-current').text(d.currentVersion);$.confirm.body.find('.offline-new').text(d.version)
+    $.confirm.click({title:cmp<0?'بازگشت به این نسخه':'نصب و راه‌اندازی مجدد',class:cmp<0?'btn-danger':'btn-success'},function(){
+        $.softwareUpdate.progress({stage:'offline_install',percent:100})
+        $.ccio.cx({f:'software_update',ff:'offline_install',package:d})
+    })
+    $.confirm.e.modal('show')
+}
+$.softwareUpdate.installing=function(d){
+    this.e.find('.update-auto,.update-offline,.update-check').prop('disabled',true)
+    this.e.find('.update-progress-wrap').show().find('.update-progress-bar').css('width','100%')
+    this.e.find('.update-progress-percent').text('100%')
+    this.e.find('.update-progress-label').text('فایل‌ها تأیید شدند؛ سرویس در حال راه‌اندازی مجدد است...')
+    this.e.find('.update-status').removeClass('warning danger').addClass('success').html('<i class="fa fa-cog fa-spin"></i><span></span>').find('span').text(d.message||'نصب خودکار آغاز شد.')
+    var seconds=25
+    var timer=setInterval(function(){seconds--;$('.update-phase-note').text('تلاش برای اتصال مجدد تا '+seconds+' ثانیه دیگر...');if(seconds<=0){clearInterval(timer);location.reload()}},1000)
+}
 
 //sys controls
 $.system={e:$('#system')}

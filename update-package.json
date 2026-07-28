@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "payloadDirectory": ".",
+  "description": "Dideban Platform automatic/offline update package",
+  "productId": "com.dideban.platform",
+  "changelog": []
+}

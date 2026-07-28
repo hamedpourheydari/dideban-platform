@@ -44,6 +44,7 @@ var io = new (require('socket.io'))();
 var execSync = require('child_process').execSync;
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
+var execFile = require('child_process').execFile;
 var socketIOclient = require('socket.io-client');
 var crypto = require('crypto');
 var webdav = require("webdav");
@@ -64,6 +65,165 @@ function didebanCompareVersions(a,b){
 function didebanUpdateManifestUrl(){
     return (config.didebanUpdate&&config.didebanUpdate.manifestUrl)||process.env.DIDEBAN_UPDATE_MANIFEST_URL||'https://raw.githubusercontent.com/hamedpourheydari/dideban-platform/main/update.json'
 }
+var didebanUpdateDownloads={}
+var didebanOfflineUploadTokens={}
+var didebanOfflineReadyPackages={}
+function didebanCleanupOfflineUploadTokens(){
+    var now=Date.now()
+    Object.keys(didebanOfflineUploadTokens).forEach(function(token){
+        var item=didebanOfflineUploadTokens[token]
+        if(!item||item.expiresAt<now){
+            try{if(item&&item.tempPath&&fs.existsSync(item.tempPath))fs.unlinkSync(item.tempPath)}catch(e){}
+            delete didebanOfflineUploadTokens[token]
+        }
+    })
+}
+function didebanCreateOfflineUploadToken(cn){
+    didebanCleanupOfflineUploadTokens()
+    var token=crypto.randomBytes(32).toString('hex')
+    var root=didebanEnsureUpdateStage()
+    didebanOfflineUploadTokens[token]={
+        cnId:cn.id,
+        mail:cn.mail,
+        ip:cn.ip,
+        createdAt:Date.now(),
+        expiresAt:Date.now()+10*60*1000,
+        tempPath:path.join(root,'offline-'+token+'.zip.part')
+    }
+    return token
+}
+function didebanInspectOfflinePackage(archivePath,callback){
+    if(process.platform!=='win32')return callback(new Error('بررسی بسته آفلاین این نسخه فعلاً برای Windows فعال است.'))
+    var inspector=path.resolve(__dirname,'updater','Inspect-DidebanPackage.ps1')
+    if(!fs.existsSync(inspector))return callback(new Error('ابزار بررسی بسته آفلاین پیدا نشد.'))
+    execFile('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',inspector,'-ArchivePath',path.resolve(archivePath)],{windowsHide:true,timeout:120000,maxBuffer:1024*1024},function(err,stdout,stderr){
+        if(err)return callback(new Error(String(stderr||stdout||err.message).trim()||'بررسی بسته آفلاین ناموفق بود.'))
+        var text=String(stdout||'').trim(),info
+        try{info=JSON.parse(text.split(/\r?\n/).filter(Boolean).pop())}catch(parseErr){return callback(new Error('پاسخ ابزار بررسی بسته آفلاین قابل پردازش نیست.'))}
+        if(!info||info.ok!==true)return callback(new Error((info&&info.message)||'بسته آفلاین معتبر نیست.'))
+        callback(null,info)
+    })
+}
+function didebanSafeUpdateUrl(rawUrl){
+    var parsed
+    try{parsed=URL.parse(String(rawUrl||''))}catch(err){throw new Error('نشانی فایل به‌روزرسانی نامعتبر است.')}
+    var localHost=['localhost','127.0.0.1','::1'].indexOf(parsed.hostname)>-1
+    if(parsed.protocol!=='https:'&&!(localHost&&parsed.protocol==='http:'))throw new Error('دانلود بسته به‌روزرسانی فقط از HTTPS مجاز است.')
+    if(!parsed.hostname)throw new Error('نام میزبان فایل به‌روزرسانی مشخص نیست.')
+    return parsed
+}
+function didebanUpdateStageRoot(){
+    return path.resolve(__dirname,'updates','downloads')
+}
+function didebanEnsureUpdateStage(){
+    var root=didebanUpdateStageRoot()
+    if(!fs.existsSync(root))fs.mkdirSync(root,{recursive:true})
+    return root
+}
+function didebanDownloadUpdate(result,cn,callback){
+    if(!result||!result.updateAvailable)return callback(new Error('نسخه جدیدی برای دانلود موجود نیست.'))
+    var downloadUrl=String(result.downloadUrl||'')
+    var expectedHash=String(result.sha256||'').toLowerCase()
+    if(!downloadUrl)return callback(new Error('نشانی دانلود در فایل update.json ثبت نشده است.'))
+    try{didebanSafeUpdateUrl(downloadUrl)}catch(urlErr){return callback(urlErr)}
+    if(!/^[a-f0-9]{64}$/.test(expectedHash))return callback(new Error('مقدار SHA-256 بسته به‌روزرسانی معتبر نیست.'))
+    var maxBytes=Number((config.didebanUpdate&&config.didebanUpdate.maxDownloadBytes)||1073741824)
+    if(!isFinite(maxBytes)||maxBytes<1048576)maxBytes=1073741824
+    var version=String(result.latestVersion||'').replace(/[^0-9A-Za-z._-]/g,'_')
+    var root=didebanEnsureUpdateStage()
+    var finalPath=path.join(root,'dideban-update-'+version+'.zip')
+    var tempPath=finalPath+'.part'
+    try{if(fs.existsSync(tempPath))fs.unlinkSync(tempPath)}catch(e){}
+    var hash=crypto.createHash('sha256'),received=0,total=0,lastPercent=-1,finished=false
+    var output=fs.createWriteStream(tempPath,{flags:'w'})
+    var requestOptions={url:downloadUrl,timeout:30000,followAllRedirects:true,maxRedirects:5,headers:{'User-Agent':'Dideban-Platform/'+didebanPackageInfo.version,'Accept':'application/zip,application/octet-stream'}}
+    var downloadRequest=request.get(requestOptions)
+    didebanUpdateDownloads[cn.id]={version:version,tempPath:tempPath,startedAt:new Date().toISOString(),cancel:function(){downloadRequest.abort()}}
+    function cleanup(){delete didebanUpdateDownloads[cn.id]}
+    function fail(err){
+        if(finished)return;finished=true
+        try{downloadRequest.abort()}catch(e){}
+        try{output.destroy()}catch(e){}
+        try{if(fs.existsSync(tempPath))fs.unlinkSync(tempPath)}catch(e){}
+        cleanup();callback(err)
+    }
+    downloadRequest.on('response',function(response){
+        if(response.statusCode<200||response.statusCode>=300)return fail(new Error('سرور دانلود پاسخ معتبر نداد (HTTP '+response.statusCode+').'))
+        total=parseInt(response.headers['content-length'],10)||0
+        if(total>maxBytes)return fail(new Error('حجم بسته به‌روزرسانی بیشتر از حد مجاز است.'))
+        var contentType=String(response.headers['content-type']||'').toLowerCase()
+        if(contentType&&contentType.indexOf('text/html')>-1)return fail(new Error('نشانی دانلود به‌جای فایل ZIP یک صفحه HTML برگرداند.'))
+    })
+    downloadRequest.on('data',function(chunk){
+        received+=chunk.length
+        if(received>maxBytes)return fail(new Error('حجم دریافتی از حد مجاز عبور کرد.'))
+        hash.update(chunk)
+        var percent=total?Math.min(99,Math.floor(received*100/total)):null
+        if(percent===null||percent!==lastPercent){
+            lastPercent=percent
+            s.tx({f:'software_update_progress',stage:'download',receivedBytes:received,totalBytes:total,percent:percent,version:version},cn.id)
+        }
+    })
+    downloadRequest.on('error',function(err){fail(new Error('دانلود بسته به‌روزرسانی ناموفق بود: '+err.message))})
+    output.on('error',function(err){fail(new Error('ذخیره بسته به‌روزرسانی ناموفق بود: '+err.message))})
+    downloadRequest.pipe(output)
+    output.on('finish',function(){
+        output.close(function(){
+            if(finished)return
+            var actualHash=hash.digest('hex').toLowerCase()
+            if(actualHash!==expectedHash)return fail(new Error('بررسی SHA-256 ناموفق بود؛ فایل دانلودشده قابل اعتماد نیست.'))
+            try{
+                if(fs.existsSync(finalPath))fs.unlinkSync(finalPath)
+                fs.renameSync(tempPath,finalPath)
+            }catch(moveErr){return fail(new Error('انتقال بسته به‌روزرسانی به محل آماده‌سازی ناموفق بود: '+moveErr.message))}
+            finished=true;cleanup()
+            callback(null,{f:'software_update_downloaded',version:version,fileName:path.basename(finalPath),filePath:finalPath,size:received,sha256:actualHash,requiresRestart:result.requiresRestart!==false,message:'بسته نسخه '+version+' با موفقیت دانلود و صحت آن تأیید شد.'})
+        })
+    })
+}
+
+function didebanUpdaterScriptPath(){
+    return path.resolve(__dirname,'updater','DidebanUpdater.ps1')
+}
+function didebanProtectedUpdatePaths(){
+    return ['conf.json','super.json','.env','videos','streams','fileBin','logs','web/uploads','updates','backups','node_modules']
+}
+function didebanLaunchInstaller(downloadResult,manifestResult,cn,callback){
+    var updaterScript=didebanUpdaterScriptPath()
+    if(process.platform!=='win32')return callback(new Error('نصب خودکار این نسخه فعلاً برای Windows فعال است.'))
+    if(!fs.existsSync(updaterScript))return callback(new Error('فایل DidebanUpdater.ps1 در پوشه updater پیدا نشد.'))
+    if(!downloadResult||!downloadResult.filePath||!fs.existsSync(downloadResult.filePath))return callback(new Error('بسته آماده نصب پیدا نشد.'))
+    var jobsRoot=path.resolve(__dirname,'updates','jobs')
+    var backupsRoot=path.resolve(__dirname,'backups')
+    if(!fs.existsSync(jobsRoot))fs.mkdirSync(jobsRoot,{recursive:true})
+    if(!fs.existsSync(backupsRoot))fs.mkdirSync(backupsRoot,{recursive:true})
+    var version=String(manifestResult.latestVersion||downloadResult.version||'unknown').replace(/[^0-9A-Za-z._-]/g,'_')
+    var jobPath=path.join(jobsRoot,'install-'+version+'-'+Date.now()+'.json')
+    var resultPath=jobPath.replace(/\.json$/,'.result.json')
+    var restartFile=path.resolve(__dirname,'start-dideban.cmd')
+    var job={
+        schemaVersion:1,
+        version:version,
+        currentVersion:String(didebanPackageInfo.version||'1.0.0'),
+        applicationRoot:path.resolve(__dirname),
+        archivePath:path.resolve(downloadResult.filePath),
+        backupRoot:backupsRoot,
+        resultPath:resultPath,
+        parentPid:process.pid,
+        restartFile:fs.existsSync(restartFile)?restartFile:null,
+        protectedPaths:didebanProtectedUpdatePaths(),
+        createdAt:new Date().toISOString()
+    }
+    try{fs.writeFileSync(jobPath,JSON.stringify(job,null,2),'utf8')}catch(writeErr){return callback(new Error('ساخت پرونده نصب به‌روزرسانی ناموفق بود: '+writeErr.message))}
+    var child
+    try{
+        child=spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',updaterScript,'-JobPath',jobPath],{detached:true,stdio:'ignore',windowsHide:true})
+        child.unref()
+    }catch(spawnErr){return callback(new Error('اجرای برنامه به‌روزرسان ناموفق بود: '+spawnErr.message))}
+    callback(null,{f:'software_update_installing',version:version,message:'نصب خودکار آغاز شد. سرویس دیده‌بان برای جایگزینی فایل‌ها راه‌اندازی مجدد می‌شود.',jobPath:jobPath})
+    setTimeout(function(){process.exit(0)},1800)
+}
+
 function didebanCheckUpdate(callback){
     var manifestUrl=didebanUpdateManifestUrl(),parsed
     try{parsed=URL.parse(manifestUrl)}catch(err){return callback(new Error('نشانی سرویس به‌روزرسانی نامعتبر است.'))}
@@ -76,7 +236,7 @@ function didebanCheckUpdate(callback){
         try{manifest=JSON.parse(String(body||'').replace(/^\uFEFF/,''))}catch(parseErr){return callback(new Error('فایل اطلاعات نسخه ساختار JSON معتبر ندارد.'))}
         if(!manifest.version||!/^v?\d+(\.\d+){1,3}([+-][0-9A-Za-z.-]+)?$/.test(String(manifest.version)))return callback(new Error('شماره نسخه در فایل به‌روزرسانی معتبر نیست.'))
         var current=String(didebanPackageInfo.version||'1.0.0'),latest=String(manifest.version).replace(/^v/i,''),available=didebanCompareVersions(latest,current)>0
-        callback(null,{f:'software_update_status',checked:true,currentVersion:current,latestVersion:latest,updateAvailable:available,mandatory:manifest.mandatory===true,requiresRestart:manifest.requiresRestart!==false,releaseDate:manifest.releaseDate||null,changelog:Array.isArray(manifest.changelog)?manifest.changelog.slice(0,30):[],downloadUrl:manifest.downloadUrl||null,manifestUrl:manifestUrl,checkedAt:new Date().toISOString(),message:available?('نسخه '+latest+' برای نصب آماده انتشار است.'):('نسخه نصب‌شده '+current+' آخرین نسخه موجود است.')})
+        callback(null,{f:'software_update_status',checked:true,currentVersion:current,latestVersion:latest,updateAvailable:available,mandatory:manifest.mandatory===true,requiresRestart:manifest.requiresRestart!==false,releaseDate:manifest.releaseDate||null,changelog:Array.isArray(manifest.changelog)?manifest.changelog.slice(0,30):[],downloadUrl:manifest.downloadUrl||null,sha256:String(manifest.sha256||'').toLowerCase(),manifestUrl:manifestUrl,checkedAt:new Date().toISOString(),message:available?('نسخه '+latest+' برای نصب آماده انتشار است.'):('نسخه نصب‌شده '+current+' آخرین نسخه موجود است.')})
     })
 }
 
@@ -4333,6 +4493,28 @@ var tx;
 
                     case'software_update':
                         switch(d.ff){
+                            case'offline_prepare':
+                                var offlineToken=didebanCreateOfflineUploadToken(cn)
+                                s.tx({f:'software_update_offline_upload_ready',token:offlineToken,url:'/dideban-offline-update/'+offlineToken,maxBytes:Number((config.didebanUpdate&&config.didebanUpdate.maxOfflineUploadBytes)||1073741824)},cn.id)
+                            break;
+                            case'offline_install':
+                                var offlineData=d.package||{}
+                                var readyPackage=didebanOfflineReadyPackages[String(offlineData.packageId||'')]
+                                if(!readyPackage||readyPackage.cnId!==cn.id||readyPackage.expiresAt<Date.now()||!fs.existsSync(readyPackage.filePath))return s.tx({f:'software_update_error',msg:'بسته آفلاین آماده نصب پیدا نشد یا اعتبار آن منقضی شده است.'},cn.id)
+                                delete didebanOfflineReadyPackages[String(offlineData.packageId||'')]
+                                var offlinePath=path.resolve(readyPackage.filePath)
+                                var offlineVersion=String(readyPackage.version||'')
+                                var offlineDownload={filePath:offlinePath,version:offlineVersion,sha256:String(readyPackage.sha256||''),size:Number(readyPackage.size||0)}
+                                var offlineManifest={latestVersion:offlineVersion,requiresRestart:true}
+                                didebanLaunchInstaller(offlineDownload,offlineManifest,cn,function(installErr,installResult){
+                                    if(installErr){
+                                        s.systemLog('Dideban Offline Update Failed',{by:cn.mail,ip:cn.ip,stage:'installer',error:installErr.message})
+                                        return s.tx({f:'software_update_error',msg:installErr.message},cn.id)
+                                    }
+                                    s.systemLog('Dideban Offline Update Started',{by:cn.mail,ip:cn.ip,version:offlineVersion,sha256:offlineDownload.sha256})
+                                    s.tx(installResult,cn.id)
+                                })
+                            break;
                             case'status':
                                 s.tx({f:'software_update_status',checked:false,currentVersion:String(didebanPackageInfo.version||'1.0.0'),latestVersion:null,updateAvailable:false,manifestUrl:didebanUpdateManifestUrl(),message:'برای دریافت اطلاعات نسخه جدید، بررسی به‌روزرسانی را اجرا کنید.'},cn.id)
                             break;
@@ -4344,6 +4526,44 @@ var tx;
                                     }
                                     s.systemLog('Dideban Update Checked',{by:cn.mail,ip:cn.ip,currentVersion:result.currentVersion,latestVersion:result.latestVersion,updateAvailable:result.updateAvailable})
                                     s.tx(result,cn.id)
+                                })
+                            break;
+                            case'download':
+                                if(didebanUpdateDownloads[cn.id])return s.tx({f:'software_update_error',msg:'یک دانلود به‌روزرسانی از قبل در حال اجرا است.'},cn.id)
+                                didebanCheckUpdate(function(updateErr,result){
+                                    if(updateErr)return s.tx({f:'software_update_error',msg:updateErr.message},cn.id)
+                                    s.tx({f:'software_update_progress',stage:'starting',percent:0,version:result.latestVersion},cn.id)
+                                    didebanDownloadUpdate(result,cn,function(downloadErr,downloadResult){
+                                        if(downloadErr){
+                                            s.systemLog('Dideban Update Download Failed',{by:cn.mail,ip:cn.ip,error:downloadErr.message})
+                                            return s.tx({f:'software_update_error',msg:downloadErr.message},cn.id)
+                                        }
+                                        s.systemLog('Dideban Update Downloaded',{by:cn.mail,ip:cn.ip,version:downloadResult.version,size:downloadResult.size,sha256:downloadResult.sha256})
+                                        s.tx(downloadResult,cn.id)
+                                    })
+                                })
+                            break;
+                            case'auto_install':
+                                if(didebanUpdateDownloads[cn.id])return s.tx({f:'software_update_error',msg:'یک عملیات به‌روزرسانی از قبل در حال اجرا است.'},cn.id)
+                                didebanCheckUpdate(function(updateErr,result){
+                                    if(updateErr)return s.tx({f:'software_update_error',msg:updateErr.message},cn.id)
+                                    if(!result.updateAvailable)return s.tx(result,cn.id)
+                                    s.tx({f:'software_update_progress',stage:'starting',percent:0,version:result.latestVersion},cn.id)
+                                    didebanDownloadUpdate(result,cn,function(downloadErr,downloadResult){
+                                        if(downloadErr){
+                                            s.systemLog('Dideban Automatic Update Failed',{by:cn.mail,ip:cn.ip,stage:'download',error:downloadErr.message})
+                                            return s.tx({f:'software_update_error',msg:downloadErr.message},cn.id)
+                                        }
+                                        s.tx({f:'software_update_progress',stage:'verified',percent:100,version:result.latestVersion},cn.id)
+                                        didebanLaunchInstaller(downloadResult,result,cn,function(installErr,installResult){
+                                            if(installErr){
+                                                s.systemLog('Dideban Automatic Update Failed',{by:cn.mail,ip:cn.ip,stage:'installer',error:installErr.message})
+                                                return s.tx({f:'software_update_error',msg:installErr.message},cn.id)
+                                            }
+                                            s.systemLog('Dideban Automatic Update Started',{by:cn.mail,ip:cn.ip,version:result.latestVersion,sha256:downloadResult.sha256})
+                                            s.tx(installResult,cn.id)
+                                        })
+                                    })
                                 })
                             break;
                         }
@@ -4905,6 +5125,60 @@ s.superAuth=function(x,callback){
 app.enable('trust proxy');
 app.use('/libs',express.static(__dirname + '/web/libs'));
 app.use('/uploads',express.static(__dirname + '/web/uploads'));
+app.post('/dideban-offline-update/:token',function(req,res){
+    didebanCleanupOfflineUploadTokens()
+    var token=String(req.params.token||'')
+    var upload=didebanOfflineUploadTokens[token]
+    function reply(code,payload){if(!res.headersSent){res.status(code).json(payload)}}
+    if(!upload)return reply(403,{ok:false,msg:'مجوز بارگذاری بسته منقضی یا نامعتبر است.'})
+    delete didebanOfflineUploadTokens[token]
+    var maxBytes=Number((config.didebanUpdate&&config.didebanUpdate.maxOfflineUploadBytes)||1073741824)
+    if(!isFinite(maxBytes)||maxBytes<1048576)maxBytes=1073741824
+    var contentLength=parseInt(req.headers['content-length'],10)||0
+    var fileName=path.basename(decodeURIComponent(String(req.headers['x-dideban-file-name']||'dideban-update.zip'))).slice(0,255)
+    if(path.extname(fileName).toLowerCase()!=='.zip')return reply(400,{ok:false,msg:'فقط بسته ZIP دیده‌بان قابل بارگذاری است.'})
+    if(contentLength&&contentLength>maxBytes)return reply(413,{ok:false,msg:'حجم بسته بیشتر از حد مجاز است.'})
+    var received=0,failed=false,hash=crypto.createHash('sha256')
+    try{if(fs.existsSync(upload.tempPath))fs.unlinkSync(upload.tempPath)}catch(e){}
+    var output=fs.createWriteStream(upload.tempPath,{flags:'wx'})
+    function fail(message,code){
+        if(failed)return;failed=true
+        try{output.destroy()}catch(e){}
+        try{if(fs.existsSync(upload.tempPath))fs.unlinkSync(upload.tempPath)}catch(e){}
+        s.tx({f:'software_update_error',msg:message},upload.cnId)
+        reply(code||400,{ok:false,msg:message})
+    }
+    req.on('data',function(chunk){
+        if(failed)return
+        received+=chunk.length
+        if(received>maxBytes){req.destroy();return fail('حجم بسته بیشتر از حد مجاز است.',413)}
+        hash.update(chunk)
+        var percent=contentLength?Math.min(99,Math.floor(received*100/contentLength)):null
+        s.tx({f:'software_update_progress',stage:'offline_upload',receivedBytes:received,totalBytes:contentLength,percent:percent},upload.cnId)
+    })
+    req.on('error',function(err){fail('بارگذاری بسته آفلاین قطع شد: '+err.message)})
+    output.on('error',function(err){fail('ذخیره بسته آفلاین ناموفق بود: '+err.message,500)})
+    req.pipe(output)
+    output.on('finish',function(){
+        output.close(function(){
+            if(failed)return
+            if(!received)return fail('فایل بارگذاری‌شده خالی است.')
+            var sha256=hash.digest('hex').toLowerCase()
+            didebanInspectOfflinePackage(upload.tempPath,function(inspectErr,info){
+                if(inspectErr)return fail(inspectErr.message)
+                var safeVersion=String(info.version||'unknown').replace(/[^0-9A-Za-z._-]/g,'_')
+                var finalPath=path.join(didebanEnsureUpdateStage(),'dideban-offline-update-'+safeVersion+'-'+Date.now()+'.zip')
+                try{fs.renameSync(upload.tempPath,finalPath)}catch(moveErr){return fail('انتقال بسته به محل نصب ناموفق بود: '+moveErr.message,500)}
+                var packageId=crypto.randomBytes(24).toString('hex')
+                didebanOfflineReadyPackages[packageId]={cnId:upload.cnId,filePath:finalPath,version:String(info.version),size:received,sha256:sha256,expiresAt:Date.now()+30*60*1000}
+                var result={f:'software_update_offline_ready',packageId:packageId,version:String(info.version),currentVersion:String(didebanPackageInfo.version||'1.0.0'),fileName:fileName,size:received,sha256:sha256,changelog:Array.isArray(info.changelog)?info.changelog:[],message:'بسته آفلاین نسخه '+info.version+' بررسی شد و آماده نصب است.'}
+                s.systemLog('Dideban Offline Update Uploaded',{by:upload.mail,ip:upload.ip,version:info.version,size:received,sha256:sha256})
+                s.tx(result,upload.cnId)
+                reply(200,{ok:true,version:info.version,size:received,sha256:sha256})
+            })
+        })
+    })
+})
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('views', __dirname + '/web');
