@@ -5004,7 +5004,7 @@ app.post(['/','/:screen'],function (req,res){
                         }
                         data.Logs=r;
                         fs.readFile(location.config,'utf8',function(err,file){
-                            data.plainConfig=JSON.parse(file)
+                            data.plainConfig=JSON.parse(file.replace(/^\uFEFF/, ''))
                             req.renderFunction(config.renderPaths.super,data);
                         })
                     })

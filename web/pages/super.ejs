@@ -9,72 +9,326 @@
 <link rel="stylesheet" href="libs/css/bootstrap-table.min.css">
 <link rel="stylesheet" href="libs/css/main.dash2.css">
 <style>
-    .form-group label>div:first-child{width:40%}
+:root{
+    --super-bg:#07111c;
+    --super-panel:#111d2a;
+    --super-panel-2:#162434;
+    --super-border:rgba(148,163,184,.18);
+    --super-text:#e8eef6;
+    --super-muted:#8fa1b5;
+    --super-green:#35c77a;
+    --super-green-dark:#22965a;
+    --super-blue:#4aa3ff;
+    --super-red:#ef6464;
+    --super-shadow:0 22px 55px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+body.super-page{
+    direction:rtl;
+    min-height:100vh;
+    margin:0;
+    color:var(--super-text);
+    background:
+        radial-gradient(circle at 8% 5%,rgba(53,199,122,.13),transparent 31%),
+        radial-gradient(circle at 92% 90%,rgba(53,199,122,.10),transparent 29%),
+        linear-gradient(135deg,#07111c 0%,#0a1521 52%,#08131d 100%);
+    font-family:Tahoma,Arial,sans-serif;
+}
+body.super-page:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.24;
+    background-image:radial-gradient(rgba(81,210,141,.35) 1px,transparent 1px);
+    background-size:24px 24px;
+    mask-image:linear-gradient(135deg,#000,transparent 48%);
+}
+.super-shell{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:32px 24px 48px}
+.super-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-height:78px;
+    padding:14px 20px;
+    margin-bottom:20px;
+    border:1px solid var(--super-border);
+    border-radius:18px;
+    background:rgba(17,29,42,.88);
+    backdrop-filter:blur(16px);
+    box-shadow:var(--super-shadow);
+}
+.super-brand{display:flex;align-items:center;gap:14px;color:var(--super-text)!important;text-decoration:none!important}
+.super-brand-logo{width:48px;height:48px;object-fit:contain;padding:5px;border-radius:14px;background:rgba(53,199,122,.10);border:1px solid rgba(53,199,122,.25)}
+.super-brand-copy{display:flex;flex-direction:column;gap:3px}
+.super-brand-copy strong{font-size:18px;font-weight:800}
+.super-brand-copy small{font-size:12px;color:var(--super-muted)}
+.super-menu{position:relative}
+.super-menu .dropdown-toggle{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;color:var(--super-text)!important;background:rgba(255,255,255,.04);border:1px solid var(--super-border)}
+.super-menu .dropdown-menu{right:auto;left:0;min-width:180px;padding:8px;border:1px solid var(--super-border);border-radius:12px;background:#142130;box-shadow:0 16px 35px rgba(0,0,0,.28)}
+.super-menu .dropdown-menu a{color:var(--super-text);padding:10px 12px;border-radius:8px;cursor:pointer}
+.super-menu .dropdown-menu a:hover{background:rgba(239,100,100,.12);color:#ff9b9b}
+.super-intro{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:22px 24px;
+    margin-bottom:20px;
+    border:1px solid var(--super-border);
+    border-radius:18px;
+    background:linear-gradient(135deg,rgba(53,199,122,.11),rgba(74,163,255,.05));
+}
+.super-intro h1{font-size:24px;margin:0 0 8px;font-weight:800}
+.super-intro p{margin:0;color:var(--super-muted);font-size:13px;line-height:1.9}
+.super-status{display:flex;align-items:center;gap:9px;white-space:nowrap;padding:9px 13px;border-radius:999px;color:#9ce9bd;background:rgba(53,199,122,.10);border:1px solid rgba(53,199,122,.24);font-size:12px;font-weight:700}
+.super-status i{font-size:9px;color:var(--super-green);filter:drop-shadow(0 0 5px rgba(53,199,122,.8))}
+.super-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.super-stat{display:flex;align-items:center;gap:13px;padding:16px 18px;border:1px solid var(--super-border);border-radius:16px;background:rgba(17,29,42,.82)}
+.super-stat-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;color:var(--super-green);background:rgba(53,199,122,.10);font-size:18px}
+.super-stat strong{display:block;font-size:20px;line-height:1.1}
+.super-stat span{display:block;margin-top:5px;color:var(--super-muted);font-size:11px}
+.super-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:20px;align-items:start}
+.super-column{display:flex;flex-direction:column;gap:20px;min-width:0}
+.super-card{overflow:hidden;border:1px solid var(--super-border);border-radius:18px;background:rgba(17,29,42,.94);box-shadow:var(--super-shadow)}
+.super-card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 19px;border-bottom:1px solid var(--super-border);background:rgba(255,255,255,.018)}
+.super-card-title{display:flex;align-items:center;gap:10px;margin:0;font-size:15px;font-weight:800;color:var(--super-text)}
+.super-card-title .icon{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;color:var(--super-green);background:rgba(53,199,122,.10)}
+.super-card-subtitle{color:var(--super-muted);font-size:11px;font-weight:400}
+.super-card-body{padding:14px 16px}
+.super-action{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;border:1px solid rgba(53,199,122,.25);border-radius:10px;color:#a7edc4!important;background:rgba(53,199,122,.10);transition:.18s ease}
+.super-action:hover{transform:translateY(-1px);background:rgba(53,199,122,.18)}
+.super-action.danger{color:#ffadad!important;border-color:rgba(239,100,100,.23);background:rgba(239,100,100,.09)}
+.super-table-wrap{overflow:auto;min-height:98px}
+.super-page .table{margin:0;color:var(--super-text);background:transparent}
+.super-page .table>tbody>tr>td{vertical-align:middle;padding:13px 8px;border-top:1px solid rgba(148,163,184,.11);background:transparent!important}
+.super-page .table>tbody>tr:first-child>td{border-top:0}
+.super-page .table-striped>tbody>tr:nth-of-type(odd){background:rgba(255,255,255,.018)}
+.super-page .mail{color:#f3f7fb;font-size:13px}
+.super-page .btn-xs{border:0;border-radius:8px;padding:6px 9px}
+.super-page .btn-primary{background:#347fbd}.super-page .btn-danger{background:#d95151}.super-page .btn-success{background:var(--super-green-dark)}
+.logs-body{height:420px;overflow:auto;padding:0 12px 12px}
+.logs-empty{padding:55px 18px;text-align:center;color:var(--super-muted);font-size:12px}
+.config-card .super-card-body{padding:16px}
+.config-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+.config-file{display:flex;align-items:center;gap:8px;color:var(--super-muted);font:12px Consolas,monospace}
+#conf_json textarea{
+    direction:ltr;
+    text-align:left;
+    height:390px!important;
+    resize:vertical;
+    padding:17px;
+    color:#dbe8f5;
+    caret-color:var(--super-green);
+    background:#09131e;
+    border:1px solid rgba(148,163,184,.22);
+    border-radius:13px;
+    font:13px/1.75 Consolas,"Courier New",monospace;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
+}
+#conf_json textarea:focus{border-color:rgba(53,199,122,.64);box-shadow:0 0 0 3px rgba(53,199,122,.11)}
+.config-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+.config-hint{color:var(--super-muted);font-size:11px}
+.super-save{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:11px!important;font-weight:700;box-shadow:0 8px 20px rgba(34,150,90,.2)}
+.system-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.system-actions .btn{white-space:normal;padding:12px 8px;border-radius:11px!important;border:1px solid rgba(239,100,100,.22);color:#ffc0c0;background:rgba(239,100,100,.11);font-size:12px}
+.system-actions .btn:hover{color:#fff;background:rgba(239,100,100,.22)}
+.super-warning{display:flex;gap:10px;margin-top:13px;padding:11px 12px;border-radius:11px;color:#d9b979;background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.13);font-size:11px;line-height:1.8}
+.form-group label>div:first-child{width:40%}
+.config-tabs{display:flex;gap:8px;overflow:auto;padding:0 0 14px;margin-bottom:16px;border-bottom:1px solid var(--super-border)}
+.config-tab{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid var(--super-border);border-radius:10px;color:var(--super-muted);background:rgba(255,255,255,.025);font-size:12px;font-weight:700;cursor:pointer;transition:.18s ease}
+.config-tab:hover{color:var(--super-text);background:rgba(255,255,255,.05)}
+.config-tab.active{color:#a7edc4;border-color:rgba(53,199,122,.34);background:rgba(53,199,122,.12)}
+.config-pane{display:none}.config-pane.active{display:block}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.settings-grid.one{grid-template-columns:1fr}
+.setting-field{min-width:0}
+.setting-field.full{grid-column:1/-1}
+.setting-field label{display:block;margin:0 0 7px;color:#cbd7e4;font-size:11px;font-weight:700}
+.setting-field .field-help{display:block;margin-top:6px;color:var(--super-muted);font-size:10px;line-height:1.7}
+.setting-input,.setting-select{width:100%;height:42px;padding:8px 11px;color:var(--super-text);background:#0a1520;border:1px solid rgba(148,163,184,.22);border-radius:10px;outline:none;transition:.18s ease}
+.setting-input:focus,.setting-select:focus{border-color:rgba(53,199,122,.64);box-shadow:0 0 0 3px rgba(53,199,122,.10)}
+.setting-select option{color:#182330;background:#fff}
+.password-wrap{position:relative}.password-wrap .setting-input{padding-left:42px}.password-toggle{position:absolute;left:4px;top:4px;width:34px;height:34px;border:0;border-radius:8px;color:var(--super-muted);background:transparent}.password-toggle:hover{color:var(--super-text);background:rgba(255,255,255,.06)}
+.config-section-title{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding-bottom:11px;border-bottom:1px solid rgba(148,163,184,.11);font-size:13px;font-weight:800}.config-section-title i{color:var(--super-green)}
+.storage-list{display:flex;flex-direction:column;gap:10px}.storage-row{display:grid;grid-template-columns:minmax(120px,.65fr) minmax(220px,1.5fr) 38px;gap:9px;align-items:end;padding:11px;border:1px solid rgba(148,163,184,.15);border-radius:12px;background:rgba(255,255,255,.018)}
+.storage-remove{height:38px;border:1px solid rgba(239,100,100,.22);border-radius:9px;color:#ffaaaa;background:rgba(239,100,100,.08)}.storage-remove:hover{background:rgba(239,100,100,.18)}
+.storage-add{display:inline-flex;align-items:center;gap:7px;margin-top:11px;padding:9px 12px;border:1px dashed rgba(53,199,122,.38);border-radius:10px;color:#a7edc4;background:rgba(53,199,122,.06);font-size:11px;font-weight:700}.storage-add:hover{background:rgba(53,199,122,.12)}
+.config-alert{display:flex;gap:10px;margin-bottom:14px;padding:12px;border-radius:11px;color:#e1c987;background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.15);font-size:11px;line-height:1.8}
+.advanced-gate{text-align:center;padding:24px 14px;border:1px dashed rgba(148,163,184,.22);border-radius:12px;background:rgba(255,255,255,.015)}.advanced-gate i{display:block;margin-bottom:10px;color:#e1c987;font-size:24px}.advanced-gate p{max-width:520px;margin:0 auto 14px;color:var(--super-muted);font-size:11px;line-height:1.9}.advanced-open{padding:9px 14px;border:1px solid rgba(234,179,8,.25);border-radius:10px;color:#f4daa0;background:rgba(234,179,8,.09);font-weight:700}
+.advanced-editor{display:none}.advanced-editor.open{display:block}
+.config-savebar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:17px;padding-top:14px;border-top:1px solid var(--super-border)}
+.config-state{display:flex;align-items:center;gap:7px;color:var(--super-muted);font-size:11px}.config-state.valid{color:#8be3b2}.config-state.invalid{color:#ff9c9c}
+.config-msg{font-size:11px;font-weight:700}
+@media(max-width:600px){.settings-grid{grid-template-columns:1fr}.storage-row{grid-template-columns:1fr}.storage-remove{width:100%}.config-savebar{align-items:stretch;flex-direction:column}}
+@media(max-width:900px){.super-grid{grid-template-columns:1fr}.super-stats{grid-template-columns:1fr 1fr}.super-intro{align-items:flex-start;flex-direction:column}}
+@media(max-width:600px){.super-shell{padding:14px 12px 30px}.super-topbar{min-height:68px;padding:10px 12px;border-radius:14px}.super-brand-copy small{display:none}.super-intro{padding:17px}.super-intro h1{font-size:20px}.super-stats{grid-template-columns:1fr}.system-actions{grid-template-columns:1fr}.config-footer{align-items:stretch;flex-direction:column}.super-save{width:100%;justify-content:center}}
 </style>
-<body style="background:rgba(33,33,33,1);">
-<div class="container-fluid">
-    <div class="container">
-<nav class="navbar navbar-default">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <a class="navbar-brand" href="/"><%-lang.superAdminTitle%></a>
-    </div>
-      <ul class="nav navbar-nav navbar-right">
-<!--        <li><a href="#">Link</a></li>-->
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">&nbsp;<i class="fa fa-bars"></i>&nbsp;</a>
-          <ul class="dropdown-menu">
-<!--
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
--->
-            <li><a class="logout"><i class="fa fa-sign-out pull-right"></i> <%-lang.Logout%></a></li>
-          </ul>
-        </li>
-      </ul>
-  </div><!-- /.container-fluid -->
-</nav>
-        
-        
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group-group grey" id="accounts">
-                    <h4><%-lang.Accounts%><a class="pull-right add btn btn-success btn-xs"><i class="fa fa-plus"></i></a></h4>
-                    <table class="table table-striped"></table>
-                </div>
-                <div class="form-group-group primary no-padding" id="logs">
-                    <h4 class="no-margin"><%-lang['Logs']%><a class="pull-right delete btn btn-danger btn-xs"><i class="fa fa-trash-o"></i></a></h4>
-                    <div style="height:400px;overflow:auto">
-                        <table class="table table-striped"></table>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <form class="form-group-group red" id="conf_json">
-                    <h4><%-lang['Configuration']%> <small class="pull-right msg"></small></h4>
-                    <div class="form-group">
-                        <textarea name="json" style="height:300px;font-family: monospace;" class="form-control"></textarea>
-                    </div>
-                      <div>
-                          <div class="pull-right">
-                              <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> <%-lang.Save%></button>
-                          </div>
-                      </div>
-                </form>
-                <div class="form-group-group blue" id="system">
-                    <h4><%-lang['System']%> <small class="pull-right msg"></small></h4>
-                    <div class="btn-group btn-group-justified">
-                        <a restart="system" class="btn btn-danger"><i class="fa fa-retweet"></i> <%-lang['Restart Core']%></a>
-                        <a restart="cron" class="btn btn-danger"><i class="fa fa-retweet"></i> <%-lang['Restart CRON']%></a>
-                        <a restart="logs" class="btn btn-danger"><i class="fa fa-retweet"></i> <%-lang['Flush PM2 Logs']%></a>
-                    </div>
-                </div>
-            </div>
+<body class="super-page">
+<div class="super-shell">
+    <nav class="super-topbar">
+        <a class="super-brand" href="/">
+            <img class="super-brand-logo" src="libs/img/android-chrome-192x192.png" alt="دیده‌بان">
+            <span class="super-brand-copy">
+                <strong><%-lang.superAdminTitle%></strong>
+                <small>مرکز مدیریت و پیکربندی دیده‌بان</small>
+            </span>
+        </a>
+        <div class="dropdown super-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="منو"><i class="fa fa-bars"></i></a>
+            <ul class="dropdown-menu">
+                <li><a class="logout"><i class="fa fa-sign-out"></i>&nbsp; <%-lang.Logout%></a></li>
+            </ul>
         </div>
-    </div>
+    </nav>
+
+    <section class="super-intro">
+        <div>
+            <h1>مدیریت سامانه دیده‌بان</h1>
+            <p>حساب‌های کاربری، پیکربندی اصلی و سرویس‌های سامانه را از این بخش مدیریت کنید.</p>
+        </div>
+        <div class="super-status"><i class="fa fa-circle"></i> سامانه در دسترس است</div>
+    </section>
+
+    <section class="super-stats">
+        <div class="super-stat"><span class="super-stat-icon"><i class="fa fa-users"></i></span><div><strong id="accounts_count"><%- (users || []).length %></strong><span>حساب کاربری</span></div></div>
+        <div class="super-stat"><span class="super-stat-icon"><i class="fa fa-database"></i></span><div><strong>conf.json</strong><span>فایل پیکربندی فعال</span></div></div>
+        <div class="super-stat"><span class="super-stat-icon"><i class="fa fa-shield"></i></span><div><strong>Super</strong><span>سطح دسترسی فعلی</span></div></div>
+    </section>
+
+    <main class="super-grid">
+        <div class="super-column">
+            <section class="super-card" id="accounts">
+                <header class="super-card-header">
+                    <div>
+                        <h2 class="super-card-title"><span class="icon"><i class="fa fa-users"></i></span><%-lang.Accounts%></h2>
+                        <div class="super-card-subtitle">مدیریت حساب‌ها و مجوزهای دسترسی</div>
+                    </div>
+                    <a class="add super-action" title="افزودن حساب"><i class="fa fa-plus"></i></a>
+                </header>
+                <div class="super-card-body super-table-wrap"><table class="table table-striped"></table></div>
+            </section>
+
+            <section class="super-card" id="logs">
+                <header class="super-card-header">
+                    <div>
+                        <h2 class="super-card-title"><span class="icon"><i class="fa fa-list-alt"></i></span><%-lang['Logs']%></h2>
+                        <div class="super-card-subtitle">رخدادهای مدیریتی و پیام‌های سامانه</div>
+                    </div>
+                    <a class="delete super-action danger" title="حذف گزارش‌ها"><i class="fa fa-trash-o"></i></a>
+                </header>
+                <div class="logs-body"><table class="table table-striped"></table><div class="logs-empty"><i class="fa fa-inbox fa-2x"></i><br><br>گزارشی برای نمایش وجود ندارد.</div></div>
+            </section>
+        </div>
+
+        <div class="super-column">
+            <form class="super-card config-card" id="config_form">
+                <header class="super-card-header">
+                    <div>
+                        <h2 class="super-card-title"><span class="icon"><i class="fa fa-sliders"></i></span><%-lang['Configuration']%></h2>
+                        <div class="super-card-subtitle">تنظیمات سامانه در نمای استاندارد و پیشرفته</div>
+                    </div>
+                    <small class="config-msg"></small>
+                </header>
+                <div class="super-card-body">
+                    <div class="config-tabs" role="tablist">
+                        <button type="button" class="config-tab active" data-pane="general"><i class="fa fa-cog"></i> عمومی</button>
+                        <button type="button" class="config-tab" data-pane="database"><i class="fa fa-database"></i> پایگاه داده</button>
+                        <button type="button" class="config-tab" data-pane="storage"><i class="fa fa-hdd-o"></i> ذخیره‌سازی</button>
+                        <button type="button" class="config-tab" data-pane="mail"><i class="fa fa-envelope-o"></i> ایمیل</button>
+                        <button type="button" class="config-tab" data-pane="advanced"><i class="fa fa-code"></i> پیشرفته</button>
+                    </div>
+
+                    <div class="config-pane active" data-pane="general">
+                        <h3 class="config-section-title"><i class="fa fa-cog"></i> تنظیمات عمومی سامانه</h3>
+                        <div class="settings-grid">
+                            <div class="setting-field">
+                                <label for="cfg_port">پورت وب</label>
+                                <input id="cfg_port" class="setting-input" type="number" min="1" max="65535" required>
+                                <span class="field-help">پورت دسترسی به پنل مدیریت؛ برای نمونه 8080.</span>
+                            </div>
+                            <div class="setting-field">
+                                <label for="cfg_language">زبان پیش‌فرض</label>
+                                <select id="cfg_language" class="setting-select">
+                                    <option value="fa">فارسی</option><option value="en_CA">English</option>
+                                </select>
+                                <span class="field-help">زبان پیش‌فرض رابط کاربری سامانه.</span>
+                            </div>
+                            <div class="setting-field full">
+                                <label for="cfg_videos_dir">مسیر اصلی ذخیره ویدئوها</label>
+                                <input id="cfg_videos_dir" class="setting-input" type="text" dir="ltr" required>
+                                <span class="field-help">مسیر کامل پوشه ذخیره‌سازی اصلی ویدئوها را وارد کنید.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-pane" data-pane="database">
+                        <h3 class="config-section-title"><i class="fa fa-database"></i> اتصال پایگاه داده</h3>
+                        <div class="config-alert"><i class="fa fa-exclamation-triangle"></i><span>تغییر نادرست اطلاعات این بخش می‌تواند ارتباط دیده‌بان با کاربران، دوربین‌ها و رویدادها را قطع کند.</span></div>
+                        <div class="settings-grid">
+                            <div class="setting-field"><label for="cfg_db_host">میزبان</label><input id="cfg_db_host" class="setting-input" type="text" dir="ltr" required></div>
+                            <div class="setting-field"><label for="cfg_db_port">پورت</label><input id="cfg_db_port" class="setting-input" type="number" min="1" max="65535" required></div>
+                            <div class="setting-field"><label for="cfg_db_name">نام پایگاه داده</label><input id="cfg_db_name" class="setting-input" type="text" dir="ltr" required></div>
+                            <div class="setting-field"><label for="cfg_db_user">نام کاربری</label><input id="cfg_db_user" class="setting-input" type="text" dir="ltr" required></div>
+                            <div class="setting-field full"><label for="cfg_db_password">رمز عبور</label><div class="password-wrap"><input id="cfg_db_password" class="setting-input" type="password" dir="ltr"><button type="button" class="password-toggle" title="نمایش یا مخفی‌کردن"><i class="fa fa-eye"></i></button></div></div>
+                        </div>
+                    </div>
+
+                    <div class="config-pane" data-pane="storage">
+                        <h3 class="config-section-title"><i class="fa fa-hdd-o"></i> محل‌های ذخیره‌سازی</h3>
+                        <div class="setting-field"><label>مسیرهای ذخیره‌سازی تکمیلی</label><span class="field-help">مسیر اصلی در تب عمومی قرار دارد. در اینجا می‌توانید محل‌های ذخیره‌سازی اضافی تعریف کنید.</span></div>
+                        <div id="storage_list" class="storage-list"></div>
+                        <button type="button" id="storage_add" class="storage-add"><i class="fa fa-plus"></i> افزودن محل ذخیره‌سازی</button>
+                    </div>
+
+                    <div class="config-pane" data-pane="mail">
+                        <h3 class="config-section-title"><i class="fa fa-envelope-o"></i> تنظیمات ارسال ایمیل</h3>
+                        <div class="settings-grid">
+                            <div class="setting-field full"><label for="cfg_mail_service">سرویس ایمیل</label><input id="cfg_mail_service" class="setting-input" type="text" dir="ltr" placeholder="gmail"></div>
+                            <div class="setting-field"><label for="cfg_mail_user">نام کاربری / ایمیل</label><input id="cfg_mail_user" class="setting-input" type="text" dir="ltr"></div>
+                            <div class="setting-field"><label for="cfg_mail_password">رمز عبور یا App Password</label><div class="password-wrap"><input id="cfg_mail_password" class="setting-input" type="password" dir="ltr"><button type="button" class="password-toggle" title="نمایش یا مخفی‌کردن"><i class="fa fa-eye"></i></button></div></div>
+                        </div>
+                    </div>
+
+                    <div class="config-pane" data-pane="advanced">
+                        <div class="advanced-gate">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            <strong>ویرایش مستقیم فایل conf.json</strong>
+                            <p>این بخش برای مدیران فنی در نظر گرفته شده است. هر خطای نحوی یا تغییر نادرست ممکن است باعث توقف سامانه یا قطع ارتباط با پایگاه داده شود.</p>
+                            <button type="button" class="advanced-open"><i class="fa fa-unlock-alt"></i> بازکردن ویرایشگر پیشرفته</button>
+                        </div>
+                        <div class="advanced-editor">
+                            <div class="config-toolbar"><span class="config-file"><i class="fa fa-file-code-o"></i> conf.json</span><span class="config-hint">ویرایشگر ساختار JSON</span></div>
+                            <div id="conf_json"><div class="form-group"><textarea name="json" class="form-control" spellcheck="false"></textarea></div></div>
+                        </div>
+                    </div>
+
+                    <div class="config-savebar">
+                        <span class="config-state valid"><i class="fa fa-check-circle"></i> تنظیمات آماده ذخیره است</span>
+                        <button type="submit" class="btn btn-success super-save"><i class="fa fa-check"></i> <%-lang.Save%></button>
+                    </div>
+                </div>
+            </form>
+
+            <section class="super-card" id="system">
+                <header class="super-card-header">
+                    <div>
+                        <h2 class="super-card-title"><span class="icon"><i class="fa fa-server"></i></span><%-lang['System']%></h2>
+                        <div class="super-card-subtitle">کنترل سرویس‌های اصلی دیده‌بان</div>
+                    </div>
+                    <small class="msg"></small>
+                </header>
+                <div class="super-card-body">
+                    <div class="system-actions">
+                        <a restart="system" class="btn"><i class="fa fa-refresh"></i><br> <%-lang['Restart Core']%></a>
+                        <a restart="cron" class="btn"><i class="fa fa-clock-o"></i><br> <%-lang['Restart CRON']%></a>
+                        <a restart="logs" class="btn"><i class="fa fa-eraser"></i><br> <%-lang['Flush PM2 Logs']%></a>
+                    </div>
+                    <div class="super-warning"><i class="fa fa-exclamation-triangle"></i><span>عملیات این بخش می‌تواند برای چند لحظه سرویس‌های سامانه را از دسترس خارج کند.</span></div>
+                </div>
+            </section>
+        </div>
+    </main>
 </div>
 <% include blocks/confirm.ejs %>
 <div id="toast" class="mdl-js-snackbar mdl-snackbar">
@@ -117,7 +371,7 @@ $.ccio.ws.on('f',function(d){
             $.ccio.tm(4,d.log,'#logs table')
         break;
         case'save_configuration':
-            $.conf.msg.html('تنظیمات ذخیره شد. برای اعمال تغییرات، دیده‌بان را مجدداً راه‌اندازی کنید.')
+            $.conf.msg.html('تنظیمات ذخیره شد').css('color','#8be3b2');setConfigState(true,'تنظیمات ذخیره شد؛ برای اعمال کامل، سامانه را راه‌اندازی مجدد کنید')
         break;
         case'edit_account':
             d.msg='حساب کاربری ویرایش شد';
@@ -128,10 +382,12 @@ $.ccio.ws.on('f',function(d){
         case'add_account':
             d.msg='حساب کاربری ایجاد شد';
             $.ccio.tm(0,d,'#accounts table')
+            $('#accounts_count').text($('#accounts table tr').length)
             $.aN.selected=$.ccio.accounts[d.ke];
         break;
         case'delete_account':
             $('#accounts table tr[ke="'+d.ke+'"]').remove()
+            $('#accounts_count').text($('#accounts table tr').length)
         break;
     }
     if(d.msg&&typeof d.msg==='string'){
@@ -155,6 +411,7 @@ $.ccio.tm=function(x,d,z,k){
     }
     if(z){
         $(z).prepend(tmp)
+        if(x===4){$('#logs .logs-empty').hide()}
     }
     switch(x){
         case 4:
@@ -209,42 +466,140 @@ $.logs.e.find('.delete').click(function(e){
     $.confirm.click({title:'حذف',class:'btn-danger'},function(){
         $.ccio.cx({f:'logs',ff:'delete',ke:'$'})
         $.logs.e.find('table').empty()
+        $('#logs .logs-empty').show()
     });
 })
-//config editor
-$.conf={e:$('#conf_json')};$.conf.draw=$.conf.e.find('[name="json"]'),$.conf.msg=$.conf.e.find('.msg')
-$.conf.valid=1;
-$.conf.draw.val(JSON.stringify(<%-JSON.stringify(plainConfig)%>,null,3))
-$.conf.draw.keyup(function(){
-    var msg=''
-    var color=''
-    try{
-        $.parseJSON($.conf.draw.val())
-        msg='ساختار JSON معتبر است'
-        color='success'
-        $.conf.valid=1
-    }catch(er){
-        msg='ساختار JSON معتبر نیست'
-        color='danger'
-        $.conf.valid=0
+//configuration manager
+$.conf={
+    e:$('#config_form'),
+    msg:$('#config_form .config-msg'),
+    state:$('#config_form .config-state'),
+    draw:$('#conf_json [name="json"]'),
+    data:<%-JSON.stringify(plainConfig)%>,
+    valid:1,
+    advancedOpen:false
+};
+function cloneConfig(obj){return JSON.parse(JSON.stringify(obj||{}))}
+$.conf.data=cloneConfig($.conf.data)
+function ensureObjects(){
+    $.conf.data.db=$.conf.data.db||{}
+    $.conf.data.mail=$.conf.data.mail||{}
+    $.conf.data.mail.auth=$.conf.data.mail.auth||{}
+    $.conf.data.addStorage=Array.isArray($.conf.data.addStorage)?$.conf.data.addStorage:[]
+}
+function setConfigState(valid,text){
+    $.conf.valid=valid?1:0
+    $.conf.state.toggleClass('valid',!!valid).toggleClass('invalid',!valid)
+    $.conf.state.html('<i class="fa '+(valid?'fa-check-circle':'fa-exclamation-circle')+'"></i> '+text)
+}
+function escapeAttr(value){return String(value==null?'':value).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function drawStorage(){
+    ensureObjects()
+    var html=''
+    $.each($.conf.data.addStorage,function(index,item){
+        item=item||{}
+        html+='<div class="storage-row" data-index="'+index+'">'
+        html+='<div class="setting-field"><label>نام</label><input class="setting-input storage-name" type="text" value="'+escapeAttr(item.name||'')+'" placeholder="archive"></div>'
+        html+='<div class="setting-field"><label>مسیر</label><input class="setting-input storage-path" type="text" dir="ltr" value="'+escapeAttr(item.path||'')+'" placeholder="D:/Dideban/Archive"></div>'
+        html+='<button type="button" class="storage-remove" title="حذف"><i class="fa fa-trash-o"></i></button></div>'
+    })
+    if(!html)html='<div class="logs-empty" style="padding:28px 12px"><i class="fa fa-hdd-o fa-2x"></i><br><br>محل ذخیره‌سازی تکمیلی تعریف نشده است.</div>'
+    $('#storage_list').html(html)
+}
+function drawStandardForm(){
+    ensureObjects()
+    $('#cfg_port').val($.conf.data.port||8080)
+    $('#cfg_language').val($.conf.data.language||'fa')
+    $('#cfg_videos_dir').val($.conf.data.videosDir||'')
+    $('#cfg_db_host').val($.conf.data.db.host||'')
+    $('#cfg_db_port').val($.conf.data.db.port||3306)
+    $('#cfg_db_name').val($.conf.data.db.database||'')
+    $('#cfg_db_user').val($.conf.data.db.user||'')
+    $('#cfg_db_password').val($.conf.data.db.password||'')
+    $('#cfg_mail_service').val($.conf.data.mail.service||'')
+    $('#cfg_mail_user').val($.conf.data.mail.auth.user||'')
+    $('#cfg_mail_password').val($.conf.data.mail.auth.pass||'')
+    drawStorage()
+}
+function collectStandardForm(){
+    ensureObjects()
+    $.conf.data.port=parseInt($('#cfg_port').val(),10)||8080
+    $.conf.data.language=$('#cfg_language').val()||'fa'
+    $.conf.data.videosDir=$('#cfg_videos_dir').val().trim()
+    $.conf.data.db.host=$('#cfg_db_host').val().trim()
+    $.conf.data.db.port=parseInt($('#cfg_db_port').val(),10)||3306
+    $.conf.data.db.database=$('#cfg_db_name').val().trim()
+    $.conf.data.db.user=$('#cfg_db_user').val().trim()
+    $.conf.data.db.password=$('#cfg_db_password').val()
+    $.conf.data.mail.service=$('#cfg_mail_service').val().trim()
+    $.conf.data.mail.auth.user=$('#cfg_mail_user').val().trim()
+    $.conf.data.mail.auth.pass=$('#cfg_mail_password').val()
+    var storage=[]
+    $('#storage_list .storage-row').each(function(){
+        var name=$(this).find('.storage-name').val().trim()
+        var path=$(this).find('.storage-path').val().trim()
+        if(name||path)storage.push({name:name,path:path})
+    })
+    $.conf.data.addStorage=storage
+    return $.conf.data
+}
+function syncAdvancedEditor(){
+    $.conf.draw.val(JSON.stringify(collectStandardForm(),null,3))
+    setConfigState(true,'ساختار JSON معتبر است')
+}
+drawStandardForm()
+$.conf.draw.val(JSON.stringify($.conf.data,null,3))
+$('.config-tab').click(function(){
+    var pane=$(this).attr('data-pane')
+    $('.config-tab').removeClass('active');$(this).addClass('active')
+    $('.config-pane').removeClass('active');$('.config-pane[data-pane="'+pane+'"]').addClass('active')
+    if(pane==='advanced'&&$.conf.advancedOpen)syncAdvancedEditor()
+})
+$('.password-toggle').click(function(){
+    var input=$(this).siblings('input')
+    var show=input.attr('type')==='password'
+    input.attr('type',show?'text':'password')
+    $(this).find('i').toggleClass('fa-eye',!show).toggleClass('fa-eye-slash',show)
+})
+$('#storage_add').click(function(){collectStandardForm();$.conf.data.addStorage.push({name:'',path:''});drawStorage()})
+$('#storage_list').on('click','.storage-remove',function(){
+    collectStandardForm();var index=parseInt($(this).closest('.storage-row').attr('data-index'),10);$.conf.data.addStorage.splice(index,1);drawStorage()
+})
+$('.advanced-open').click(function(){
+    var openEditor=function(){
+        $.conf.advancedOpen=true
+        $('.advanced-gate').hide();$('.advanced-editor').addClass('open')
+        syncAdvancedEditor();$.conf.draw.focus()
     }
-    $.conf.msg.text(msg).css('color',color)
+    $.confirm.e.modal('show')
+    $.confirm.title.html('فعال‌سازی ویرایشگر پیشرفته')
+    $.confirm.body.html('<p>ویرایش مستقیم JSON می‌تواند باعث توقف سامانه شود. فقط در صورتی ادامه دهید که با ساختار فایل <b>conf.json</b> آشنا هستید.</p>')
+    $.confirm.click({title:'ادامه می‌دهم',class:'btn-warning'},openEditor)
+})
+$.conf.draw.on('input',function(){
+    try{
+        $.parseJSON($.conf.draw.val());setConfigState(true,'ساختار JSON معتبر است')
+    }catch(er){setConfigState(false,'ساختار JSON معتبر نیست')}
 })
 $.conf.e.submit(function(e){
     e.preventDefault()
-    if($.conf.valid===1){
-        $.confirm.e.modal('show');
-        $.confirm.title.html('ذخیره پیکربندی <small>conf.json</small>')
-        e.html='<p>این تغییر در فایل پیکربندی (conf.json) اعمال خواهد شد. آیا از انجام این کار مطمئن هستید؟ برای اعمال تغییرات باید دیده‌بان را مجدداً راه‌اندازی کنید. <b>محتوای JSON زیر ذخیره خواهد شد.</b></p>'
-        e.html+='<pre>'+JSON.stringify($.parseJSON($.conf.draw.val()),null,3)+'</pre>'
-        $.confirm.body.html(e.html)
-        $.confirm.click({title:'ذخیره',class:'btn-success'},function(){
-            $.ccio.cx({f:'system',ff:'configure',data:$.parseJSON($.conf.draw.val())})
-        });
+    var data
+    if($.conf.advancedOpen&&$('.config-pane[data-pane="advanced"]').hasClass('active')){
+        try{data=$.parseJSON($.conf.draw.val());setConfigState(true,'ساختار JSON معتبر است')}catch(er){setConfigState(false,'JSON نامعتبر است و ذخیره نشد');return false}
     }else{
-        $.conf.msg.text('ساختار JSON نامعتبر است و امکان ذخیره وجود ندارد.')
+        data=collectStandardForm()
+        if(!data.videosDir||!data.db.host||!data.db.database||!data.db.user){
+            setConfigState(false,'فیلدهای ضروری را کامل کنید');return false
+        }
     }
-    return false;
+    $.confirm.e.modal('show')
+    $.confirm.title.html('ذخیره تنظیمات سامانه')
+    $.confirm.body.html('<p>تغییرات در فایل <b>conf.json</b> ذخیره می‌شود. برای اعمال برخی تنظیمات، راه‌اندازی مجدد دیده‌بان ضروری است.</p>')
+    $.confirm.click({title:'ذخیره',class:'btn-success'},function(){
+        $.conf.data=cloneConfig(data)
+        $.ccio.cx({f:'system',ff:'configure',data:data})
+    })
+    return false
 })
 //sys controls
 $.system={e:$('#system')}
