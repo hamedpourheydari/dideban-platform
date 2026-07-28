@@ -68,6 +68,146 @@ function didebanUpdateManifestUrl(){
 var didebanUpdateDownloads={}
 var didebanOfflineUploadTokens={}
 var didebanOfflineReadyPackages={}
+var didebanSupportDownloads={}
+var didebanSupportBuilds={}
+function didebanSanitizeSupportValue(value,key){
+    var sensitive=/(pass(word)?|token|secret|api.?key|private.?key|auth|cookie|session|smtp|mail.*pass)/i
+    if(key&&sensitive.test(String(key)))return '********'
+    if(Array.isArray(value))return value.map(function(x){return didebanSanitizeSupportValue(x,'')})
+    if(value&&typeof value==='object'){
+        var out={}
+        Object.keys(value).forEach(function(k){out[k]=didebanSanitizeSupportValue(value[k],k)})
+        return out
+    }
+    return value
+}
+function didebanPathWritable(target){
+    try{
+        if(!fs.existsSync(target))fs.mkdirSync(target,{recursive:true})
+        var test=path.join(target,'.dideban-write-test-'+process.pid+'-'+Date.now())
+        fs.writeFileSync(test,'ok');fs.unlinkSync(test);return true
+    }catch(e){return false}
+}
+function didebanDiskInfo(target){
+    try{
+        if(fs.statfsSync){
+            var st=fs.statfsSync(target),total=Number(st.blocks)*Number(st.bsize),free=Number(st.bavail)*Number(st.bsize)
+            return {totalBytes:total,freeBytes:free,freePercent:total?Math.round(free*100/total):null}
+        }
+    }catch(e){}
+    return {totalBytes:null,freeBytes:null,freePercent:null}
+}
+function didebanRunHealthCheck(){
+    var checks=[],videoPath=path.resolve((config.videosDir)||path.join(__dirname,'videos'))
+    function add(id,title,status,message,details){checks.push({id:id,title:title,status:status,message:message,details:details||null})}
+    var disk=didebanDiskInfo(videoPath),diskStatus=disk.freePercent===null?'warning':(disk.freePercent<5?'danger':(disk.freePercent<15?'warning':'ok'))
+    add('disk','فضای ذخیره‌سازی',diskStatus,disk.freePercent===null?'اطلاعات فضای دیسک در دسترس نیست.':disk.freePercent+'٪ فضای آزاد باقی مانده است.',disk)
+    add('videos','مسیر ضبط ویدئو',didebanPathWritable(videoPath)?'ok':'danger',didebanPathWritable(videoPath)?'مسیر ضبط قابل نوشتن است.':'نوشتن در مسیر ضبط امکان‌پذیر نیست.',{path:videoPath})
+    var ffmpegOk=false,ffmpegText='',ffmpegCandidates=[]
+    try{
+        if(staticFFmpeg)ffmpegCandidates.push(staticFFmpeg)
+        if(config.ffmpegDir)ffmpegCandidates.push(config.ffmpegDir)
+        if(config.ffmpegBinary)ffmpegCandidates.push(config.ffmpegBinary)
+        ffmpegCandidates.push(path.join(__dirname,'ffmpeg','ffmpeg.exe'))
+        ffmpegCandidates.push(path.join(__dirname,'ffmpeg.exe'))
+        for(var fc=0;fc<ffmpegCandidates.length;fc++){
+            var candidate=ffmpegCandidates[fc]
+            if(candidate&&fs.existsSync(candidate)){ffmpegOk=true;ffmpegText='فایل FFmpeg یافت شد.';break}
+        }
+        if(!ffmpegOk){
+            var pathEntries=String(process.env.PATH||'').split(path.delimiter)
+            for(var pe=0;pe<pathEntries.length;pe++){
+                var binary=path.join(pathEntries[pe],process.platform==='win32'?'ffmpeg.exe':'ffmpeg')
+                if(fs.existsSync(binary)){ffmpegOk=true;ffmpegText='FFmpeg در PATH سیستم یافت شد.';break}
+            }
+        }
+    }catch(e){}
+    add('ffmpeg','FFmpeg',ffmpegOk?'ok':'warning',ffmpegOk?(ffmpegText||'FFmpeg در دسترس است.'):'فایل FFmpeg پیدا نشد؛ مسیر FFmpeg را بررسی کنید.')
+    var memTotal=os.totalmem(),memFree=os.freemem(),memUsed=Math.round((1-memFree/memTotal)*100)
+    add('memory','حافظه RAM',memUsed>90?'danger':(memUsed>80?'warning':'ok'),memUsed+'٪ حافظه در حال استفاده است.',{totalBytes:memTotal,freeBytes:memFree,usedPercent:memUsed})
+    add('database','پایگاه داده',(config.db&&config.db.host)?'ok':'warning',(config.db&&config.db.host)?'پیکربندی پایگاه داده موجود است.':'پیکربندی پایگاه داده شناسایی نشد.',{engine:config.databaseType||'mysql',host:(config.db&&config.db.host)||null})
+    var updateOk=fs.existsSync(path.join(__dirname,'updater','DidebanUpdater.ps1'))
+    add('update','سامانه به‌روزرسانی',updateOk?'ok':'danger',updateOk?'فایل‌های Updater در دسترس هستند.':'فایل Updater پیدا نشد.')
+    var backupRoot=path.join(__dirname,'backups'),backupCount=0
+    try{backupCount=didebanListBackups().length}catch(e){}
+    add('backup','نسخه‌های پشتیبان',backupCount?'ok':'warning',backupCount?backupCount+' نسخه پشتیبان قابل بازیابی موجود است.':'هنوز نسخه پشتیبان قابل بازیابی ساخته نشده است.',{count:backupCount,path:backupRoot})
+    var httpsEnabled=!!(config.ssl&&config.ssl.key&&config.ssl.cert)
+    add('https','HTTPS',httpsEnabled?'ok':'warning',httpsEnabled?'HTTPS پیکربندی شده است.':'HTTPS غیرفعال است؛ برای محیط عملیاتی فعال‌سازی توصیه می‌شود.')
+    var overall=checks.some(function(x){return x.status==='danger'})?'danger':(checks.some(function(x){return x.status==='warning'})?'warning':'ok')
+    return {f:'support_health_result',status:overall,checkedAt:new Date().toISOString(),version:String(didebanPackageInfo.version||'1.0.0'),node:process.version,platform:process.platform,arch:process.arch,hostname:os.hostname(),uptimeSeconds:Math.floor(process.uptime()),checks:checks}
+}
+function didebanCopySupportLogs(destination){
+    var roots=[path.join(__dirname,'logs'),path.join(__dirname,'updates','logs')],copied=0,maxFiles=12,maxBytes=2*1024*1024
+    roots.forEach(function(root){
+        if(copied>=maxFiles||!fs.existsSync(root))return
+        function walk(dir){
+            if(copied>=maxFiles)return
+            fs.readdirSync(dir,{withFileTypes:true}).forEach(function(entry){
+                if(copied>=maxFiles)return
+                var src=path.join(dir,entry.name)
+                if(entry.isDirectory())return walk(src)
+                if(!/\.(log|txt|json)$/i.test(entry.name))return
+                try{
+                    var stat=fs.statSync(src),start=Math.max(0,stat.size-maxBytes),fd=fs.openSync(src,'r'),buf=Buffer.alloc(stat.size-start)
+                    fs.readSync(fd,buf,0,buf.length,start);fs.closeSync(fd)
+                    fs.writeFileSync(path.join(destination,(copied+'-'+entry.name).replace(/[^a-zA-Z0-9._-]/g,'_')),buf);copied++
+                }catch(e){}
+            })
+        }
+        try{walk(root)}catch(e){}
+    })
+    return copied
+}
+function didebanBuildSupportPackage(cn,callback){
+    if(didebanSupportBuilds[cn.id])return callback(new Error('یک بسته پشتیبانی در حال ساخت است.'))
+    var supportRoot=path.join(__dirname,'support-packages'),stamp=new Date().toISOString().replace(/[:.]/g,'-'),work=path.join(supportRoot,'work-'+stamp+'-'+crypto.randomBytes(3).toString('hex')),zipPath=path.join(supportRoot,'dideban-support-'+stamp+'.zip')
+    didebanSupportBuilds[cn.id]=true
+    try{
+        fs.mkdirSync(path.join(work,'logs'),{recursive:true});fs.mkdirSync(path.join(work,'config'),{recursive:true})
+        var health=didebanRunHealthCheck(),systemInfo={createdAt:new Date().toISOString(),version:String(didebanPackageInfo.version||'1.0.0'),node:process.version,platform:process.platform,release:os.release(),arch:process.arch,hostname:os.hostname(),cpuCount:os.cpus().length,totalMemoryBytes:os.totalmem(),freeMemoryBytes:os.freemem(),processUptimeSeconds:Math.floor(process.uptime())}
+        fs.writeFileSync(path.join(work,'system-info.json'),JSON.stringify(systemInfo,null,2),'utf8')
+        fs.writeFileSync(path.join(work,'health-report.json'),JSON.stringify(health,null,2),'utf8')
+        fs.writeFileSync(path.join(work,'config','conf.sanitized.json'),JSON.stringify(didebanSanitizeSupportValue(config,''),null,2),'utf8')
+        try{var superConfig=jsonfile.readFileSync(location.super);fs.writeFileSync(path.join(work,'config','super.sanitized.json'),JSON.stringify(didebanSanitizeSupportValue(superConfig,''),null,2),'utf8')}catch(e){}
+        var logCount=didebanCopySupportLogs(path.join(work,'logs'))
+        var lines=['DIDEBAN DIAGNOSTICS','===================','Version: '+systemInfo.version,'Created: '+systemInfo.createdAt,'','Overall: '+health.status.toUpperCase(),'']
+        health.checks.forEach(function(x){lines.push('['+x.status.toUpperCase()+'] '+x.title+': '+x.message)})
+        lines.push('','Sensitive values in configuration files have been replaced with ********.','Collected log files: '+logCount)
+        fs.writeFileSync(path.join(work,'diagnostics.txt'),lines.join('\r\n'),'utf8')
+        fs.writeFileSync(path.join(work,'README.txt'),'این بسته برای عیب‌یابی دیده‌بان تولید شده است. رمزها، توکن‌ها و کلیدهای حساس از تنظیمات حذف شده‌اند.\r\n','utf8')
+    }catch(e){delete didebanSupportBuilds[cn.id];try{fs.rmSync(work,{recursive:true,force:true})}catch(x){};return callback(e)}
+    var done=function(err){
+        delete didebanSupportBuilds[cn.id];try{fs.rmSync(work,{recursive:true,force:true})}catch(x){}
+        if(err)return callback(err)
+        var token=crypto.randomBytes(32).toString('hex');didebanSupportDownloads[token]={path:zipPath,cnId:cn.id,expiresAt:Date.now()+30*60*1000}
+        callback(null,{f:'support_package_ready',fileName:path.basename(zipPath),size:fs.statSync(zipPath).size,url:'/dideban-support-download/'+token,health:didebanRunHealthCheck()})
+    }
+    if(process.platform==='win32'){
+        // Compress the contents of the work directory. -Path expands the wildcard;
+        // -LiteralPath does not, which could leave PowerShell waiting or produce no archive.
+        var sourcePattern=path.join(work,'*').replace(/'/g,"''")
+        var destination=zipPath.replace(/'/g,"''")
+        var command="$ErrorActionPreference='Stop'; Compress-Archive -Path '"+sourcePattern+"' -DestinationPath '"+destination+"' -Force"
+        execFile('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-Command',command],{
+            windowsHide:true,
+            timeout:120000,
+            maxBuffer:2*1024*1024
+        },function(err,stdout,stderr){
+            if(err){
+                var detail=String(stderr||stdout||err.message||'').trim()
+                return done(new Error('ساخت فایل ZIP پشتیبانی ناموفق بود: '+(detail||'خطای PowerShell')))
+            }
+            if(!fs.existsSync(zipPath))return done(new Error('فایل ZIP پشتیبانی ساخته نشد.'))
+            done(null)
+        })
+    }else{
+        execFile('zip',['-qr',zipPath,'.'],{cwd:work,timeout:120000,maxBuffer:2*1024*1024},function(err,stdout,stderr){
+            if(err)return done(new Error(String(stderr||stdout||'ابزار zip برای ساخت بسته پشتیبانی در دسترس نیست.').trim()))
+            if(!fs.existsSync(zipPath))return done(new Error('فایل ZIP پشتیبانی ساخته نشد.'))
+            done(null)
+        })
+    }
+}
 function didebanCleanupOfflineUploadTokens(){
     var now=Date.now()
     Object.keys(didebanOfflineUploadTokens).forEach(function(token){
@@ -221,6 +361,32 @@ function didebanLaunchInstaller(downloadResult,manifestResult,cn,callback){
         child.unref()
     }catch(spawnErr){return callback(new Error('اجرای برنامه به‌روزرسان ناموفق بود: '+spawnErr.message))}
     callback(null,{f:'software_update_installing',version:version,message:'نصب خودکار آغاز شد. سرویس دیده‌بان برای جایگزینی فایل‌ها راه‌اندازی مجدد می‌شود.',jobPath:jobPath})
+    setTimeout(function(){process.exit(0)},1800)
+}
+
+function didebanListBackups(){
+    var root=path.resolve(__dirname,'backups')
+    if(!fs.existsSync(root))return []
+    return fs.readdirSync(root).map(function(name){
+        var full=path.join(root,name),manifestPath=path.join(full,'backup-manifest.json')
+        if(!fs.existsSync(manifestPath))return null
+        try{
+            var m=JSON.parse(fs.readFileSync(manifestPath,'utf8').replace(/^\uFEFF/,'')),st=fs.statSync(full)
+            return {id:name,fromVersion:String(m.fromVersion||''),toVersion:String(m.toVersion||''),createdAt:m.createdAt||st.mtime.toISOString()}
+        }catch(e){return null}
+    }).filter(Boolean).sort(function(a,b){return String(b.createdAt).localeCompare(String(a.createdAt))}).slice(0,20)
+}
+function didebanLaunchRollback(backupId,cn,callback){
+    if(process.platform!=='win32')return callback(new Error('بازگشت خودکار این نسخه فعلاً برای Windows فعال است.'))
+    var safe=path.basename(String(backupId||'')),backupRoot=path.resolve(__dirname,'backups'),backupPath=path.resolve(backupRoot,safe)
+    if(!safe||!backupPath.startsWith(backupRoot+path.sep)||!fs.existsSync(path.join(backupPath,'backup-manifest.json')))return callback(new Error('نسخه پشتیبان معتبر پیدا نشد.'))
+    var script=path.resolve(__dirname,'updater','DidebanRollback.ps1'),jobsRoot=path.resolve(__dirname,'updates','jobs')
+    if(!fs.existsSync(script))return callback(new Error('ابزار بازگشت نسخه پیدا نشد.'))
+    if(!fs.existsSync(jobsRoot))fs.mkdirSync(jobsRoot,{recursive:true})
+    var jobPath=path.join(jobsRoot,'rollback-'+Date.now()+'.json'),resultPath=jobPath.replace(/\.json$/,'.result.json'),restartFile=path.resolve(__dirname,'start-dideban.cmd')
+    var job={schemaVersion:1,applicationRoot:path.resolve(__dirname),backupPath:backupPath,resultPath:resultPath,parentPid:process.pid,restartFile:fs.existsSync(restartFile)?restartFile:null,createdAt:new Date().toISOString()}
+    try{fs.writeFileSync(jobPath,JSON.stringify(job,null,2),'utf8');var child=spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',script,'-JobPath',jobPath],{detached:true,stdio:'ignore',windowsHide:true});child.unref()}catch(e){return callback(new Error('اجرای بازگشت نسخه ناموفق بود: '+e.message))}
+    callback(null,{f:'software_update_installing',version:'rollback',message:'بازگشت نسخه آغاز شد. سرویس دیده‌بان پس از بازیابی خودکار راه‌اندازی مجدد می‌شود.'})
     setTimeout(function(){process.exit(0)},1800)
 }
 
@@ -4491,6 +4657,32 @@ var tx;
                         }
                     break;
 
+                    case'support_center':
+                        switch(d.ff){
+                            case'health':
+                                // Send an immediate acknowledgement so the browser can distinguish
+                                // a live socket from a stalled health-check operation.
+                                s.tx({f:'support_package_progress',message:'درخواست بررسی سلامت دریافت شد؛ در حال جمع‌آوری اطلاعات...'},cn.id)
+                                setImmediate(function(){
+                                    try{
+                                        var healthResult=didebanRunHealthCheck()
+                                        s.tx(healthResult,cn.id)
+                                    }catch(healthErr){
+                                        console.error('Dideban health check failed:',healthErr&&healthErr.stack?healthErr.stack:healthErr)
+                                        s.tx({f:'support_center_error',msg:'بررسی سلامت سیستم انجام نشد: '+(healthErr&&healthErr.message?healthErr.message:'خطای نامشخص')},cn.id)
+                                    }
+                                })
+                            break;
+                            case'package':
+                                s.tx({f:'support_package_progress',message:'در حال جمع‌آوری اطلاعات و ساخت فایل ZIP...'},cn.id)
+                                didebanBuildSupportPackage(cn,function(supportErr,result){
+                                    if(supportErr)return s.tx({f:'support_center_error',msg:supportErr.message},cn.id)
+                                    s.systemLog('Dideban Support Package Created',{by:cn.mail,ip:cn.ip,fileName:result.fileName,size:result.size})
+                                    s.tx(result,cn.id)
+                                })
+                            break;
+                        }
+                    break;
                     case'software_update':
                         switch(d.ff){
                             case'offline_prepare':
@@ -4513,6 +4705,16 @@ var tx;
                                     }
                                     s.systemLog('Dideban Offline Update Started',{by:cn.mail,ip:cn.ip,version:offlineVersion,sha256:offlineDownload.sha256})
                                     s.tx(installResult,cn.id)
+                                })
+                            break;
+                            case'backups':
+                                s.tx({f:'software_update_backups',backups:didebanListBackups()},cn.id)
+                            break;
+                            case'rollback':
+                                didebanLaunchRollback(d.backupId,cn,function(rollbackErr,rollbackResult){
+                                    if(rollbackErr)return s.tx({f:'software_update_error',msg:rollbackErr.message},cn.id)
+                                    s.systemLog('Dideban Rollback Started',{by:cn.mail,ip:cn.ip,backupId:d.backupId})
+                                    s.tx(rollbackResult,cn.id)
                                 })
                             break;
                             case'status':
@@ -5125,6 +5327,13 @@ s.superAuth=function(x,callback){
 app.enable('trust proxy');
 app.use('/libs',express.static(__dirname + '/web/libs'));
 app.use('/uploads',express.static(__dirname + '/web/uploads'));
+app.get('/dideban-support-download/:token',function(req,res){
+    var token=String(req.params.token||''),item=didebanSupportDownloads[token]
+    if(!item||item.expiresAt<Date.now()||!fs.existsSync(item.path))return res.status(404).send('Support package not found or expired.')
+    delete didebanSupportDownloads[token]
+    res.download(item.path,path.basename(item.path),function(){setTimeout(function(){try{fs.unlinkSync(item.path)}catch(e){}},5000)})
+})
+
 app.post('/dideban-offline-update/:token',function(req,res){
     didebanCleanupOfflineUploadTokens()
     var token=String(req.params.token||'')
@@ -5181,6 +5390,73 @@ app.post('/dideban-offline-update/:token',function(req,res){
 })
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+
+
+// Dideban System Health HTTP endpoint.
+// Registered after body-parser so the Super credentials in the JSON body are
+// available. Only the health-check action uses this endpoint; the rest of the
+// Support Center remains unchanged.
+app.post('/dideban-system-health',function(req,res){
+    var body=req.body||{}
+    var mail=String(body.mail||'')
+    var pass=String(body.pass||'')
+    function reply(code,payload){
+        if(res.headersSent)return
+        res.status(code)
+        res.set('Cache-Control','no-store')
+        res.type('application/json; charset=utf-8')
+        res.send(JSON.stringify(payload))
+    }
+    if(!mail||!pass)return reply(401,{ok:false,msg:'احراز هویت مدیر سیستم انجام نشد.'})
+    var authenticated=s.superAuth({mail:mail,pass:pass},function(){
+        setImmediate(function(){
+            try{
+                var result=didebanRunHealthCheck()
+                result.ok=true
+                reply(200,result)
+            }catch(healthErr){
+                console.error('Dideban HTTP health check failed:',healthErr&&healthErr.stack?healthErr.stack:healthErr)
+                reply(500,{ok:false,msg:'بررسی سلامت سیستم انجام نشد: '+(healthErr&&healthErr.message?healthErr.message:'خطای نامشخص')})
+            }
+        })
+    })
+    if(authenticated===false)reply(401,{ok:false,msg:'نام کاربری یا رمز عبور مدیر سیستم معتبر نیست.'})
+})
+
+// Dideban Support Package HTTP endpoint.
+// This endpoint is intentionally separate from the health check and only
+// replaces the package-creation transport. Other Support Center features stay unchanged.
+app.post('/dideban-support-package',function(req,res){
+    var body=req.body||{}
+    var mail=String(body.mail||'')
+    var pass=String(body.pass||'')
+    function reply(code,payload){
+        if(res.headersSent)return
+        res.status(code)
+        res.set('Cache-Control','no-store')
+        res.type('application/json; charset=utf-8')
+        res.send(JSON.stringify(payload))
+    }
+    if(!mail||!pass)return reply(401,{ok:false,msg:'احراز هویت مدیر سیستم انجام نشد.'})
+    var authenticated=s.superAuth({mail:mail,pass:pass},function(user){
+        var supportClient={
+            id:'http-support-'+crypto.randomBytes(12).toString('hex'),
+            mail:mail,
+            ip:req.ip||req.connection&&req.connection.remoteAddress||''
+        }
+        didebanBuildSupportPackage(supportClient,function(supportErr,result){
+            if(supportErr){
+                console.error('Dideban support package failed:',supportErr&&supportErr.stack?supportErr.stack:supportErr)
+                return reply(500,{ok:false,msg:supportErr.message||'ساخت بسته پشتیبانی ناموفق بود.'})
+            }
+            try{s.systemLog('Dideban Support Package Created',{by:mail,ip:supportClient.ip,fileName:result.fileName,size:result.size})}catch(logErr){}
+            result.ok=true
+            reply(200,result)
+        })
+    })
+    if(authenticated===false)reply(401,{ok:false,msg:'نام کاربری یا رمز عبور مدیر سیستم معتبر نیست.'})
+})
+
 app.set('views', __dirname + '/web');
 app.set('view engine','ejs');
 //add template handler

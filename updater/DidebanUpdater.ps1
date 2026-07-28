@@ -42,6 +42,8 @@ $workRoot = Join-Path ([System.IO.Path]::GetDirectoryName($JobPath)) ('work-' + 
 $extractRoot = Join-Path $workRoot 'extracted'
 $backupPath = Join-Path $backupRoot (($job.currentVersion -replace '[^0-9A-Za-z._-]','_') + '-before-' + $version + '-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 $copiedFiles = New-Object System.Collections.Generic.List[string]
+$createdFiles = New-Object System.Collections.Generic.List[string]
+$replacedFiles = New-Object System.Collections.Generic.List[string]
 
 try {
     if(-not (Test-Path -LiteralPath $archivePath)){ throw 'فایل بسته به‌روزرسانی پیدا نشد.' }
@@ -88,9 +90,12 @@ try {
         if(-not $destination.StartsWith(($appRoot.TrimEnd('\') + '\'),[System.StringComparison]::OrdinalIgnoreCase)){ throw 'مسیر فایل بسته خارج از پوشه برنامه است.' }
 
         if(Test-Path -LiteralPath $destination -PathType Leaf){
+            $replacedFiles.Add($relative)
             $backupFile = Join-Path $backupPath $relative
             New-Item -ItemType Directory -Force -Path ([System.IO.Path]::GetDirectoryName($backupFile)) | Out-Null
             Copy-Item -LiteralPath $destination -Destination $backupFile -Force
+        } else {
+            $createdFiles.Add($relative)
         }
 
         New-Item -ItemType Directory -Force -Path ([System.IO.Path]::GetDirectoryName($destination)) | Out-Null
@@ -104,11 +109,18 @@ try {
         if($LASTEXITCODE -ne 0){ throw 'اجرای عملیات تکمیلی بسته ناموفق بود.' }
     }
 
+    $backupManifest = @{schemaVersion=1;productId='com.dideban.platform';fromVersion=[string]$job.currentVersion;toVersion=$version;createdAt=(Get-Date).ToUniversalTime().ToString('o');replacedFiles=@($replacedFiles);createdFiles=@($createdFiles);protectedPaths=@($job.protectedPaths)}
+    $backupManifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $backupPath 'backup-manifest.json') -Encoding UTF8
+
     Write-Result -Status 'success' -Message ('نسخه ' + $version + ' با موفقیت نصب شد.') -Extra @{version=$version;backupPath=$backupPath;filesInstalled=$copiedFiles.Count}
 }
 catch {
     $failure = $_.Exception.Message
     try {
+        foreach($relative in $createdFiles){
+            $createdPath = Join-Path $appRoot $relative
+            if(Test-Path -LiteralPath $createdPath -PathType Leaf){ Remove-Item -LiteralPath $createdPath -Force }
+        }
         if(Test-Path -LiteralPath $backupPath){
             Get-ChildItem -LiteralPath $backupPath -Recurse -Force -File | ForEach-Object {
                 $relative = Normalize-RelativePath -Base $backupPath -Full $_.FullName

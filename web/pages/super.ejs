@@ -91,6 +91,8 @@ body.super-page:before{
 .super-stat span{display:block;margin-top:5px;color:var(--super-muted);font-size:11px}
 .super-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:20px;align-items:start}
 .super-column{display:flex;flex-direction:column;gap:20px;min-width:0}
+.super-pair-row{grid-column:1 / -1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch;min-width:0}
+.super-pair-row>.super-card{height:100%;margin:0}
 .super-card{overflow:hidden;border:1px solid var(--super-border);border-radius:18px;background:rgba(17,29,42,.94);box-shadow:var(--super-shadow)}
 .super-card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 19px;border-bottom:1px solid var(--super-border);background:rgba(255,255,255,.018)}
 .super-card-title{display:flex;align-items:center;gap:10px;margin:0;font-size:15px;font-weight:800;color:var(--super-text)}
@@ -162,7 +164,7 @@ body.super-page:before{
 .config-state{display:flex;align-items:center;gap:7px;color:var(--super-muted);font-size:11px}.config-state.valid{color:#8be3b2}.config-state.invalid{color:#ff9c9c}
 .config-msg{font-size:11px;font-weight:700}
 @media(max-width:600px){.settings-grid{grid-template-columns:1fr}.storage-row{grid-template-columns:1fr}.storage-remove{width:100%}.config-savebar{align-items:stretch;flex-direction:column}}
-@media(max-width:900px){.super-grid{grid-template-columns:1fr}.super-stats{grid-template-columns:1fr 1fr}.super-intro{align-items:flex-start;flex-direction:column}}
+@media(max-width:900px){.super-grid{grid-template-columns:1fr}.super-pair-row{grid-template-columns:1fr}.super-stats{grid-template-columns:1fr 1fr}.super-intro{align-items:flex-start;flex-direction:column}}
 @media(max-width:600px){.super-shell{padding:14px 12px 30px}.super-topbar{min-height:68px;padding:10px 12px;border-radius:14px}.super-brand-copy small{display:none}.super-intro{padding:17px}.super-intro h1{font-size:20px}.super-stats{grid-template-columns:1fr}.system-actions{grid-template-columns:1fr}.config-footer{align-items:stretch;flex-direction:column}.super-save{width:100%;justify-content:center}}
 
 .instruction-list{display:flex;flex-direction:column;gap:10px}
@@ -185,6 +187,183 @@ body.super-page:before{
 .update-changelog{display:none;padding:12px;border:1px solid var(--super-border);border-radius:11px;background:rgba(255,255,255,.02)}.update-changelog h4{font-size:12px;margin:0 0 8px}.update-changelog ul{margin:0;padding-right:18px;color:#cbd5e1;font-size:11px;line-height:1.9}
 .update-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.update-actions .btn{border-radius:9px}.update-source{font-size:9px;color:var(--super-muted);direction:ltr;word-break:break-all}.update-progress-wrap{display:none}.update-progress-track{height:9px;background:#07111c;border:1px solid var(--super-border);border-radius:99px;overflow:hidden}.update-progress-bar{height:100%;width:0;background:linear-gradient(90deg,#2563eb,#22c55e);transition:width .2s}.update-progress-text{font-size:10px;color:#cbd5e1;margin-top:6px;display:flex;justify-content:space-between;gap:10px}
 @media(max-width:600px){.update-version-grid{grid-template-columns:1fr}}
+.support-health-summary{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #26384a;border-radius:10px;background:#0a1927}.support-health-summary.ok{border-color:#1d7354;color:#91e7bd}.support-health-summary.warning{border-color:#8a6924;color:#f1cf7a}.support-health-summary.danger{border-color:#8e3944;color:#ff9da8}
+.support-health-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.support-health-item{border:1px solid #26384a;border-radius:10px;padding:12px;background:#091725}.support-health-item strong{display:block;margin-bottom:4px}.support-health-item small{color:#9aacbf}.support-health-item.ok{border-right:4px solid #36c98a}.support-health-item.warning{border-right:4px solid #e9b64f}.support-health-item.danger{border-right:4px solid #ef6675}.support-actions{display:flex;gap:10px;flex-wrap:wrap}.support-progress{display:none;color:#9aacbf}.support-download{display:none}
+@media(max-width:600px){.support-health-grid{grid-template-columns:1fr}}
+
+
+/* Phase 30.6 — Professional Super Dashboard visual refresh (UI only) */
+:root{
+    --super-bg:#06101a;
+    --super-panel:#111e2c;
+    --super-panel-2:#172637;
+    --super-panel-3:#0b1723;
+    --super-border:rgba(148,163,184,.16);
+    --super-border-strong:rgba(148,163,184,.27);
+    --super-text:#edf4fb;
+    --super-muted:#91a4b8;
+    --super-green:#39d083;
+    --super-green-dark:#219a5a;
+    --super-blue:#55a9ff;
+    --super-amber:#e8b34f;
+    --super-red:#ef6f75;
+    --super-shadow:0 18px 48px rgba(0,0,0,.24);
+    --super-shadow-soft:0 8px 24px rgba(0,0,0,.16);
+}
+body.super-page{
+    background:
+        radial-gradient(circle at 12% 0%,rgba(57,208,131,.10),transparent 27%),
+        radial-gradient(circle at 92% 100%,rgba(85,169,255,.08),transparent 28%),
+        linear-gradient(145deg,#06101a 0%,#091522 48%,#07121d 100%);
+}
+body.super-page:before{opacity:.16;background-size:28px 28px}
+.super-shell{max-width:1400px;padding:24px 28px 56px}
+.super-topbar{
+    min-height:72px;
+    margin-bottom:16px;
+    padding:11px 16px;
+    border-radius:16px;
+    background:rgba(13,25,38,.88);
+    box-shadow:var(--super-shadow-soft);
+}
+.super-brand-logo{width:44px;height:44px;border-radius:13px}
+.super-brand-copy strong{font-size:17px;letter-spacing:-.2px}
+.super-menu .dropdown-toggle{width:40px;height:40px}
+.super-intro{
+    position:relative;
+    overflow:hidden;
+    margin-bottom:16px;
+    padding:20px 22px;
+    border-radius:16px;
+    background:linear-gradient(120deg,rgba(57,208,131,.13),rgba(85,169,255,.055));
+    box-shadow:var(--super-shadow-soft);
+}
+.super-intro:after{
+    content:"";
+    position:absolute;
+    left:-40px;
+    top:-70px;
+    width:210px;
+    height:210px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(85,169,255,.12),transparent 67%);
+    pointer-events:none;
+}
+.super-intro h1{font-size:22px;letter-spacing:-.4px}
+.super-status{position:relative;z-index:1;padding:8px 12px}
+.super-stats{gap:12px;margin-bottom:16px}
+.super-stat{
+    min-height:82px;
+    padding:14px 16px;
+    border-radius:14px;
+    background:linear-gradient(145deg,rgba(18,32,47,.96),rgba(12,24,36,.96));
+    box-shadow:var(--super-shadow-soft);
+    transition:transform .18s ease,border-color .18s ease,background .18s ease;
+}
+.super-stat:hover{transform:translateY(-2px);border-color:rgba(57,208,131,.28);background:linear-gradient(145deg,rgba(21,38,54,.98),rgba(13,27,40,.98))}
+.super-stat-icon{width:40px;height:40px;border-radius:11px}
+.super-stat strong{font-size:18px}
+.super-grid{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:16px}
+.super-column{gap:16px}
+.super-card{
+    border-radius:16px;
+    background:linear-gradient(180deg,rgba(18,32,47,.97),rgba(14,27,40,.97));
+    box-shadow:var(--super-shadow-soft);
+    transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+.super-card:hover{border-color:rgba(148,163,184,.23);box-shadow:0 14px 38px rgba(0,0,0,.22)}
+.super-card-header{min-height:70px;padding:14px 16px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.008))}
+.super-card-title{font-size:14px;letter-spacing:-.15px}
+.super-card-title .icon{width:32px;height:32px;border-radius:9px;box-shadow:inset 0 0 0 1px rgba(57,208,131,.08)}
+.super-card-subtitle{margin-top:3px;font-size:10.5px;line-height:1.65}
+.super-card-body{padding:14px 16px 16px}
+.super-action{width:32px;height:32px;border-radius:9px}
+.super-table-wrap{min-height:84px}
+.super-page .table>tbody>tr>td{padding:11px 8px}
+.super-page .table>tbody>tr{transition:background .16s ease}
+.super-page .table>tbody>tr:hover{background:rgba(255,255,255,.025)}
+.super-page .btn{
+    border-radius:9px!important;
+    border:1px solid transparent;
+    font-weight:700;
+    box-shadow:none;
+    transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
+}
+.super-page .btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.super-page .btn:active{transform:translateY(0)}
+.super-page .btn-primary{border-color:rgba(85,169,255,.26);background:linear-gradient(180deg,#428fd6,#327cbc)}
+.super-page .btn-success{border-color:rgba(57,208,131,.25);background:linear-gradient(180deg,#35c77a,#23995b)}
+.super-page .btn-warning{border-color:rgba(232,179,79,.25);background:linear-gradient(180deg,#e8b34f,#c99131);color:#17202a}
+.super-page .btn-danger{border-color:rgba(239,111,117,.25);background:linear-gradient(180deg,#e8646b,#c94c55)}
+.logs-body{height:360px;padding:8px 12px 12px}
+#logs .table{border-collapse:separate;border-spacing:0 9px}
+#logs .table>tbody>tr{background:rgba(7,17,28,.66);box-shadow:inset 0 0 0 1px rgba(148,163,184,.10)}
+#logs .table>tbody>tr>td{padding:12px 13px;border:0!important;line-height:1.75}
+#logs .table>tbody>tr>td:first-child{border-radius:0 11px 11px 0}
+#logs .table>tbody>tr>td:last-child{border-radius:11px 0 0 11px}
+#logs .table pre,#logs .table code{white-space:pre-wrap;word-break:break-word;color:#c8d6e5;background:transparent;border:0;font-size:11px}
+.logs-empty{padding:44px 18px}
+.config-card .super-card-body{padding:15px 16px 16px}
+.config-tabs{gap:7px;padding-bottom:12px;margin-bottom:14px}
+.config-tab{padding:8px 12px;border-radius:9px}
+.config-tab.active{box-shadow:0 5px 16px rgba(35,153,91,.12)}
+.config-section-title{display:flex;align-items:center;gap:7px;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid rgba(148,163,184,.10);font-size:12px;color:#dce8f4}
+.setting-input,.setting-select{height:40px;border-radius:9px;background:rgba(7,17,28,.78)}
+.setting-input:hover,.setting-select:hover{border-color:rgba(148,163,184,.32)}
+.config-footer{padding-top:13px;border-top:1px solid rgba(148,163,184,.10)}
+.super-save{min-width:112px}
+.instruction-list{gap:8px}
+.instruction-item{border-radius:11px;background:rgba(7,17,28,.52);transition:border-color .16s ease,transform .16s ease}
+.instruction-item:hover{transform:translateY(-1px);border-color:rgba(57,208,131,.22)}
+.instruction-empty{padding:36px 12px}
+.software-update-card .super-card-body{gap:12px}
+.update-version-box{padding:12px 13px;border-radius:11px;background:rgba(7,17,28,.72)}
+.update-status{border-radius:10px}
+.update-changelog{background:rgba(7,17,28,.45)}
+.update-actions .btn{min-height:36px;padding:8px 12px}
+.support-health-summary{border-radius:11px;background:rgba(7,17,28,.58)}
+.support-health-grid{gap:8px}
+.support-health-item{min-height:72px;padding:11px 12px;border-radius:11px;background:rgba(7,17,28,.62)}
+.support-health-item strong{font-size:12px}
+.support-health-item small{line-height:1.7}
+.support-actions .btn{min-height:36px;padding:8px 12px}
+.system-actions .btn{min-height:70px;background:linear-gradient(180deg,rgba(239,111,117,.09),rgba(239,111,117,.045))}
+.system-actions .btn i{display:inline-block;margin-bottom:7px;font-size:15px}
+.super-warning{border-radius:10px}
+
+/* More balanced desktop rhythm */
+#accounts .super-card-body{padding-top:8px;padding-bottom:8px}
+#instructions_admin .super-card-body{min-height:150px}
+#support_center .super-card-body,#software_update .super-card-body{padding-top:13px}
+
+/* Scrollbars */
+.super-page *{scrollbar-width:thin;scrollbar-color:rgba(111,132,153,.55) rgba(7,17,28,.42)}
+.super-page *::-webkit-scrollbar{width:8px;height:8px}
+.super-page *::-webkit-scrollbar-track{background:rgba(7,17,28,.42);border-radius:10px}
+.super-page *::-webkit-scrollbar-thumb{background:rgba(111,132,153,.52);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+.super-page *::-webkit-scrollbar-thumb:hover{background:rgba(139,159,179,.68);background-clip:padding-box}
+
+/* Responsive */
+@media(max-width:1100px){
+    .super-shell{padding:20px 18px 44px}
+    .super-grid{grid-template-columns:1fr}
+    .logs-body{height:300px}
+}
+@media(max-width:760px){
+    .super-shell{padding:14px 10px 34px}
+    .super-topbar,.super-intro,.super-card{border-radius:13px}
+    .super-intro{align-items:flex-start;flex-direction:column}
+    .super-stats{grid-template-columns:1fr}
+    .super-stat{min-height:70px}
+    .super-card-header{min-height:64px;padding:12px 13px}
+    .super-card-body{padding:12px 13px 14px}
+    .settings-grid{grid-template-columns:1fr}
+    .setting-field.full{grid-column:auto}
+    .update-actions,.support-actions{display:grid;grid-template-columns:1fr}
+    .update-actions .btn,.support-actions .btn,.support-download{width:100%;text-align:center}
+    .system-actions{grid-template-columns:1fr}
+}
+
 
 </style>
 <body class="super-page">
@@ -369,10 +548,35 @@ body.super-page:before{
                         <button type="button" class="btn btn-success update-auto"><i class="fa fa-refresh"></i> بررسی و به‌روزرسانی خودکار</button>
                         <button type="button" class="btn btn-primary update-check"><i class="fa fa-search"></i> فقط بررسی نسخه</button>
                         <button type="button" class="btn btn-warning update-offline"><i class="fa fa-usb"></i> نصب بسته آفلاین (USB/ZIP)</button>
+                        <button type="button" class="btn btn-danger update-rollback"><i class="fa fa-undo"></i> بازگشت به نسخه پشتیبان</button>
                         <input type="file" class="update-offline-file" accept=".zip,application/zip" style="display:none">
                         <span class="update-phase-note">برای اینترنت از به‌روزرسانی خودکار و برای شبکه ایزوله از بسته ZIP روی USB استفاده کنید. در هر دو روش، بکاپ و نصب به‌صورت خودکار انجام می‌شود.</span>
                     </div>
                     <div class="update-source"></div>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="super-pair-row">
+            <section class="super-card" id="support_center">
+                <header class="super-card-header">
+                    <div>
+                        <h2 class="super-card-title"><span class="icon"><i class="fa fa-life-ring"></i></span>مرکز پشتیبانی و سلامت سیستم</h2>
+                        <div class="super-card-subtitle">بررسی وضعیت سرویس‌ها و ساخت بسته عیب‌یابی بدون اطلاعات حساس</div>
+                    </div>
+                    <small class="support-last-check">هنوز بررسی نشده</small>
+                </header>
+                <div class="super-card-body">
+                    <div class="support-health-summary"><i class="fa fa-info-circle"></i><span>برای مشاهده وضعیت سامانه، بررسی سلامت را اجرا کنید.</span></div>
+                    <div class="support-health-grid"></div>
+                    <div class="support-actions">
+                        <button type="button" class="btn btn-primary support-health-check"><i class="fa fa-heartbeat"></i> بررسی سلامت سیستم</button>
+                        <button type="button" class="btn btn-success support-package-create"><i class="fa fa-file-archive-o"></i> ایجاد بسته پشتیبانی</button>
+                        <a class="btn btn-info support-download" href="#" download><i class="fa fa-download"></i> دانلود بسته پشتیبانی</a>
+                    </div>
+                    <div class="support-progress"><i class="fa fa-spinner fa-spin"></i> <span>در حال انجام عملیات...</span></div>
+                    <p class="update-phase-note">فایل پشتیبانی شامل گزارش سلامت، اطلاعات سیستم، تنظیمات پاک‌سازی‌شده و بخش محدودی از لاگ‌های اخیر است. رمزها، توکن‌ها و کلیدها حذف می‌شوند.</p>
                 </div>
             </section>
 
@@ -474,10 +678,23 @@ $.ccio.ws.on('f',function(d){
         case'save_configuration':
             $.conf.msg.html('تنظیمات ذخیره شد').css('color','#8be3b2');setConfigState(true,'تنظیمات ذخیره شد؛ برای اعمال کامل، سامانه را راه‌اندازی مجدد کنید')
         break;
+        case'support_health_result':
+            $.supportCenter.renderHealth(d)
+        break;
+        case'support_package_progress':
+            $.supportCenter.progress(d.message)
+        break;
+        case'support_package_ready':
+            $.supportCenter.packageReady(d)
+        break;
+        case'support_center_error':
+            $.supportCenter.error(d.msg||'عملیات مرکز پشتیبانی ناموفق بود.')
+        break;
         case'software_update_status':
             $.softwareUpdate.render(d)
         break;
         case'software_update_error':
+            if($.softwareUpdate&&$.softwareUpdate.finishRollbackRequest)$.softwareUpdate.finishRollbackRequest()
             $.softwareUpdate.error(d.msg||'عملیات به‌روزرسانی انجام نشد.')
         break;
         case'software_update_progress':
@@ -494,6 +711,9 @@ $.ccio.ws.on('f',function(d){
         break;
         case'software_update_offline_ready':
             $.softwareUpdate.offlineReady(d)
+        break;
+        case'software_update_backups':
+            $.softwareUpdate.showBackups(d.backups||[])
         break;
         case'instructions_list':
             $.instructions.draw(d.instructions||[])
@@ -1038,6 +1258,124 @@ $.softwareUpdate.installing=function(d){
     var seconds=25
     var timer=setInterval(function(){seconds--;$('.update-phase-note').text('تلاش برای اتصال مجدد تا '+seconds+' ثانیه دیگر...');if(seconds<=0){clearInterval(timer);location.reload()}},1000)
 }
+
+
+$.softwareUpdate.finishRollbackRequest=function(){
+    if(this.rollbackTimer){clearTimeout(this.rollbackTimer);this.rollbackTimer=null}
+    var button=this.e.find('.update-rollback')
+    button.prop('disabled',false).html('<i class="fa fa-undo"></i> بازگشت به نسخه پشتیبان')
+}
+$.softwareUpdate.e.on('click','.update-rollback',function(){
+    var button=$(this)
+    if(button.prop('disabled'))return
+    button.prop('disabled',true).html('<i class="fa fa-spinner fa-spin"></i> در حال دریافت نسخه‌های پشتیبان...')
+    $.softwareUpdate.e.find('.update-progress-wrap').show()
+    $.softwareUpdate.e.find('.update-progress-label').text('در حال بررسی نسخه‌های پشتیبان موجود...')
+    $.softwareUpdate.e.find('.update-progress-percent').text('')
+    $.softwareUpdate.e.find('.update-progress-bar').css('width','15%')
+    $.ccio.cx({f:'software_update',ff:'backups'})
+    $.softwareUpdate.rollbackTimer=setTimeout(function(){
+        $.softwareUpdate.finishRollbackRequest()
+        $.confirm.title.html('خطا در دریافت نسخه‌های پشتیبان')
+        $.confirm.body.html('<p>پاسخی از سرور دریافت نشد. اتصال پنل را بررسی کرده و دوباره تلاش کنید.</p>')
+        $.confirm.click({title:'بستن',class:'btn-default'},function(){})
+        $.confirm.e.modal('show')
+    },10000)
+})
+$.softwareUpdate.showBackups=function(items){
+    this.finishRollbackRequest()
+    if(!items.length){
+        this.e.find('.update-progress-wrap').hide()
+        $.confirm.title.html('نسخه پشتیبان موجود نیست')
+        $.confirm.body.html('<p>هنوز هیچ نسخه پشتیبان قابل بازگشتی ایجاد نشده است.</p><p class="text-muted">نسخه پشتیبان بعد از اولین نصب موفق به‌روزرسانی ساخته می‌شود. تا قبل از آن، عملیات بازگشت قابل اجرا نیست.</p>')
+        $.confirm.click({title:'متوجه شدم',class:'btn-default'},function(){})
+        $.confirm.e.modal('show')
+        return
+    }
+    var select=$('<select class="form-control rollback-select"></select>')
+    items.forEach(function(x){$('<option>').val(x.id).text('نسخه '+x.fromVersion+' — قبل از نصب '+x.toVersion+' — '+new Date(x.createdAt).toLocaleString('fa-IR')).appendTo(select)})
+    $.confirm.title.html('بازگشت به نسخه پشتیبان')
+    $.confirm.body.empty().append('<p class="text-danger"><b>هشدار:</b> فایل‌های برنامه به وضعیت نسخه انتخاب‌شده برمی‌گردند. داده‌ها، تنظیمات و ویدئوها دست‌نخورده می‌مانند.</p>').append(select)
+    $.confirm.click({title:'بازیابی و راه‌اندازی مجدد',class:'btn-danger'},function(){var id=$.confirm.body.find('.rollback-select').val();$.softwareUpdate.progress({stage:'rollback',percent:100});$.ccio.cx({f:'software_update',ff:'rollback',backupId:id})})
+    $.confirm.e.modal('show')
+}
+
+$.supportCenter={e:$('#support_center'),requestTimer:null}
+$.supportCenter.clearRequestTimer=function(){if(this.requestTimer){clearTimeout(this.requestTimer);this.requestTimer=null}}
+$.supportCenter.startRequestTimer=function(){var self=this;this.clearRequestTimer();this.requestTimer=setTimeout(function(){self.requestTimer=null;self.error('سرور در زمان تعیین‌شده پاسخ نداد. اتصال سرور و خروجی ترمینال Node.js را بررسی کنید.')},30000)}
+$.supportCenter.formatBytes=function(bytes){if(bytes===null||bytes===undefined)return 'نامشخص';var units=['B','KB','MB','GB','TB'],i=0,n=Number(bytes)||0;while(n>=1024&&i<units.length-1){n/=1024;i++}return n.toFixed(i?1:0)+' '+units[i]}
+$.supportCenter.setBusy=function(state,message){this.e.find('.support-health-check,.support-package-create').prop('disabled',state);this.e.find('.support-progress').toggle(state).find('span').text(message||'در حال انجام عملیات...')}
+$.supportCenter.progress=function(message){this.clearRequestTimer();this.setBusy(true,message);this.startRequestTimer()}
+$.supportCenter.error=function(message){this.clearRequestTimer();this.setBusy(false);$.confirm.title.html('خطای مرکز پشتیبانی');$.confirm.body.text(message);$.confirm.click({title:'بستن',class:'btn-default'},function(){});$.confirm.e.modal('show')}
+$.supportCenter.renderHealth=function(d){
+    this.clearRequestTimer();this.setBusy(false);this.e.find('.support-last-check').text('آخرین بررسی: '+new Date(d.checkedAt).toLocaleString('fa-IR'))
+    var labels={ok:'سامانه سالم است',warning:'سامانه نیازمند توجه است',danger:'یک یا چند مشکل مهم شناسایی شد'},summary=this.e.find('.support-health-summary').removeClass('ok warning danger').addClass(d.status||'warning')
+    summary.find('i').attr('class','fa '+(d.status==='ok'?'fa-check-circle':d.status==='danger'?'fa-times-circle':'fa-exclamation-triangle'));summary.find('span').text(labels[d.status]||labels.warning)
+    var grid=this.e.find('.support-health-grid').empty()
+    ;(d.checks||[]).forEach(function(x){var icon=x.status==='ok'?'fa-check-circle':x.status==='danger'?'fa-times-circle':'fa-exclamation-triangle';$('<div class="support-health-item"></div>').addClass(x.status).append($('<strong></strong>').append('<i class="fa '+icon+'"></i> ').append(document.createTextNode(x.title))).append($('<small></small>').text(x.message)).appendTo(grid)})
+}
+$.supportCenter.packageReady=function(d){this.clearRequestTimer();this.renderHealth(d.health||{});this.setBusy(false);this.e.find('.support-download').attr('href',d.url).attr('download',d.fileName).show().html('<i class="fa fa-download"></i> دانلود '+d.fileName+' ('+this.formatBytes(d.size)+')');$.confirm.title.html('بسته پشتیبانی آماده است');$.confirm.body.html('<p>فایل پشتیبانی با موفقیت ساخته شد. لینک دانلود تا ۳۰ دقیقه معتبر است.</p>');$.confirm.click({title:'دانلود فایل',class:'btn-success'},function(){location.href=d.url});$.confirm.e.modal('show')}
+$.supportCenter.e.on('click','.support-health-check',function(){
+    $.supportCenter.setBusy(true,'در حال بررسی سلامت سیستم...')
+    $.supportCenter.startRequestTimer()
+    $.ajax({
+        url:'/dideban-system-health',
+        method:'POST',
+        dataType:'text',
+        contentType:'application/json; charset=utf-8',
+        processData:false,
+        cache:false,
+        timeout:25000,
+        data:JSON.stringify({mail:$user.mail,pass:$user.pass})
+    }).done(function(raw){
+        var result
+        try{result=typeof raw==='string'?JSON.parse(raw):raw}catch(parseError){
+            return $.supportCenter.error('پاسخ سرویس سلامت JSON معتبر نبود. برنامه را یک‌بار کامل راه‌اندازی مجدد کنید.')
+        }
+        if(result&&result.ok!==false&&Array.isArray(result.checks))return $.supportCenter.renderHealth(result)
+        $.supportCenter.error((result&&result.msg)||'پاسخ بررسی سلامت معتبر نبود.')
+    }).fail(function(xhr,status){
+        var result=null
+        try{result=JSON.parse(xhr.responseText||'')}catch(e){}
+        var message=(result&&result.msg)||'ارتباط با سرویس بررسی سلامت برقرار نشد.'
+        if(status==='timeout')message='بررسی سلامت بیش از زمان مجاز طول کشید.'
+        else if(xhr&&xhr.status)message+=' (HTTP '+xhr.status+')'
+        $.supportCenter.error(message)
+    })
+})
+$.supportCenter.e.on('click','.support-package-create',function(){
+    $.confirm.title.html('ایجاد بسته پشتیبانی')
+    $.confirm.body.html('<p>گزارش سلامت، مشخصات سیستم، تنظیمات پاک‌سازی‌شده و لاگ‌های اخیر در یک فایل ZIP قرار می‌گیرند.</p><p><b>رمزها، توکن‌ها، کلیدهای API و اطلاعات حساس حذف می‌شوند.</b></p>')
+    $.confirm.click({title:'ایجاد بسته',class:'btn-success'},function(){
+        $.supportCenter.clearRequestTimer()
+        $.supportCenter.setBusy(true,'در حال جمع‌آوری اطلاعات و ساخت ZIP...')
+        $.ajax({
+            url:'/dideban-support-package',
+            method:'POST',
+            dataType:'text',
+            contentType:'application/json; charset=utf-8',
+            processData:false,
+            cache:false,
+            timeout:150000,
+            data:JSON.stringify({mail:$user.mail,pass:$user.pass})
+        }).done(function(raw){
+            var result
+            try{result=typeof raw==='string'?JSON.parse(raw):raw}catch(parseError){
+                return $.supportCenter.error('پاسخ سرویس ساخت بسته پشتیبانی JSON معتبر نبود.')
+            }
+            if(result&&result.ok!==false&&result.url&&result.fileName)return $.supportCenter.packageReady(result)
+            $.supportCenter.error((result&&result.msg)||'پاسخ ساخت بسته پشتیبانی معتبر نبود.')
+        }).fail(function(xhr,status){
+            var result=null
+            try{result=JSON.parse(xhr.responseText||'')}catch(e){}
+            var message=(result&&result.msg)||'ارتباط با سرویس ساخت بسته پشتیبانی برقرار نشد.'
+            if(status==='timeout')message='ساخت بسته پشتیبانی بیش از دو دقیقه طول کشید و متوقف شد.'
+            else if(xhr&&xhr.status)message+=' (HTTP '+xhr.status+')'
+            $.supportCenter.error(message)
+        })
+    })
+    $.confirm.e.modal('show')
+})
 
 //sys controls
 $.system={e:$('#system')}
