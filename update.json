@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "minimumVersion": "1.0.0",
+  "releaseDate": "2026-07-28",
+  "downloadUrl": "",
+  "sha256": "",
+  "mandatory": false,
+  "requiresRestart": true,
+  "changelog": [
+    "نسخه پایه مرکز به‌روزرسانی دیده‌بان",
+    "افزوده شدن بررسی نسخه جدید از پنل Super",
+    "آماده‌سازی معماری دانلود و نصب امن در نسخه بعد"
+  ]
+}

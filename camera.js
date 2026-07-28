@@ -49,6 +49,37 @@ var crypto = require('crypto');
 var webdav = require("webdav");
 var jsonfile = require("jsonfile");
 var connectionTester = require('connection-tester');
+
+// Dideban Software Update Center - Phase 25
+// Checks a signed-manifest-ready JSON endpoint. This phase never downloads,
+// replaces, deletes, or modifies application/user data.
+var didebanPackageInfo={version:'1.0.0'}
+try{didebanPackageInfo=require('./package.json')}catch(e){}
+function didebanCompareVersions(a,b){
+    function parts(v){return String(v||'0').replace(/^v/i,'').split('-')[0].split('.').map(function(x){return parseInt(x,10)||0})}
+    var ap=parts(a),bp=parts(b),length=Math.max(ap.length,bp.length)
+    for(var i=0;i<length;i++){var av=ap[i]||0,bv=bp[i]||0;if(av>bv)return 1;if(av<bv)return -1}
+    return 0
+}
+function didebanUpdateManifestUrl(){
+    return (config.didebanUpdate&&config.didebanUpdate.manifestUrl)||process.env.DIDEBAN_UPDATE_MANIFEST_URL||'https://raw.githubusercontent.com/hamedpourheydari/dideban-platform/main/update.json'
+}
+function didebanCheckUpdate(callback){
+    var manifestUrl=didebanUpdateManifestUrl(),parsed
+    try{parsed=URL.parse(manifestUrl)}catch(err){return callback(new Error('نشانی سرویس به‌روزرسانی نامعتبر است.'))}
+    var localHost=['localhost','127.0.0.1','::1'].indexOf(parsed.hostname)>-1
+    if(parsed.protocol!=='https:'&&!(localHost&&parsed.protocol==='http:'))return callback(new Error('سرویس به‌روزرسانی باید از HTTPS استفاده کند.'))
+    request.get({url:manifestUrl,timeout:12000,headers:{'User-Agent':'Dideban-Platform/'+didebanPackageInfo.version,'Accept':'application/json'},gzip:true},function(err,response,body){
+        if(err)return callback(new Error('ارتباط با سرویس به‌روزرسانی برقرار نشد: '+err.message))
+        if(!response||response.statusCode<200||response.statusCode>=300)return callback(new Error('سرویس به‌روزرسانی پاسخ معتبر نداد (HTTP '+(response&&response.statusCode||0)+').'))
+        var manifest
+        try{manifest=JSON.parse(String(body||'').replace(/^\uFEFF/,''))}catch(parseErr){return callback(new Error('فایل اطلاعات نسخه ساختار JSON معتبر ندارد.'))}
+        if(!manifest.version||!/^v?\d+(\.\d+){1,3}([+-][0-9A-Za-z.-]+)?$/.test(String(manifest.version)))return callback(new Error('شماره نسخه در فایل به‌روزرسانی معتبر نیست.'))
+        var current=String(didebanPackageInfo.version||'1.0.0'),latest=String(manifest.version).replace(/^v/i,''),available=didebanCompareVersions(latest,current)>0
+        callback(null,{f:'software_update_status',checked:true,currentVersion:current,latestVersion:latest,updateAvailable:available,mandatory:manifest.mandatory===true,requiresRestart:manifest.requiresRestart!==false,releaseDate:manifest.releaseDate||null,changelog:Array.isArray(manifest.changelog)?manifest.changelog.slice(0,30):[],downloadUrl:manifest.downloadUrl||null,manifestUrl:manifestUrl,checkedAt:new Date().toISOString(),message:available?('نسخه '+latest+' برای نصب آماده انتشار است.'):('نسخه نصب‌شده '+current+' آخرین نسخه موجود است.')})
+    })
+}
+
 var events = require('events');
 var onvif = require('node-onvif');
 var knex = require('knex');
@@ -4295,6 +4326,24 @@ var tx;
                                 s.systemLog('conf.json Modified',{by:cn.mail,ip:cn.ip,old:jsonfile.readFileSync(location.config)})
                                 jsonfile.writeFile(location.config,d.data,{spaces: 2},function(){
                                     s.tx({f:'save_configuration'},cn.id)
+                                })
+                            break;
+                        }
+                    break;
+
+                    case'software_update':
+                        switch(d.ff){
+                            case'status':
+                                s.tx({f:'software_update_status',checked:false,currentVersion:String(didebanPackageInfo.version||'1.0.0'),latestVersion:null,updateAvailable:false,manifestUrl:didebanUpdateManifestUrl(),message:'برای دریافت اطلاعات نسخه جدید، بررسی به‌روزرسانی را اجرا کنید.'},cn.id)
+                            break;
+                            case'check':
+                                didebanCheckUpdate(function(updateErr,result){
+                                    if(updateErr){
+                                        s.systemLog('Dideban Update Check Failed',{by:cn.mail,ip:cn.ip,error:updateErr.message})
+                                        return s.tx({f:'software_update_error',msg:updateErr.message,currentVersion:String(didebanPackageInfo.version||'1.0.0')},cn.id)
+                                    }
+                                    s.systemLog('Dideban Update Checked',{by:cn.mail,ip:cn.ip,currentVersion:result.currentVersion,latestVersion:result.latestVersion,updateAvailable:result.updateAvailable})
+                                    s.tx(result,cn.id)
                                 })
                             break;
                         }

@@ -82,7 +82,3 @@ desktop.ini
 /build/
 
 /shinobi-brand-audit.txt
-
-# Instruction attachments
-web/uploads/instructions/*
-!web/uploads/instructions/.gitkeep

@@ -175,6 +175,17 @@ body.super-page:before{
 .instruction-current-file{display:flex;align-items:center;gap:8px;margin-top:9px;padding:9px;border-radius:8px;background:#091521}.instruction-current-file label{margin-right:auto;margin-bottom:0;font-weight:400;color:#fca5a5}
 .instruction-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}.instruction-check{display:flex!important;align-items:center;gap:10px;margin:0!important;padding:11px 12px;border:1px solid rgba(148,163,184,.24);border-radius:10px;background:#091521;cursor:pointer;font-weight:600!important}.instruction-check input{appearance:auto!important;-webkit-appearance:checkbox!important;width:18px!important;height:18px!important;min-width:18px;opacity:1!important;position:static!important;margin:0!important;accent-color:#22c55e}.instruction-upload-progress{display:none;margin-top:10px}.instruction-upload-progress .progress{height:8px;margin:6px 0;background:#091521}.instruction-upload-progress .progress-bar{min-width:2%;transition:width .18s ease}.instruction-upload-status{font-size:11px;color:#a9bac8}.instruction-upload-cancel{float:left;color:#fca5a5;cursor:pointer}@media(max-width:700px){.instruction-options{grid-template-columns:1fr}}
 .instruction-admin-file{margin-top:9px;padding:8px 10px;border-radius:8px;background:#091521;color:#9ed9bd;font-size:11px}
+
+.software-update-card .super-card-body{display:flex;flex-direction:column;gap:14px}
+.update-version-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.update-version-box{padding:13px;border:1px solid var(--super-border);border-radius:12px;background:#091521}
+.update-version-box span{display:block;color:var(--super-muted);font-size:10px;margin-bottom:5px}.update-version-box strong{font-size:17px;color:#f8fafc;direction:ltr;display:inline-block}
+.update-status{display:flex;align-items:center;gap:10px;padding:12px;border-radius:11px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#bfdbfe}
+.update-status.success{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.22);color:#bbf7d0}.update-status.warning{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.22);color:#fde68a}.update-status.danger{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.22);color:#fecaca}
+.update-changelog{display:none;padding:12px;border:1px solid var(--super-border);border-radius:11px;background:rgba(255,255,255,.02)}.update-changelog h4{font-size:12px;margin:0 0 8px}.update-changelog ul{margin:0;padding-right:18px;color:#cbd5e1;font-size:11px;line-height:1.9}
+.update-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.update-actions .btn{border-radius:9px}.update-source{font-size:9px;color:var(--super-muted);direction:ltr;word-break:break-all}
+@media(max-width:600px){.update-version-grid{grid-template-columns:1fr}}
+
 </style>
 <body class="super-page">
 <div class="super-shell">
@@ -337,6 +348,31 @@ body.super-page:before{
                 </div>
             </form>
 
+
+            <section class="super-card software-update-card" id="software_update">
+                <header class="super-card-header">
+                    <div>
+                        <h2 class="super-card-title"><span class="icon"><i class="fa fa-cloud-download"></i></span>به‌روزرسانی نرم‌افزار</h2>
+                        <div class="super-card-subtitle">بررسی نسخه‌های جدید منتشرشده توسط تیم توسعه</div>
+                    </div>
+                    <small class="update-last-check"></small>
+                </header>
+                <div class="super-card-body">
+                    <div class="update-version-grid">
+                        <div class="update-version-box"><span>نسخه نصب‌شده</span><strong class="current-version">...</strong></div>
+                        <div class="update-version-box"><span>آخرین نسخه منتشرشده</span><strong class="latest-version">بررسی نشده</strong></div>
+                    </div>
+                    <div class="update-status"><i class="fa fa-info-circle"></i><span>برای دریافت اطلاعات نسخه جدید، دکمه بررسی به‌روزرسانی را بزنید.</span></div>
+                    <div class="update-changelog"><h4><i class="fa fa-list-ul"></i> تغییرات این نسخه</h4><ul></ul></div>
+                    <div class="update-actions">
+                        <button type="button" class="btn btn-primary update-check"><i class="fa fa-refresh"></i> بررسی به‌روزرسانی</button>
+                        <button type="button" class="btn btn-success update-download" style="display:none" disabled><i class="fa fa-download"></i> دانلود نسخه جدید</button>
+                        <span class="update-phase-note">در فاز فعلی فقط بررسی نسخه فعال است؛ نصب امن در فاز بعد اضافه می‌شود.</span>
+                    </div>
+                    <div class="update-source"></div>
+                </div>
+            </section>
+
             <section class="super-card" id="system">
                 <header class="super-card-header">
                     <div>
@@ -427,12 +463,19 @@ $.ccio.ws.on('f',function(d){
     switch(d.f){
         case'init_success':
             $.ccio.cx({f:'instructions',ff:'list'})
+            $.ccio.cx({f:'software_update',ff:'status'})
         break;
         case'log':
             $.ccio.tm(4,d.log,'#logs table')
         break;
         case'save_configuration':
             $.conf.msg.html('تنظیمات ذخیره شد').css('color','#8be3b2');setConfigState(true,'تنظیمات ذخیره شد؛ برای اعمال کامل، سامانه را راه‌اندازی مجدد کنید')
+        break;
+        case'software_update_status':
+            $.softwareUpdate.render(d)
+        break;
+        case'software_update_error':
+            $.softwareUpdate.error(d.msg||'بررسی به‌روزرسانی انجام نشد.')
         break;
         case'instructions_list':
             $.instructions.draw(d.instructions||[])
@@ -852,6 +895,37 @@ $.conf.e.submit(function(e){
     })
     return false
 })
+
+// Dideban software update checker (Phase 25: check and display only)
+$.softwareUpdate={e:$('#software_update'),data:null}
+$.softwareUpdate.setBusy=function(busy){
+    this.e.find('.update-check').prop('disabled',busy).html(busy?'<i class="fa fa-spinner fa-spin"></i> در حال بررسی...':'<i class="fa fa-refresh"></i> بررسی به‌روزرسانی')
+}
+$.softwareUpdate.render=function(d){
+    this.setBusy(false);this.data=d||{}
+    this.e.find('.current-version').text(d.currentVersion||'نامشخص')
+    this.e.find('.latest-version').text(d.latestVersion||'بررسی نشده')
+    this.e.find('.update-source').text(d.manifestUrl?'منبع: '+d.manifestUrl:'')
+    var status=this.e.find('.update-status').removeClass('success warning danger')
+    var icon='fa-info-circle',text=d.message||'وضعیت نسخه دریافت شد.'
+    if(d.updateAvailable){status.addClass('warning');icon='fa-cloud-download'}
+    else if(d.checked){status.addClass('success');icon='fa-check-circle'}
+    status.html('<i class="fa '+icon+'"></i><span></span>').find('span').text(text)
+    var list=this.e.find('.update-changelog ul').empty(),changes=Array.isArray(d.changelog)?d.changelog:[]
+    changes.forEach(function(item){$('<li>').text(item).appendTo(list)})
+    this.e.find('.update-changelog').toggle(changes.length>0)
+    this.e.find('.update-download').toggle(!!d.updateAvailable).prop('disabled',true)
+    if(d.checkedAt)this.e.find('.update-last-check').text('آخرین بررسی: '+new Date(d.checkedAt).toLocaleString('fa-IR'))
+}
+$.softwareUpdate.error=function(message){
+    this.setBusy(false)
+    this.e.find('.update-status').removeClass('success warning').addClass('danger').html('<i class="fa fa-exclamation-circle"></i><span></span>').find('span').text(message)
+}
+$.softwareUpdate.e.on('click','.update-check',function(){
+    $.softwareUpdate.setBusy(true)
+    $.ccio.cx({f:'software_update',ff:'check'})
+})
+
 //sys controls
 $.system={e:$('#system')}
 $.system.e.find('[system]').click(function(e){
