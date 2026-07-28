@@ -11,7 +11,7 @@ docs/images/banner.png
 ### سامانه مدیریت ویدئو و ضبط تصاویر تحت شبکه  
 ### Video Management System (VMS / NVR)
 
-A modern, self-hosted and Persian-first video surveillance platform built on the Shinobi engine.
+A modern, self-hosted and Persian-first video surveillance platform.
 
 <br>
 
@@ -31,7 +31,7 @@ A modern, self-hosted and Persian-first video surveillance platform built on the
 
 **Dideban Platform** is a self-hosted Video Management System (VMS/NVR) for centralized monitoring, recording and management of IP cameras.
 
-The project is built on the Shinobi surveillance engine and introduces a redesigned Persian-first interface, right-to-left layout, Dideban branding and a more modern dashboard experience.
+The project introduces a redesigned Persian-first interface, right-to-left layout, Dideban branding and a more modern dashboard experience.
 
 Dideban aims to preserve the mature camera and streaming capabilities of the upstream engine while improving localization, usability, visual consistency and readiness for organizational deployments.
 
@@ -50,14 +50,13 @@ Dideban aims to preserve the mature camera and streaming capabilities of the ups
 
 **دیده‌بان** یک سامانه متن‌باز و قابل‌استقرار روی سرور شخصی برای مدیریت ویدئو، مانیتورینگ زنده، ضبط تصاویر و مدیریت متمرکز دوربین‌های تحت شبکه است.
 
-این پروژه بر پایه هسته **Shinobi** توسعه یافته و با هدف ارائه رابط کاربری فارسی، راست‌چین و مدرن بازطراحی شده است. در دیده‌بان تلاش می‌شود قابلیت‌های پایدار هسته اصلی حفظ شوند و در کنار آن، تجربه کاربری، برندسازی، مستندسازی و آمادگی برای استفاده سازمانی بهبود پیدا کند.
+این پروژه با هدف ارائه رابط کاربری فارسی، راست‌چین و مدرن بازطراحی شده است. در دیده‌بان تلاش می‌شود قابلیت‌های پایدار هسته اصلی حفظ شوند و در کنار آن، تجربه کاربری، برندسازی، مستندسازی و آمادگی برای استفاده سازمانی بهبود پیدا کند.
 
 ### اهداف اصلی پروژه
 
 - ارائه رابط کاربری فارسی و راست‌چین
 - ساده‌سازی مدیریت و مشاهده دوربین‌ها
 - طراحی داشبورد مدرن و مناسب مراکز مانیتورینگ
-- حفظ قابلیت‌های فنی هسته Shinobi
 - توسعه تدریجی و مستند پروژه
 - آماده‌سازی برای استقرار در محیط‌های حرفه‌ای و سازمانی
 
@@ -81,7 +80,7 @@ Dideban aims to preserve the mature camera and streaming capabilities of the ups
 | Archive and timeline redesign | 🚧 |
 | Security review and production hardening | 🚧 |
 
-> Some capabilities are provided by the underlying Shinobi engine. Dideban-specific interface and workflow improvements are being developed incrementally.
+> Dideban-specific interface and workflow improvements are being developed incrementally.
 
 ---
 
@@ -144,7 +143,7 @@ docs/
 
 ## Why Dideban?
 
-| Upstream Shinobi interface | Dideban Platform |
+| رابط کاربری سنتی | Dideban Platform |
 |---|---|
 | General-purpose interface | Persian-first interface |
 | Left-to-right oriented experience | Native RTL layout |
@@ -153,7 +152,7 @@ docs/
 | Generic navigation | Localized and simplified navigation |
 | Upstream documentation | Project-specific Persian and English documentation |
 
-Dideban does not attempt to hide its upstream foundation. The project builds on Shinobi and focuses on localization, user experience, branding and deployment needs for Persian-speaking environments.
+Dideban focuses on localization, user experience, branding and deployment needs for Persian-speaking environments.
 
 ---
 
@@ -167,7 +166,7 @@ IP Cameras
     │
     ▼
 ┌───────────────────────────┐
-│      Shinobi Engine       │
+│   Video Management Core   │
 │ Streaming • Recording     │
 │ Events • Users • Storage  │
 └─────────────┬─────────────┘
@@ -199,7 +198,7 @@ IP Cameras
 | Frontend | EJS, HTML, CSS and JavaScript |
 | Realtime communication | Socket.IO |
 | Camera streaming | RTSP |
-| Camera integration | Shinobi camera and ONVIF components |
+| Camera integration | RTSP and ONVIF components |
 
 ---
 
@@ -490,11 +489,11 @@ For major changes, open an Issue before implementation so the design and technic
 
 ## Credits and Upstream
 
-Dideban Platform is based on the **Shinobi Open Source NVR** project.
+Dideban Platform includes open-source components governed by their respective licenses.
 
-The camera management, streaming and recording foundation originates from the upstream Shinobi project. Dideban adds project-specific localization, branding, interface design and documentation.
+Dideban adds project-specific localization, branding, interface design and documentation.
 
-Thanks to the Shinobi developers and contributors for building and maintaining the upstream surveillance platform.
+Thanks to all open-source developers and contributors whose work supports this platform.
 
 ---
 
@@ -505,7 +504,7 @@ This repository contains `LICENSE` and `COPYING` files inherited from or associa
 Before distributing, modifying or deploying the project, review those files carefully and ensure that:
 
 - Upstream copyright notices remain intact.
-- Shinobi attribution is preserved.
+- Required third-party copyright and license notices remain intact.
 - Source-distribution requirements are respected.
 - Modified versions comply with all applicable upstream license terms.
 
@@ -535,7 +534,7 @@ For production use:
 
 **سامانه مدیریت ویدئو و نظارت تصویری دیده‌بان**
 
-Built on the Shinobi engine  
+Video Management System  
 Designed for a Persian-first monitoring experience
 
 </div>

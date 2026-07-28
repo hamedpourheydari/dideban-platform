@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="libs/css/fullcalendar.min.css">
 <link rel="stylesheet" href="libs/css/bootstrap-table.min.css">
 <link rel="stylesheet" href="libs/css/main.dash2.css">
+<link rel="stylesheet" href="libs/css/dideban-modern-ui.css?v=13.0.0">
 <style>
 :root{
     --super-bg:#07111c;
@@ -177,6 +178,7 @@ body.super-page:before{
         <div class="dropdown super-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="منو"><i class="fa fa-bars"></i></a>
             <ul class="dropdown-menu">
+                <li><a href="#" data-toggle="modal" data-target="#super_about_modal"><i class="fa fa-info-circle"></i>&nbsp; درباره ما</a></li>
                 <li><a class="logout"><i class="fa fa-sign-out"></i>&nbsp; <%-lang.Logout%></a></li>
             </ul>
         </div>
@@ -610,7 +612,7 @@ $.system.e.find('[system]').click(function(e){
             if(!e.distro){e.distro='master'}
             $.confirm.e.modal('show')
             $.confirm.title.html('دیده‌بان به‌روزرسانی شود؟')
-            $.confirm.body.html('به‌روزرسانی دیده‌بان باعث بازنویسی فایل‌ها می‌شود. اگر فایل‌ها را شخصاً تغییر داده‌اید، باید دیده‌بان را به‌صورت دستی به‌روزرسانی کنید. به‌روزرسان، آخرین نسخه '+e.distro+' را از <a href="https://github.com/ShinobiCCTV/Shinobi" target="_blank">مخزن حرفه‌ای</a> دریافت خواهد کرد.')
+            $.confirm.body.html('به‌روزرسانی دیده‌بان باعث بازنویسی فایل‌ها می‌شود. اگر فایل‌ها را شخصاً تغییر داده‌اید، باید دیده‌بان را به‌صورت دستی به‌روزرسانی کنید. به‌روزرسان، آخرین نسخه ' + e.distro + ' را از مخزن رسمی پروژه دریافت خواهد کرد.')
             $.confirm.click({title:'به‌روزرسانی',class:'btn-danger'},function(){
                 $.ccio.cx({f:'system',ff:'update',distro:e.distro})
             });
@@ -654,4 +656,23 @@ $('body')
     localStorage.removeItem('ShinobiLogin_'+location.host);location.href='/';
 })    
 </script>
+
+<div class="modal fade dideban-about-modal" id="super_about_modal" tabindex="-1" role="dialog" aria-labelledby="super_about_title" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <button type="button" class="dideban-about-close" data-dismiss="modal" aria-label="بستن"><i class="fa fa-times"></i></button>
+      <div class="dideban-about-hero">
+        <img src="libs/img/android-chrome-192x192.png" alt="لوگوی دیده‌بان">
+        <div><span class="dideban-about-kicker">مرکز مدیریت سامانه</span><h2 id="super_about_title">دیده‌بان</h2><p>سامانه مدیریت و نظارت تصویری تحت شبکه</p></div>
+      </div>
+      <div class="dideban-about-body">
+        <section><h3><i class="fa fa-building-o"></i> این محصول توسط مرکز علوم نوین پدافندی دانشکده و پژوهشکده پدافندغیرعامل دانشگاه جامع امام حسین (ع) طراحی و توسعه داده شده است.</p></section>
+        <section><h3><i class="fa fa-video-camera"></i> درباره دیده‌بان</h3><p>دیده‌بان بستری یکپارچه برای مدیریت کاربران، دوربین‌ها، ذخیره‌سازی، نمایش زنده و کنترل تنظیمات سامانه فراهم می‌کند.</p></section>
+        <div class="dideban-about-meta"><div><span>نسخه</span><strong>1.0.0</strong></div><div><span>توسعه‌دهنده</span><strong>دانشکده و پژوهشکده پدافندغیرعامل دانشگاه جامع امام حسین</strong></div><div><span>وب‌سایت</span><strong>https://fpd.ihu.ac.ir</strong></div><div><span>پشتیبانی</span><strong>pd@ihu.ac.ir</strong></div></div>
+      </div>
+      <div class="dideban-about-footer">© 2026 تمامی حقوق برای دانشکده و پژوهشکده دانشگاه جامع امام حسین (ع) محفوظ است.</div>
+    </div>
+  </div>
+</div>
+
 <% include blocks/mainpermissions.ejs %>

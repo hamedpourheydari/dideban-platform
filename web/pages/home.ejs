@@ -141,6 +141,7 @@
                 <li class="mdl-menu__item" system="jpegToggle"><div><i class="fa fa-file-image-o"></i><div><%- lang['JPEG Mode'] %></div></div></li>
                 <li class="mdl-menu__item" system="switch" switch="monitorOrder" type="text"><div><i class="fa fa-sort"></i><div><%- lang['Order Streams'] %></div></div></li>
                 <li class="mdl-menu__item" system="switch" switch="notifyHide" type="text"><div><i class="fa fa-exclamation-circle"></i><div><%- lang['Hide Notes'] %></div></div></li>
+                <li class="mdl-menu__item" data-toggle="modal" data-target="#dideban_about_modal"><div><i class="fa fa-info-circle"></i><div>درباره ما</div></div></li>
                 <li class="mdl-menu__item logout"><div><i class="fa fa-sign-out"></i><div><%- lang.Logout %></div></div></li>
             </ul>
             <div class="mdl-layout-spacer"></div>
@@ -402,5 +403,39 @@
     })
 })()
 </script>
+
+<div class="modal fade dideban-about-modal" id="dideban_about_modal" tabindex="-1" role="dialog" aria-labelledby="dideban_about_title" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <button type="button" class="dideban-about-close" data-dismiss="modal" aria-label="بستن"><i class="fa fa-times"></i></button>
+      <div class="dideban-about-hero">
+        <img src="libs/img/android-chrome-192x192.png" alt="لوگوی دیده‌بان">
+        <div>
+          <span class="dideban-about-kicker">سامانه مدیریت ویدئو</span>
+          <h2 id="dideban_about_title">دیده‌بان</h2>
+          <p>راهکار یکپارچه مدیریت، پایش و ضبط دوربین‌های تحت شبکه</p>
+        </div>
+      </div>
+      <div class="dideban-about-body">
+        <section>
+          <h3><i class="fa fa-building-o"></i> درباره مجموعه</h3>
+          <p>این بخش برای معرفی شرکت یا تیم توسعه‌دهنده در نظر گرفته شده است. نام مجموعه، حوزه فعالیت، سابقه و توضیحات دلخواه خود را در همین قسمت جایگزین کنید.</p>
+        </section>
+        <section>
+          <h3><i class="fa fa-shield"></i> درباره محصول</h3>
+          <p>دیده‌بان سامانه‌ای فارسی و تحت وب برای مدیریت متمرکز دوربین‌ها، نمایش زنده، ضبط تصاویر، مدیریت کاربران و رویدادهای نظارتی است.</p>
+        </section>
+        <div class="dideban-about-meta">
+          <div><span>نسخه نرم‌افزار</span><strong>1.0.0</strong></div>
+          <div><span>توسعه‌دهنده</span><strong>دانشکده و پژوهشکده پدافندغیرعامل دانشگاه جامع امام حسین(ع)</strong></div>
+          <div><span>وب‌سایت</span><strong>https://fpd.ihu.ac.ir/</strong></div>
+          <div><span>پشتیبانی</span><strong> pd@ihu.ac.ir</strong></div>
+        </div>
+      </div>
+      <div class="dideban-about-footer">© 2026 تمامی حقوق برای دانشکده و پژوهشکده پدافندغیرعامل دانشگاه جامع امام حسین (ع) محفوظ است.</div>
+    </div>
+  </div>
+</div>
+
 <script><% include ../libs/js/main.dash2.js %></script>
 <% include blocks/help.ejs %>
