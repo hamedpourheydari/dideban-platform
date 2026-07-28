@@ -69,6 +69,29 @@
         text-align: center;
     }
 
+    .dideban-nav-label {
+        flex: 1 1 auto;
+    }
+
+    .dideban-nav-badge {
+        align-items: center;
+        background: #ef4444;
+        border-radius: 999px;
+        color: #fff;
+        display: inline-flex;
+        font-size: 10px;
+        font-weight: 800;
+        height: 20px;
+        justify-content: center;
+        min-width: 20px;
+        padding: 0 6px;
+    }
+
+    .dideban-instructions-nav.has-unread {
+        background: rgba(239,68,68,.10);
+        border: 1px solid rgba(239,68,68,.28);
+    }
+
     .dideban-monitor-section {
         padding-top: 10px;
     }
@@ -259,6 +282,12 @@
         <a class="dideban-nav-item active" href="javascript:;" data-dideban-view="dashboard">
             <i class="fa fa-dashboard" aria-hidden="true"></i>
             <span>&#1583;&#1575;&#1588;&#1576;&#1608;&#1585;&#1583;</span>
+        </a>
+
+        <a class="dideban-nav-item dideban-instructions-nav" href="javascript:;" data-toggle="modal" data-target="#dideban_instructions_modal">
+            <i class="fa fa-bullhorn" aria-hidden="true"></i>
+            <span class="dideban-nav-label">&#1583;&#1587;&#1578;&#1608;&#1585;&#1575;&#1604;&#1593;&#1605;&#1604;&#8204;&#1607;&#1575;</span>
+            <span id="dideban_instruction_sidebar_badge" class="dideban-nav-badge" style="display:none">0</span>
         </a>
 
         <a class="dideban-nav-item permission_monitor_edit" href="javascript:;" monitor="edit" mid="" ke="">

@@ -219,6 +219,79 @@ if(databaseOptions.client === 'sqlite3' && databaseOptions.connection.filename =
     databaseOptions.connection.filename = __dirname+"/shinobi.sqlite"
 }
 s.databaseEngine = knex(databaseOptions)
+// Dideban persistent instruction center tables
+s.ensureDidebanInstructionTables=function(callback){
+    callback=callback||function(){}
+    if(s.didebanInstructionTablesReady){callback();return}
+    if(!s.didebanInstructionTablesPromise){
+        s.didebanInstructionTablesPromise=Promise.all([
+            s.databaseEngine.schema.hasTable('DidebanInstructions').then(function(exists){
+                if(exists)return
+                return s.databaseEngine.schema.createTable('DidebanInstructions',function(table){
+                    table.string('id',64).primary()
+                    table.string('title',255).notNullable()
+                    table.text('body').notNullable()
+                    table.string('priority',20).defaultTo('normal')
+                    table.integer('pinned').defaultTo(0)
+                    table.integer('require_ack').defaultTo(0)
+                    table.string('target_type',20).defaultTo('all')
+                    table.text('target_value')
+                    table.string('status',20).defaultTo('active')
+                    table.string('created_by',255)
+                    table.timestamp('created_at').nullable()
+                    table.timestamp('updated_at').nullable()
+                })
+            }),
+            s.databaseEngine.schema.hasTable('DidebanInstructionReads').then(function(exists){
+                if(exists)return
+                return s.databaseEngine.schema.createTable('DidebanInstructionReads',function(table){
+                    table.increments('row_id').primary()
+                    table.string('instruction_id',64).notNullable()
+                    table.string('ke',50).notNullable()
+                    table.string('uid',50).notNullable()
+                    table.timestamp('read_at').nullable()
+                    table.timestamp('acknowledged_at').nullable()
+                    table.unique(['instruction_id','ke','uid'],'dideban_instruction_read_unique')
+                })
+            })
+        ]).then(function(){
+            return Promise.all([
+                s.databaseEngine.schema.hasColumn('DidebanInstructions','attachment_name').then(function(exists){
+                    if(!exists)return s.databaseEngine.schema.table('DidebanInstructions',function(table){table.string('attachment_name',255).nullable()})
+                }),
+                s.databaseEngine.schema.hasColumn('DidebanInstructions','attachment_path').then(function(exists){
+                    if(!exists)return s.databaseEngine.schema.table('DidebanInstructions',function(table){table.string('attachment_path',500).nullable()})
+                }),
+                s.databaseEngine.schema.hasColumn('DidebanInstructions','attachment_mime').then(function(exists){
+                    if(!exists)return s.databaseEngine.schema.table('DidebanInstructions',function(table){table.string('attachment_mime',120).nullable()})
+                }),
+                s.databaseEngine.schema.hasColumn('DidebanInstructions','attachment_size').then(function(exists){
+                    if(!exists)return s.databaseEngine.schema.table('DidebanInstructions',function(table){table.bigInteger('attachment_size').nullable()})
+                })
+            ])
+        }).then(function(){
+            s.didebanInstructionTablesReady=true
+        }).catch(function(err){
+            s.didebanInstructionTablesPromise=null
+            throw err
+        })
+    }
+    s.didebanInstructionTablesPromise.then(function(){callback()}).catch(function(err){callback(err)})
+}
+s.didebanInstructionQuery=function(query,values,callback){
+    if(typeof values==='function'){callback=values;values=[]}
+    s.ensureDidebanInstructionTables(function(tableErr){
+        if(tableErr){
+            if(callback)callback(tableErr)
+            else console.error('Dideban instruction tables error',tableErr)
+            return
+        }
+        s.sqlQuery(query,values,callback)
+    })
+}
+s.ensureDidebanInstructionTables(function(err){
+    if(err)console.error('Dideban instruction tables could not be created:',err)
+})
 s.sqlDate = function(value){
     var dateQueryFunction = ''
     if(databaseOptions.client === 'sqlite3'){
@@ -567,13 +640,13 @@ if(config.ssl&&config.ssl.key&&config.ssl.cert){
     serverHTTPS.listen(config.ssl.port,config.bindip,function(){
         console.log('SSL '+lang.Shinobi+' - SSL PORT : '+config.ssl.port);
     });
-    io.attach(serverHTTPS);
+    io.attach(serverHTTPS,{maxHttpBufferSize:20*1024*1024});
 }
 //start HTTP
 server.listen(config.port,config.bindip,function(){
     console.log(lang.Shinobi+' - PORT : '+config.port);
 });
-io.attach(server);
+io.attach(server,{maxHttpBufferSize:20*1024*1024});
 console.log('NODE.JS version : '+execSync("node -v"))
 //ffmpeg location
 if(!config.ffmpegDir){
@@ -4226,6 +4299,171 @@ var tx;
                             break;
                         }
                     break;
+                    case'instructions':
+                        function removeInstructionAttachment(relativePath){
+                            if(!relativePath)return
+                            var safeRelative=String(relativePath).replace(/^\/+/, '')
+                            if(safeRelative.indexOf('uploads/instructions/')!==0)return
+                            var absolutePath=path.resolve(__dirname,'web',safeRelative)
+                            var allowedRoot=path.resolve(__dirname,'web','uploads','instructions')+path.sep
+                            if(absolutePath.indexOf(allowedRoot)!==0)return
+                            fs.unlink(absolutePath,function(){})
+                        }
+                        function saveInstructionAttachment(attachment,previousPath,done){
+                            attachment=attachment||{}
+                            if(attachment.upload_token){
+                                var uploadedFile=cn.didebanInstructionUploadedFiles&&cn.didebanInstructionUploadedFiles[attachment.upload_token]
+                                if(!uploadedFile)return done(new Error('فایل بارگذاری‌شده پیدا نشد. لطفاً دوباره فایل را انتخاب کنید.'))
+                                delete cn.didebanInstructionUploadedFiles[attachment.upload_token]
+                                if(previousPath)removeInstructionAttachment(previousPath)
+                                return done(null,uploadedFile)
+                            }
+                            if(attachment.remove===true||attachment.remove==='1'){
+                                removeInstructionAttachment(previousPath)
+                                return done(null,{name:null,path:null,mime:null,size:null})
+                            }
+                            if(!attachment.data)return done(null,null)
+                            var originalName=path.basename(String(attachment.name||'file')).slice(0,255)
+                            var extension=path.extname(originalName).toLowerCase()
+                            var allowedExtensions=['.pdf','.png','.jpg','.jpeg','.webp','.txt','.doc','.docx','.xls','.xlsx','.zip']
+                            if(allowedExtensions.indexOf(extension)===-1)return done(new Error('نوع فایل مجاز نیست.'))
+                            var match=String(attachment.data).match(/^data:([^;]+);base64,(.+)$/)
+                            if(!match)return done(new Error('ساختار فایل نامعتبر است.'))
+                            var buffer
+                            try{buffer=Buffer.from(match[2],'base64')}catch(err){return done(new Error('فایل قابل پردازش نیست.'))}
+                            var maxSize=10*1024*1024
+                            if(!buffer.length||buffer.length>maxSize)return done(new Error('حداکثر حجم فایل ۱۰ مگابایت است.'))
+                            var uploadDir=path.join(__dirname,'web','uploads','instructions')
+                            try{fs.mkdirSync(uploadDir,{recursive:true})}catch(err){return done(err)}
+                            var storedName=Date.now()+'-'+s.gid()+extension
+                            fs.writeFile(path.join(uploadDir,storedName),buffer,function(err){
+                                if(err)return done(err)
+                                if(previousPath)removeInstructionAttachment(previousPath)
+                                done(null,{name:originalName,path:'uploads/instructions/'+storedName,mime:String(attachment.mime||match[1]||'application/octet-stream').slice(0,120),size:buffer.length})
+                            })
+                        }
+                        cn.didebanInstructionUploads=cn.didebanInstructionUploads||{}
+                        cn.didebanInstructionUploadedFiles=cn.didebanInstructionUploadedFiles||{}
+                        switch(d.ff){
+                            case'upload_start':
+                                var uploadInfo=d.upload||{}
+                                var uploadName=path.basename(String(uploadInfo.name||'file')).slice(0,255)
+                                var uploadExt=path.extname(uploadName).toLowerCase()
+                                var uploadAllowed=['.pdf','.png','.jpg','.jpeg','.webp','.txt','.doc','.docx','.xls','.xlsx','.zip']
+                                var uploadSize=parseInt(uploadInfo.size,10)||0
+                                if(uploadAllowed.indexOf(uploadExt)===-1)return s.tx({f:'instructions_error',msg:'نوع فایل مجاز نیست.'},cn.id)
+                                if(!uploadSize||uploadSize>10*1024*1024)return s.tx({f:'instructions_error',msg:'حداکثر حجم فایل ۱۰ مگابایت است.'},cn.id)
+                                var uploadToken=s.gid()+s.gid()
+                                cn.didebanInstructionUploads[uploadToken]={name:uploadName,extension:uploadExt,mime:String(uploadInfo.mime||'application/octet-stream').slice(0,120),size:uploadSize,chunks:[],received:0}
+                                s.tx({f:'instruction_attachment_upload_ready',token:uploadToken},cn.id)
+                            break;
+                            case'upload_cancel':
+                                if(d.token){delete cn.didebanInstructionUploads[d.token];delete cn.didebanInstructionUploadedFiles[d.token]}
+                                s.tx({f:'instruction_attachment_upload_cancelled'},cn.id)
+                            break;
+                            case'upload_chunk':
+                                var activeUpload=cn.didebanInstructionUploads[d.token]
+                                if(!activeUpload)return s.tx({f:'instructions_error',msg:'نشست بارگذاری فایل پیدا نشد.'},cn.id)
+                                var chunk=String(d.chunk||'')
+                                if(!chunk||chunk.length>400000)return s.tx({f:'instructions_error',msg:'بخش فایل نامعتبر است.'},cn.id)
+                                var expectedIndex=activeUpload.chunks.length
+                                if(parseInt(d.index,10)!==expectedIndex)return s.tx({f:'instructions_error',msg:'ترتیب بخش‌های فایل نامعتبر است.'},cn.id)
+                                activeUpload.chunks.push(chunk)
+                                activeUpload.received+=chunk.length
+                                if(activeUpload.received>15*1024*1024){delete cn.didebanInstructionUploads[d.token];return s.tx({f:'instructions_error',msg:'حجم فایل بیش از حد مجاز است.'},cn.id)}
+                                s.tx({f:'instruction_attachment_chunk_saved',token:d.token,index:d.index},cn.id)
+                            break;
+                            case'upload_finish':
+                                var finishingUpload=cn.didebanInstructionUploads[d.token]
+                                if(!finishingUpload)return s.tx({f:'instructions_error',msg:'نشست بارگذاری فایل پیدا نشد.'},cn.id)
+                                var uploadBuffer
+                                try{uploadBuffer=Buffer.from(finishingUpload.chunks.join(''),'base64')}catch(uploadDecodeErr){delete cn.didebanInstructionUploads[d.token];return s.tx({f:'instructions_error',msg:'فایل قابل پردازش نیست.'},cn.id)}
+                                if(!uploadBuffer.length||uploadBuffer.length!==finishingUpload.size||uploadBuffer.length>10*1024*1024){delete cn.didebanInstructionUploads[d.token];return s.tx({f:'instructions_error',msg:'اندازه فایل با اطلاعات ارسال‌شده مطابقت ندارد.'},cn.id)}
+                                var instructionUploadDir=path.join(__dirname,'web','uploads','instructions')
+                                try{fs.mkdirSync(instructionUploadDir,{recursive:true})}catch(uploadDirErr){delete cn.didebanInstructionUploads[d.token];return s.tx({f:'instructions_error',msg:uploadDirErr.message},cn.id)}
+                                var instructionStoredName=Date.now()+'-'+s.gid()+finishingUpload.extension
+                                fs.writeFile(path.join(instructionUploadDir,instructionStoredName),uploadBuffer,function(writeUploadErr){
+                                    if(writeUploadErr)return s.tx({f:'instructions_error',msg:writeUploadErr.message||'ذخیره فایل ممکن نشد.'},cn.id)
+                                    var uploadedMeta={name:finishingUpload.name,path:'uploads/instructions/'+instructionStoredName,mime:finishingUpload.mime,size:uploadBuffer.length}
+                                    cn.didebanInstructionUploadedFiles[d.token]=uploadedMeta
+                                    delete cn.didebanInstructionUploads[d.token]
+                                    s.tx({f:'instruction_attachment_uploaded',token:d.token,file:uploadedMeta},cn.id)
+                                })
+                            break;
+                            case'list':
+                                s.didebanInstructionQuery('SELECT * FROM DidebanInstructions ORDER BY pinned DESC, created_at DESC',function(err,rows){
+                                    if(err)return s.tx({f:'instructions_error',msg:err.message||'Database error'},cn.id)
+                                    s.didebanInstructionQuery('SELECT instruction_id,COUNT(*) AS read_count,SUM(CASE WHEN acknowledged_at IS NOT NULL THEN 1 ELSE 0 END) AS ack_count FROM DidebanInstructionReads GROUP BY instruction_id',function(readErr,stats){
+                                        var map={}
+                                        ;(stats||[]).forEach(function(x){map[x.instruction_id]=x})
+                                        ;(rows||[]).forEach(function(x){x.read_count=map[x.id]?map[x.id].read_count:0;x.ack_count=map[x.id]?map[x.id].ack_count:0;didebanPrepareInstructionAttachment(x)})
+                                        s.tx({f:'instructions_list',instructions:rows||[]},cn.id)
+                                    })
+                                })
+                            break;
+                            case'save':
+                                var form=d.form||{}
+                                form.title=String(form.title||'').trim().slice(0,255)
+                                form.body=String(form.body||'').trim().slice(0,20000)
+                                if(!form.title||!form.body){
+                                    s.tx({f:'instructions_error',msg:'عنوان و متن دستورالعمل الزامی است.'},cn.id);return
+                                }
+                                var persistInstruction=function(previousRow){
+                                    saveInstructionAttachment(form.attachment,previousRow&&previousRow.attachment_path,function(fileErr,storedFile){
+                                        if(fileErr)return s.tx({f:'instructions_error',msg:fileErr.message||'خطا در ذخیره فایل'},cn.id)
+                                        storedFile=storedFile||{
+                                            name:previousRow&&previousRow.attachment_name||null,
+                                            path:previousRow&&previousRow.attachment_path||null,
+                                            mime:previousRow&&previousRow.attachment_mime||null,
+                                            size:previousRow&&previousRow.attachment_size||null
+                                        }
+                                        var values=[form.title,form.body,form.priority||'normal',form.pinned?1:0,form.require_ack?1:0,form.target_type||'all',form.target_value||'',form.status||'active',cn.mail,storedFile.name,storedFile.path,storedFile.mime,storedFile.size,new Date()]
+                                        if(form.id){
+                                            values.push(form.id)
+                                            s.didebanInstructionQuery('UPDATE DidebanInstructions SET title=?,body=?,priority=?,pinned=?,require_ack=?,target_type=?,target_value=?,status=?,created_by=?,attachment_name=?,attachment_path=?,attachment_mime=?,attachment_size=?,updated_at=? WHERE id=?',values,function(err){
+                                                if(err)return s.tx({f:'instructions_error',msg:err.message||'Database error'},cn.id)
+                                                didebanSetInstructionAttachmentMeta(form.id,storedFile)
+                                                s.tx({f:'instruction_saved',id:form.id,msg:'دستورالعمل ویرایش شد.'},cn.id)
+                                                s.tx({f:'dideban_instruction_changed'},'GRP_ALL')
+                                            })
+                                        }else{
+                                            form.id=s.gid()
+                                            s.didebanInstructionQuery('INSERT INTO DidebanInstructions (title,body,priority,pinned,require_ack,target_type,target_value,status,created_by,attachment_name,attachment_path,attachment_mime,attachment_size,created_at,updated_at,id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',values.concat([new Date(),form.id]),function(err){
+                                                if(err)return s.tx({f:'instructions_error',msg:err.message||'Database error'},cn.id)
+                                                didebanSetInstructionAttachmentMeta(form.id,storedFile)
+                                                s.tx({f:'instruction_saved',id:form.id,msg:'دستورالعمل منتشر شد.'},cn.id)
+                                                s.tx({f:'dideban_instruction_changed'},'GRP_ALL')
+                                            })
+                                        }
+                                    })
+                                }
+                                if(form.id){
+                                    s.didebanInstructionQuery('SELECT * FROM DidebanInstructions WHERE id=?',[form.id],function(findErr,rows){
+                                        if(findErr)return s.tx({f:'instructions_error',msg:findErr.message||'Database error'},cn.id)
+                                        persistInstruction(rows&&rows[0])
+                                    })
+                                }else persistInstruction(null)
+                            break;
+                            case'archive':
+                                s.didebanInstructionQuery('UPDATE DidebanInstructions SET status=?,updated_at=? WHERE id=?',['archived',new Date(),d.id],function(err){
+                                    if(err)return s.tx({f:'instructions_error',msg:err.message||'Database error'},cn.id)
+                                    s.tx({f:'instruction_saved',id:d.id,msg:'دستورالعمل بایگانی شد.'},cn.id)
+                                })
+                            break;
+                            case'delete':
+                                s.didebanInstructionQuery('SELECT attachment_path FROM DidebanInstructions WHERE id=?',[d.id],function(findErr,rows){
+                                    if(rows&&rows[0])removeInstructionAttachment(rows[0].attachment_path)
+                                    s.didebanInstructionQuery('DELETE FROM DidebanInstructionReads WHERE instruction_id=?',[d.id])
+                                    s.didebanInstructionQuery('DELETE FROM DidebanInstructions WHERE id=?',[d.id],function(err){
+                                        if(err)return s.tx({f:'instructions_error',msg:err.message||'Database error'},cn.id)
+                                        didebanSetInstructionAttachmentMeta(d.id,null)
+                                        s.tx({f:'instruction_deleted',id:d.id,msg:'دستورالعمل حذف شد.'},cn.id)
+                                        s.tx({f:'dideban_instruction_changed'},'GRP_ALL')
+                                    })
+                                })
+                            break;
+                        }
+                    break;
                     case'accounts':
                         switch(d.ff){
                             case'register':
@@ -4617,6 +4855,7 @@ s.superAuth=function(x,callback){
 ////Pages
 app.enable('trust proxy');
 app.use('/libs',express.static(__dirname + '/web/libs'));
+app.use('/uploads',express.static(__dirname + '/web/uploads'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('views', __dirname + '/web');
@@ -4662,6 +4901,147 @@ app.get(config.webPaths.super, function (req,res){
         res.end(html)
     })
 });
+// Persistent attachment metadata fallback.
+// Some SQL drivers/configurations may omit newly-added attachment columns from
+// result rows even though the file itself was stored successfully. Keep a tiny
+// server-side index keyed by instruction id so both Super and normal users can
+// always discover and download the attachment.
+var didebanInstructionAttachmentIndexPath=path.join(__dirname,'web','uploads','instructions','index.json')
+var didebanInstructionAttachmentIndexCache=null
+function didebanLoadInstructionAttachmentIndex(){
+    if(didebanInstructionAttachmentIndexCache)return didebanInstructionAttachmentIndexCache
+    try{
+        var raw=fs.readFileSync(didebanInstructionAttachmentIndexPath,'utf8').replace(/^\uFEFF/,'')
+        didebanInstructionAttachmentIndexCache=JSON.parse(raw)||{}
+    }catch(err){didebanInstructionAttachmentIndexCache={}}
+    return didebanInstructionAttachmentIndexCache
+}
+function didebanSaveInstructionAttachmentIndex(){
+    try{
+        fs.mkdirSync(path.dirname(didebanInstructionAttachmentIndexPath),{recursive:true})
+        fs.writeFileSync(didebanInstructionAttachmentIndexPath,JSON.stringify(didebanLoadInstructionAttachmentIndex(),null,2),'utf8')
+    }catch(err){s.systemLog('Dideban Instruction Attachment Index',err)}
+}
+function didebanSetInstructionAttachmentMeta(id,file){
+    if(!id)return
+    var index=didebanLoadInstructionAttachmentIndex()
+    if(file&&file.path){
+        index[String(id)]={name:file.name||null,path:file.path,mime:file.mime||null,size:file.size||null}
+    }else delete index[String(id)]
+    didebanSaveInstructionAttachmentIndex()
+}
+function didebanGetInstructionAttachmentMeta(id){
+    return didebanLoadInstructionAttachmentIndex()[String(id)]||null
+}
+
+// Secure-ish attachment delivery for persistent instructions.
+// Stored filenames are random and the route only serves files from the
+// dedicated instruction upload directory. Content-Disposition forces a
+// normal browser download and prevents path traversal.
+app.get('/dideban/instruction-attachment/:file',function(req,res){
+    var storedName=path.basename(String(req.params.file||''))
+    if(!/^[A-Za-z0-9._-]+$/.test(storedName))return res.status(400).end('Invalid file')
+    var uploadRoot=path.resolve(__dirname,'web','uploads','instructions')
+    var absolutePath=path.resolve(uploadRoot,storedName)
+    if(absolutePath.indexOf(uploadRoot+path.sep)!==0)return res.status(403).end('Forbidden')
+    fs.stat(absolutePath,function(err,stat){
+        if(err||!stat||!stat.isFile())return res.status(404).end('File not found')
+        res.download(absolutePath,storedName)
+    })
+})
+function didebanPrepareInstructionAttachment(row){
+    if(!row)return row
+    // Normalize column names returned by different SQL drivers/configurations.
+    row.attachment_name=row.attachment_name||row.attachmentName||row.ATTACHMENT_NAME||null
+    row.attachment_path=row.attachment_path||row.attachmentPath||row.ATTACHMENT_PATH||null
+    row.attachment_mime=row.attachment_mime||row.attachmentMime||row.ATTACHMENT_MIME||null
+    row.attachment_size=row.attachment_size||row.attachmentSize||row.ATTACHMENT_SIZE||null
+    var indexedAttachment=didebanGetInstructionAttachmentMeta(row.id)
+    if(!row.attachment_path&&indexedAttachment){
+        row.attachment_name=indexedAttachment.name||null
+        row.attachment_path=indexedAttachment.path||null
+        row.attachment_mime=indexedAttachment.mime||null
+        row.attachment_size=indexedAttachment.size||null
+    }
+    if(row.attachment_path){
+        var storedName=path.basename(String(row.attachment_path))
+        row.attachment_url='/dideban/instruction-attachment-by-id/'+encodeURIComponent(String(row.id))
+        row.has_attachment=true
+    }else{
+        row.attachment_url=null
+        row.has_attachment=false
+    }
+    return row
+}
+// Download by instruction id. This avoids relying on a client-visible stored path
+// and always reads the current attachment metadata directly from the database.
+app.get('/dideban/instruction-attachment-by-id/:id',function(req,res){
+    var instructionId=String(req.params.id||'').replace(/[^A-Za-z0-9_-]/g,'')
+    if(!instructionId)return res.status(400).end('Invalid instruction')
+    s.didebanInstructionQuery('SELECT * FROM DidebanInstructions WHERE id=?',[instructionId],function(err,rows){
+        if(err||!rows||!rows[0])return res.status(404).end('Instruction not found')
+        var row=didebanPrepareInstructionAttachment(rows[0])
+        if(!row.attachment_path)return res.status(404).end('Attachment not found')
+        var storedName=path.basename(String(row.attachment_path))
+        var uploadRoot=path.resolve(__dirname,'web','uploads','instructions')
+        var absolutePath=path.resolve(uploadRoot,storedName)
+        if(absolutePath.indexOf(uploadRoot+path.sep)!==0)return res.status(403).end('Forbidden')
+        fs.stat(absolutePath,function(statErr,stat){
+            if(statErr||!stat||!stat.isFile())return res.status(404).end('File not found')
+            res.download(absolutePath,row.attachment_name||storedName)
+        })
+    })
+})
+// Dideban persistent instruction center API
+function didebanInstructionTargetsUser(row,user){
+    if(!row||row.status!=='active')return false
+    if(row.target_type==='all')return true
+    if(row.target_type==='group')return row.target_value===user.ke
+    if(row.target_type==='users'){
+        try{
+            var targets=JSON.parse(row.target_value||'[]')
+            return targets.indexOf(user.ke+':'+user.uid)>-1
+        }catch(err){return false}
+    }
+    return false
+}
+app.get('/:auth/dideban/instructions/:ke',function(req,res){
+    res.setHeader('Content-Type','application/json; charset=utf-8')
+    s.auth(req.params,function(user){
+        s.didebanInstructionQuery('SELECT * FROM DidebanInstructions WHERE status=? ORDER BY pinned DESC, created_at DESC',['active'],function(err,rows){
+            if(err)return res.end(s.s({ok:false,msg:err.message||'Database error'}))
+            rows=(rows||[]).filter(function(row){return didebanInstructionTargetsUser(row,user)}).map(didebanPrepareInstructionAttachment)
+            s.didebanInstructionQuery('SELECT instruction_id,read_at,acknowledged_at FROM DidebanInstructionReads WHERE ke=? AND uid=?',[user.ke,user.uid],function(readErr,reads){
+                var readMap={}
+                ;(reads||[]).forEach(function(read){readMap[read.instruction_id]=read})
+                rows.forEach(function(row){
+                    row.read_at=readMap[row.id]?readMap[row.id].read_at:null
+                    row.acknowledged_at=readMap[row.id]?readMap[row.id].acknowledged_at:null
+                })
+                res.end(s.s({ok:true,instructions:rows}))
+            })
+        })
+    },res,req)
+})
+app.post('/:auth/dideban/instructions/:ke/:id/read',function(req,res){
+    res.setHeader('Content-Type','application/json; charset=utf-8')
+    s.auth(req.params,function(user){
+        var acknowledged=req.body&&String(req.body.acknowledged)==='1'
+        s.didebanInstructionQuery('SELECT * FROM DidebanInstructionReads WHERE instruction_id=? AND ke=? AND uid=?',[req.params.id,user.ke,user.uid],function(err,rows){
+            var now=new Date()
+            if(rows&&rows[0]){
+                var q='UPDATE DidebanInstructionReads SET read_at=?'
+                var values=[now]
+                if(acknowledged){q+=', acknowledged_at=?';values.push(now)}
+                q+=' WHERE instruction_id=? AND ke=? AND uid=?'
+                values.push(req.params.id,user.ke,user.uid)
+                s.sqlQuery(q,values,function(updateErr){res.end(s.s({ok:!updateErr,msg:updateErr&&updateErr.message}))})
+            }else{
+                s.didebanInstructionQuery('INSERT INTO DidebanInstructionReads (instruction_id,ke,uid,read_at,acknowledged_at) VALUES (?,?,?,?,?)',[req.params.id,user.ke,user.uid,now,acknowledged?now:null],function(insertErr){res.end(s.s({ok:!insertErr,msg:insertErr&&insertErr.message}))})
+            }
+        })
+    },res,req)
+})
 //update server
 app.get('/:auth/update/:key', function (req,res){
     req.ret={ok:false};

@@ -123,26 +123,19 @@
         <header class="demo-drawer-header">
           <div class="demo-avatar-dropdown">
             <button id="accbtn" style="color:#fff" class="usermail mdl-button mdl-js-button mdl-js-ripple-effect"></button>
-            <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="accbtn">
-                <li class="mdl-menu__item" data-toggle="modal" data-target="#multi_mon"><div><i class="fa fa-clone"></i><div><%- lang['Monitors'] %></div></div></li>
-                <li class="mdl-menu__item" mid="" ke=""><div class="flex" monitor="powerview"><i class="fa fa-map-marker"></i><div><%- lang['Power Viewer'] %></div></div></li>
-                <li class="mdl-menu__item" mid="" ke=""><div class="flex" monitor="timelapse"><i class="fa fa-angle-double-right"></i><div><%- lang['Time-lapse'] %></div></div></li>
-                <li class="mdl-menu__item" data-toggle="modal" data-target="#settings"><div><i class="fa fa-gears"></i><div><%- lang.Settings %></div></div></li>
-                <li class="mdl-menu__item" data-toggle="modal" data-target="#apis"><div><i class="fa fa-code"></i><div><%- lang.API %></div></div></li>
-                <% if(!details.sub){ %>
-                <li class="mdl-menu__item" data-toggle="modal" data-target="#onvif_probe"><div><i class="fa fa-rss"></i><div><%- lang.ONVIF %></div></div></li>
-                <li class="mdl-menu__item" data-toggle="modal" data-target="#probe"><div><i class="fa fa-search"></i><div><%- lang.FFprobe %></div></div></li>
-                <li class="mdl-menu__item" data-toggle="modal" data-target="#filters"><div><i class="fa fa-filter"></i><div><%- lang.Filters %></div></div></li>
-                <% } %>
-                <li class="mdl-menu__item" data-toggle="modal" data-target="#logs_modal"><div><i class="fa fa-exclamation-triangle"></i><div><%- lang.Logs %></div></div></li>
-                <li class="mdl-menu__item" class_toggle="list-blocks" data-target="#left_menu"><div><i class="fa fa-camera"></i><div><%- lang['List Toggle'] %></div></div></li>
-                <li class="mdl-menu__item" class_toggle="hide-side" data-target=".mdl-js-layout"><div><i class="fa fa-bars"></i><div><%- lang['Hide List'] %></div></div></li>
-                <li class="mdl-menu__item shinobi-detector-motion shinobi-detector-opencv shinobi-detector_plug" class_toggle="hide_indifference" data-target="body" style="display:none"><div><i class="fa fa-bolt"></i><div><%- lang['Motion GUI'] %></div></div></li>
-                <li class="mdl-menu__item" system="jpegToggle"><div><i class="fa fa-file-image-o"></i><div><%- lang['JPEG Mode'] %></div></div></li>
-                <li class="mdl-menu__item" system="switch" switch="monitorOrder" type="text"><div><i class="fa fa-sort"></i><div><%- lang['Order Streams'] %></div></div></li>
-                <li class="mdl-menu__item" system="switch" switch="notifyHide" type="text"><div><i class="fa fa-exclamation-circle"></i><div><%- lang['Hide Notes'] %></div></div></li>
-                <li class="mdl-menu__item" data-toggle="modal" data-target="#dideban_about_modal"><div><i class="fa fa-info-circle"></i><div>درباره ما</div></div></li>
-                <li class="mdl-menu__item logout"><div><i class="fa fa-sign-out"></i><div><%- lang.Logout %></div></div></li>
+            <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect dideban-account-menu" for="accbtn" dir="rtl">
+                <li class="mdl-menu__item dideban-account-menu__item" data-toggle="modal" data-target="#settings">
+                    <div><i class="fa fa-user-circle"></i><div>تنظیمات حساب کاربری</div></div>
+                </li>
+                <li class="mdl-menu__item dideban-account-menu__item" data-toggle="modal" data-target="#dideban_instructions_modal">
+                    <div><i class="fa fa-bullhorn"></i><div>دستورالعمل‌ها <span id="dideban_instruction_badge" class="badge" style="display:none"></span></div></div>
+                </li>
+                <li class="mdl-menu__item dideban-account-menu__item" data-toggle="modal" data-target="#dideban_about_modal">
+                    <div><i class="fa fa-info-circle"></i><div>درباره ما</div></div>
+                </li>
+                <li class="mdl-menu__item dideban-account-menu__item dideban-account-menu__logout logout">
+                    <div><i class="fa fa-sign-out"></i><div><%- lang.Logout %></div></div>
+                </li>
             </ul>
             <div class="mdl-layout-spacer"></div>
             <button class_toggle="list-blocks" data-target="#left_menu" class="mdl-button mdl-button--icon">
@@ -404,6 +397,14 @@
 })()
 </script>
 
+
+<div class="modal fade" id="dideban_instructions_modal" tabindex="-1" role="dialog" aria-labelledby="dideban_instructions_title" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document"><div class="modal-content dideban-instructions-content">
+    <div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="بستن"><span>&times;</span></button><h3 id="dideban_instructions_title"><i class="fa fa-bullhorn"></i> دستورالعمل‌ها و پیام‌های مدیریت</h3><p>پیام‌های منتشرشده توسط مدیر سامانه در این بخش به‌صورت دائمی نگهداری می‌شوند.</p></div>
+    <div class="modal-body"><div id="dideban_instructions_list"><div class="dideban-instruction-loading"><i class="fa fa-spinner fa-spin"></i> در حال دریافت...</div></div></div>
+  </div></div>
+</div>
+
 <div class="modal fade dideban-about-modal" id="dideban_about_modal" tabindex="-1" role="dialog" aria-labelledby="dideban_about_title" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -436,6 +437,88 @@
     </div>
   </div>
 </div>
+
+
+<script>
+(function(){
+    'use strict'
+    var rows={}
+    var initialPopupShown=false
+    function esc(v){return $('<div>').text(v==null?'':v).html()}
+    function endpoint(id){return '/'+encodeURIComponent($user.auth_token||$user.auth)+'/dideban/instructions/'+encodeURIComponent($user.ke)+(id?'/'+encodeURIComponent(id)+'/read':'')}
+    function updateBadge(list){
+        var unread=0
+        $.each(list||[],function(_,x){if(!x.read_at)unread++})
+        $('#dideban_instruction_badge,#dideban_instruction_sidebar_badge').text(unread).toggle(unread>0)
+        $('.dideban-instructions-nav').toggleClass('has-unread',unread>0)
+    }
+    function draw(list){
+        rows={}
+        var html=''
+        $.each(list||[],function(_,x){
+            rows[x.id]=x
+            html+='<article class="dideban-instruction-card '+(x.read_at?'is-read':'is-unread')+' '+(x.priority==='high'?'is-high':'')+'" data-id="'+esc(x.id)+'">'
+            html+='<header><div><h4>'+(x.pinned?'<i class="fa fa-thumb-tack"></i> ':'')+esc(x.title)+'</h4><span>'+(x.priority==='high'?'مهم':'عادی')+(x.read_at?' · مطالعه‌شده':' · جدید')+'</span></div><i class="fa fa-chevron-down"></i></header>'
+            html+='<div class="dideban-instruction-body"><div class="dideban-instruction-text">'+esc(x.body).replace(/\r?\n/g,'<br>')+'</div>'
+            if(x.has_attachment||x.attachment_url||x.attachment_path||x.attachment_name){
+                var attachmentUrl=x.attachment_url||('/dideban/instruction-attachment-by-id/'+encodeURIComponent(String(x.id||'')))
+                var attachmentSize=x.attachment_size?Math.max(1,Math.round(Number(x.attachment_size)/1024))+' کیلوبایت':''
+                html+='<div class="dideban-instruction-attachment-box"><div class="dideban-instruction-attachment-title"><i class="fa fa-paperclip"></i> این دستورالعمل فایل پیوست دارد</div><a class="dideban-instruction-attachment" href="'+esc(attachmentUrl)+'" target="_blank" rel="noopener" download><i class="fa fa-file-o"></i><span><strong>'+esc(x.attachment_name||'فایل پیوست')+'</strong><small>'+esc(attachmentSize)+'</small></span><span class="dideban-download-label"><i class="fa fa-download"></i> دانلود فایل</span></a></div>'
+            }
+            if(x.require_ack&&!x.acknowledged_at)html+='<button class="btn btn-success dideban-instruction-ack"><i class="fa fa-check"></i> مطالعه و درک کردم</button>'
+            else if(x.acknowledged_at)html+='<div class="dideban-instruction-acked"><i class="fa fa-check-circle"></i> تأیید مطالعه ثبت شده است</div>'
+            html+='</div></article>'
+        })
+        $('#dideban_instructions_list').html(html||'<div class="dideban-instruction-empty"><i class="fa fa-inbox fa-3x"></i><p>دستورالعملی برای شما منتشر نشده است.</p></div>')
+        updateBadge(list)
+    }
+    function maybeShowImportant(list){
+        if(initialPopupShown)return
+        var urgent=null
+        $.each(list||[],function(_,x){
+            if(!x.read_at&&(x.priority==='high'||(x.require_ack&&!x.acknowledged_at))){urgent=x;return false}
+        })
+        if(urgent){
+            initialPopupShown=true
+            $('#dideban_instructions_modal').modal({backdrop:urgent.require_ack?'static':true,keyboard:!urgent.require_ack})
+            setTimeout(function(){
+                var card=$('.dideban-instruction-card[data-id="'+urgent.id+'"]')
+                card.addClass('open')
+                if(card.length)$('#dideban_instructions_modal .modal-body').animate({scrollTop:card.position().top},250)
+            },250)
+        }
+    }
+    function load(showImportant){
+        return $.getJSON(endpoint()).done(function(r){
+            if(r&&r.ok){draw(r.instructions||[]);if(showImportant)maybeShowImportant(r.instructions||[])}
+            else $('#dideban_instructions_list').html('<div class="dideban-instruction-empty">دریافت دستورالعمل‌ها ممکن نشد.<br><small>'+esc(r&&r.msg||'خطای نامشخص')+'</small></div>')
+        }).fail(function(){$('#dideban_instructions_list').html('<div class="dideban-instruction-empty">ارتباط با سرور برقرار نشد.</div>')})
+    }
+    function mark(id,ack){return $.ajax({url:endpoint(id),method:'POST',data:{acknowledged:ack?'1':'0'},dataType:'json'})}
+    $('#dideban_instructions_modal').on('show.bs.modal',function(){load(false)})
+    $('#dideban_instructions_list').on('click','.dideban-instruction-card header',function(){
+        var card=$(this).closest('.dideban-instruction-card'),id=card.data('id')
+        card.toggleClass('open')
+        if(rows[id]&&!rows[id].read_at){mark(id,false).done(function(){rows[id].read_at=new Date().toISOString();card.removeClass('is-unread').addClass('is-read');updateBadge(Object.keys(rows).map(function(k){return rows[k]}))})}
+    })
+    $('#dideban_instructions_list').on('click','.dideban-instruction-ack',function(e){
+        e.stopPropagation()
+        var button=$(this),card=button.closest('.dideban-instruction-card'),id=card.data('id')
+        button.prop('disabled',true)
+        mark(id,true).done(function(r){
+            if(r&&r.ok){
+                rows[id].read_at=rows[id].read_at||new Date().toISOString()
+                rows[id].acknowledged_at=new Date().toISOString()
+                button.replaceWith('<div class="dideban-instruction-acked"><i class="fa fa-check-circle"></i> تأیید مطالعه ثبت شد</div>')
+                card.removeClass('is-unread').addClass('is-read')
+                updateBadge(Object.keys(rows).map(function(k){return rows[k]}))
+            }else button.prop('disabled',false)
+        }).fail(function(){button.prop('disabled',false)})
+    })
+    $(document).on('dideban_instruction_changed',function(){load(false)})
+    $(function(){load(true);setInterval(function(){load(false)},30000)})
+})()
+</script>
 
 <script><% include ../libs/js/main.dash2.js %></script>
 <% include blocks/help.ejs %>
